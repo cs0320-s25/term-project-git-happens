@@ -1,0 +1,57 @@
+{
+  "name": "cs32-final-project-git-happens",
+  "type": "module",
+  "version": "22.2.0",
+  "description": "Brown CSCI0320 Final Project — Git Happens: A Game For Learning Git",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "chart.js": "^4.4.4",
+    "react": "^18.3.1",
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.30.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.51.1",
+    "@types/node": "^20.17.25",
+    "@types/react": "^18.0.9",
+    "@types/react-dom": "^18.0.4",
+    "@vitejs/plugin-react": "^4.1.0",
+    "eslint": "^8.15.0",
+    "playwright": "^1.39.0",
+    "typescript": "^4.6.4",
+    "vite": "^6.2.2",
+    "vitest": "^3.0.9",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "test": "npm run test:unit && npm run test:e2e",
+    "backend": "cd ../server && ./run"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ],
+    "rules": {
+      "testing-library/no-dom-import": "off"
+    }
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

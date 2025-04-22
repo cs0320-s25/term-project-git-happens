@@ -1,0 +1,112 @@
+/* For controlling appearance of the mock app (such as headers) */
+.App {
+  text-align: center;
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.App-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  min-height: 10vh;
+  background-color: #272731;
+}
+
+.mock-header {
+  color: white;
+  margin: 0;
+  padding-left: 1.25rem;
+  font-size: calc(20px + 3vmin);
+  font-family: "Lucida Console", Monaco, monospace;
+  font-weight: bolder;
+}
+
+/* Header buttons container */
+.header-buttons {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.header-buttons .cl-signOutButton {
+  color: white;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+}
+
+.header-buttons .cl-signOutButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 5px solid #646cff;
+}
+
+.custom-login {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 400px !important;
+  padding: 2rem !important;
+  border-radius: 25px !important;
+  box-shadow: 0 4px 12px rgba(0, 26, 34, 0.1) !important;
+  background-color: #fff !important;
+  /* z-index: 1000 !important; */
+
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.custom-login h1 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+  font-weight: 600;
+  text-align: center;
+  font-family: "Lucida Console", Monaco, monospace;
+}
+
+.custom-login .notice {
+  color: #555;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-size: 0.95rem;
+}
+
+.custom-login button.cl-signInButton {
+  background-color: #0f4d92;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: 100%;
+  max-width: 200px;
+}
+
+.custom-login button.cl-signInButton:hover {
+  background-color: #646cff;
+}
+
+@media screen and (max-width: 768px) {
+  .custom-login {
+    width: 85% !important;
+    max-width: 200px !important;
+    padding: 1.5rem !important;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .custom-login {
+    padding: 1.25rem !important;
+    border-radius: 20px !important;
+  }
+}

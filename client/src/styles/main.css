@@ -1,0 +1,290 @@
+/* CSS for Main Select interface */
+
+.select {
+  position: relative;
+  min-height: 95vh;
+}
+
+.select-history {
+  height: 55vh;
+  margin: auto;
+  display: block;
+  overflow: scroll;
+}
+
+.select-layout {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.select-sidebar {
+  width: 25%;
+  min-width: 250px;
+  padding: 16px;
+  border-right: 1px solid #e0e0e0;
+  box-sizing: border-box;
+}
+
+.select-display {
+  width: 75%;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+/* For mobile screens, stack the layout */
+@media (max-width: 768px) {
+  .select-sidebar,
+  .select-display {
+    width: 100%;
+  }
+
+  .select-sidebar {
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+  }
+}
+
+.mode-toggle {
+  margin-bottom: 16px;
+}
+
+.mode-toggle button {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.dropdown-container fieldset {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.dropdown-container legend {
+  padding: 0 8px;
+  font-weight: bold;
+}
+
+.dropdown-container select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #6c6565;
+  border-radius: 8px;
+  font-size: 15px;
+  padding: 6px 10px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-color: #6b6b6b;
+  border-color: white;
+}
+
+.dropdown-container select:focus {
+  border-color: #646cff;
+}
+
+.dropdown-container select option {
+  padding: 5px;
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.dropdown-container select option:checked {
+  background-color: #b8daff;
+  color: black;
+  padding: 5px;
+  font-size: 15px;
+}
+
+.dropdown-container select option:hover {
+  border-color: #646cff;
+}
+.parameter-row select.dropdown {
+  height: auto;
+  min-height: 30px;
+}
+
+.parameter-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.parameter-row p {
+  margin-right: 8px;
+  margin-bottom: 4px;
+}
+
+.dropdown {
+  padding: 6px;
+  margin-right: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 8px;
+  margin-bottom: 8px;
+}
+
+.error-message {
+  color: red;
+  padding: 8px;
+  border: 1px solid red;
+  background-color: #fff0f0;
+  border-radius: 4px;
+  margin-top: 8px;
+}
+
+.help-message {
+  color: #0066cc;
+  padding: 8px;
+  border: 1px solid #0066cc;
+  background-color: #f0f8ff;
+  border-radius: 4px;
+  margin-top: 8px;
+  text-align: left;
+}
+
+.select-container {
+  height: 100%;
+}
+
+.select-container h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+pre {
+  overflow: auto;
+  max-height: 600px;
+  border: 1px solid #e0e0e0;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.graph-container {
+  height: 75vh;
+  margin: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.table {
+  height: 65vh;
+  margin: auto;
+  display: flex;
+  overflow: scroll;
+  justify-content: center;
+  align-content: flex-start;
+}
+
+.table th,
+.table td {
+  border: 1px solid gray;
+  font-size: min(2vw, 2vh);
+  padding: 1vw;
+}
+
+.table th {
+  background-color: #015b99;
+}
+
+.table th:focus {
+  outline: 2px solid #3d8ed5;
+  position: relative;
+  z-index: 1;
+}
+
+.table td:focus {
+  outline: 2px solid #42aaf4;
+  position: relative;
+  z-index: 1;
+}
+
+.dropdown {
+  width: 20vw;
+  margin-top: auto;
+  margin-bottom: auto;
+  font-size: min(2vw, 2vh);
+  cursor: pointer;
+}
+
+.dropdown > option {
+  font-size: min(3vw, 3vh);
+  text-align: center;
+}
+
+.default-command-box {
+  width: 80%;
+  margin-top: auto;
+  margin-bottom: auto;
+  display: block;
+}
+
+.optional-command-box {
+  width: 90%;
+  margin-top: auto;
+  margin-bottom: auto;
+  display: block;
+}
+
+fieldset {
+  border: 2px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+legend {
+  font-weight: bold;
+}
+
+.parameter-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  justify-content: center;
+}
+
+.short-parameter-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 0px;
+  justify-content: center;
+}
+
+@media (prefers-color-scheme: light) {
+  .table th {
+    background-color: aqua;
+  }
+
+  button {
+    background-color: #f0f0f0;
+  }
+
+  button:hover {
+    background-color: #e0e0e0;
+  }
+
+  pre {
+    background-color: #f8f8f8;
+    border: 1px;
+  }
+}
