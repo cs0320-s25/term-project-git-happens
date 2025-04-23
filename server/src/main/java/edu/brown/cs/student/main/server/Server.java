@@ -2,15 +2,14 @@ package edu.brown.cs.student.main.server;
 
 import static spark.Spark.after;
 
+import edu.brown.cs.student.main.server.handlers.CreateSessionHandler;
+import edu.brown.cs.student.main.server.storage.FirebaseUtilities;
+import edu.brown.cs.student.main.server.storage.StorageInterface;
+import java.io.IOException;
 import spark.Spark;
 
-/**
- * The main API Server. Uses {@link Spark} to open the endpoints {@code "..."}
- */
+/** The main API Server. Uses {@link Spark} to open the endpoints {@code "..."} */
 public class Server {
-  private static final Integer CACHE_TIMEOUT = null;
-  private static final int CACHE_SIZE = 100;
-
   /**
    * Entry point for the program. Launches the API server on port {@code 3232}
    *
@@ -38,14 +37,36 @@ public class Server {
     after(
         (request, response) -> {
           response.header("Access-Control-Allow-Origin", "*");
-          response.header("Access-Control-Allow-Methods", "GET");
+          response.header("Access-Control-Allow-Methods", "*");
         });
 
-    // Setting up the handlers for the endpoints
-    //Spark.get("loadcsv", new LoadEndpointHandler(lazyParser));
-    Spark.init();
-    Spark.awaitInitialization();
+    final StorageInterface firebaseUtils;
+    try {
+      firebaseUtils = new FirebaseUtilities();
 
-    System.out.println("Server started at http://localhost:" + port);
+      // Setting up the handlers for the endpoints
+      Spark.get("createsession", new CreateSessionHandler(firebaseUtils));
+      //    Spark.get("joinsession", new JoinSessionHandler(firebaseUtils));
+      //    Spark.get("joinresponse", new JoinResponseHandler(firebaseUtils));
+      //    Spark.get("getfile", new GetFileHandler(firebaseUtils));
+      //    Spark.get("updatefile", new UpdateFileHandler(firebaseUtils));
+      //    Spark.get("updatesessionlevel", new UpdateSessionLevelHandler(firebaseUtils));
+
+      Spark.notFound(
+          (request, response) -> {
+            response.status(404); // Not Found
+            System.out.println("ERROR");
+            return "404 Not Found - The requested endpoint does not exist.";
+          });
+      Spark.init();
+      Spark.awaitInitialization();
+
+      System.out.println("Server started at http://localhost:" + port);
+    } catch (IOException e) {
+      e.printStackTrace();
+      System.err.println(
+          "Error: Could not initialize Firebase. Likely due to firebase_config.json not being found. Exiting.");
+      System.exit(1);
+    }
   }
 }

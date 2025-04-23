@@ -1,4 +1,4 @@
-package edu.brown.cs.student.main.server;
+package edu.brown.cs.student.main.server.handlers;
 
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
@@ -15,7 +15,6 @@ public abstract class AbstractEndpointHandler implements Route {
   protected Map<String, Object> responseMap;
   private final Moshi moshi = new Moshi.Builder().build();
   private final JsonAdapter<Map<String, Object>> responseMapAdapter = makeResponseMapMoshiAdapter();
-
 
   /**
    * Creates a {@link Moshi} JSON adapter for a {@link Map} with {@link String} keys and {@link

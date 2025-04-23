@@ -12,7 +12,8 @@
 // import spark.Response;
 
 // /**
-//  * Handles requests for loading CSV data into the server. Extends {@link AbstractEndpointHandler} to
+//  * Handles requests for loading CSV data into the server. Extends {@link AbstractEndpointHandler}
+// to
 //  * provide response formatting.
 //  */
 // public class LoadEndpointHandler extends AbstractEndpointHandler {
@@ -29,7 +30,7 @@
 //   }
 
 //   /**
-//    * Handles HTTP requests for loading a CSV file.
+//    * Handles HTTPrequests for loading a CSV file.
 //    *
 //    * @param request The request object containing HTTP request details. The request must include
 //    *     {@code "filepath} and {@code "has_header"} parameters. {@code "has_header"} must be a
@@ -101,7 +102,8 @@
 //    * Marks the response as an error using the given error parameters and returns the {@code
 //    * responseMap} serialized to a JSON string.
 //    *
-//    * <p>Also unloads the {@link LazyParser} so that a subsequent search or view before a valid load
+//    * <p>Also unloads the {@link LazyParser} so that a subsequent search or view before a valid
+// load
 //    * will return an error.
 //    *
 //    * @param errorMessage The error message to include in the response.
