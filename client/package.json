@@ -6,6 +6,7 @@
   "license": "UNLICENSED",
   "dependencies": {
     "chart.js": "^4.4.4",
+    "firebase": "^11.6.1",
     "react": "^18.3.1",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.3.1",
