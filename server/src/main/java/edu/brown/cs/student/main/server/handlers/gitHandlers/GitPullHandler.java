@@ -18,11 +18,16 @@ public class GitPullHandler extends AbstractEndpointHandler {
   public Object handle(final Request request, final Response response) throws Exception {
     responseMap = new HashMap<>();
 
-    // Code
+    final String branchName = request.queryParams("branch_name");
+    // TODO: request.queryParams for current branch state
 
     try {
 
-      // Code
+      // TODO: check if branchName exists,
+      //  fetch branch JSON data,
+      //  create helper class to compare current branch state with pulled branch,
+        //  if there are no conflicts, add pulled branch to response map
+        //  if there are conflicts, return error response for merging
 
     } catch (Exception e) {
       return returnErrorResponse("", "");

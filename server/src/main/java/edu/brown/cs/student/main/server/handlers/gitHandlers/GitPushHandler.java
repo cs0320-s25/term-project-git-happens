@@ -18,11 +18,12 @@ public class GitPushHandler extends AbstractEndpointHandler {
   public Object handle(final Request request, final Response response) throws Exception {
     responseMap = new HashMap<>();
 
-    // Code
+    final String branchName = request.queryParams("branch_name");
+    final String commitHash = request.queryParams("commit_hash");
 
     try {
 
-      // Code
+      // TODO:
 
     } catch (Exception e) {
       return returnErrorResponse("", "");
