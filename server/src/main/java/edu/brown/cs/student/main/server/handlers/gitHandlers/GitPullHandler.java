@@ -1,15 +1,16 @@
-package edu.brown.cs.student.main.server.handlers;
+package edu.brown.cs.student.main.server.handlers.gitHandlers;
 
+import edu.brown.cs.student.main.server.handlers.AbstractEndpointHandler;
 import edu.brown.cs.student.main.server.storage.StorageInterface;
 import java.util.HashMap;
 import spark.Request;
 import spark.Response;
 
-public class GitAddHandler extends AbstractEndpointHandler {
+public class GitPullHandler extends AbstractEndpointHandler {
 
   final StorageInterface storage;
 
-  public GitAddHandler(final StorageInterface storage) {
+  public GitPullHandler(final StorageInterface storage) {
     this.storage = storage;
   }
 
