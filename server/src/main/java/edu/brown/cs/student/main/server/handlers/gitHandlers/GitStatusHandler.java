@@ -18,11 +18,11 @@ public class GitStatusHandler extends AbstractEndpointHandler {
   public Object handle(final Request request, final Response response) throws Exception {
     responseMap = new HashMap<>();
 
-    // Code
+    // TODO: request.queryParams for map of filename keys to Lists of Shapes (stored as arrays?)
 
     try {
 
-      // Code
+      // TODO: fetch staging area, return status of working directory and staging area)
 
     } catch (Exception e) {
       return returnErrorResponse("", "");

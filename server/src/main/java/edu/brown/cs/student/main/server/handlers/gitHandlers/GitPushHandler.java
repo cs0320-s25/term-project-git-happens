@@ -23,7 +23,7 @@ public class GitPushHandler extends AbstractEndpointHandler {
 
     try {
 
-      // TODO:
+      // Todo:
 
     } catch (Exception e) {
       return returnErrorResponse("", "");

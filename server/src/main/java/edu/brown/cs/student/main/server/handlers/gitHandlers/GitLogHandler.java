@@ -18,11 +18,9 @@ public class GitLogHandler extends AbstractEndpointHandler {
   public Object handle(final Request request, final Response response) throws Exception {
     responseMap = new HashMap<>();
 
-    // Code
-
     try {
 
-      // Code
+      // Todo: fetch and return commit history (ID, Author, Date, and Message?)
 
     } catch (Exception e) {
       return returnErrorResponse("", "");

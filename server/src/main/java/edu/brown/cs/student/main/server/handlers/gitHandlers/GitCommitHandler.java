@@ -25,7 +25,7 @@ public class GitCommitHandler extends AbstractEndpointHandler {
 
     try {
 
-      // Code
+      // TODO: add staged files to branch's commits, stored with commit message
 
     } catch (Exception e) {
       return returnErrorResponse("", "");

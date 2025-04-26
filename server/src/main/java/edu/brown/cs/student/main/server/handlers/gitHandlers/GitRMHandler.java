@@ -18,11 +18,12 @@ public class GitRMHandler extends AbstractEndpointHandler {
   public Object handle(final Request request, final Response response) throws Exception {
     responseMap = new HashMap<>();
 
-    // Code
+    final String branchName = request.queryParams("branch_name");
+    final String fileName = request.queryParams("file_name");
 
     try {
 
-      // Code
+      // Todo: remove fileName file from both "local" and "git" branchName
 
     } catch (Exception e) {
       return returnErrorResponse("", "");

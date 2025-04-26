@@ -18,11 +18,18 @@ public class GitBranchHandler extends AbstractEndpointHandler {
   public Object handle(final Request request, final Response response) throws Exception {
     responseMap = new HashMap<>();
 
-    // Code
+    final String branchRequest = request.queryParams("branch_request");
 
     try {
 
-      // Code
+      // TODO: if branchRequest == "":
+        // Fetch and return List of local branch names
+      // TODO: if branchRequest == "-a":
+        // Fetch and return List of local and remote branch names
+      // TODO: if branchRequest == "-d" + ...:
+        // Fetch and delete specified branch
+      // TODO: else:
+        // Create branch with given string name
 
     } catch (Exception e) {
       return returnErrorResponse("", "");

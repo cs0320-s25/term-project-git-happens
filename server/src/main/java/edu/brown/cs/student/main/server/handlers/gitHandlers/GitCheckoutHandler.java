@@ -18,11 +18,11 @@ public class GitCheckoutHandler extends AbstractEndpointHandler {
   public Object handle(final Request request, final Response response) throws Exception {
     responseMap = new HashMap<>();
 
-    // Code
+    final String branchName = request.queryParams("branch_name");
 
     try {
 
-      // Code
+      // TODO: fetch branch from firestore and switch
 
     } catch (Exception e) {
       return returnErrorResponse("", "");

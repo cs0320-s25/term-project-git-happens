@@ -18,11 +18,11 @@ public class GitResetHandler extends AbstractEndpointHandler {
   public Object handle(final Request request, final Response response) throws Exception {
     responseMap = new HashMap<>();
 
-    // Code
+    final String commitHash = request.queryParams("commit_hash");
 
     try {
 
-      // Code
+      // TODO: Fetch commitHash commit, replace working directory with hashed commit
 
     } catch (Exception e) {
       return returnErrorResponse("", "");

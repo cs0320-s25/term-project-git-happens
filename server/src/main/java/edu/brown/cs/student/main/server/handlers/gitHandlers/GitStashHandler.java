@@ -18,11 +18,11 @@ public class GitStashHandler extends AbstractEndpointHandler {
   public Object handle(final Request request, final Response response) throws Exception {
     responseMap = new HashMap<>();
 
-    // Code
+    // TODO: request.queryParams for map of filename keys to Lists of Shapes (stored as arrays?)
 
     try {
 
-      // Code
+      // TODO: add files to firestore stash
 
     } catch (Exception e) {
       return returnErrorResponse("", "");
