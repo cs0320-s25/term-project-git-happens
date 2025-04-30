@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -273,6 +274,7 @@ public class FirebaseUtilities implements StorageInterface {
     List<QueryDocumentSnapshot> changes = changesCollection.get().get().getDocuments();
     Map<String, Object> latestChange = changes.get(changes.size()-1).getData();
     data.put("commit_message", commit_message);
+    data.put("date_time", ZonedDateTime.now());
     data.put("file_map", latestChange.get("file_map"));
     String commitId = generateCommitId();
     while (commitIds.contains(commitId)) {
@@ -313,7 +315,7 @@ public class FirebaseUtilities implements StorageInterface {
     deleteCollection(stagedCommitsCollection);
   }
 
-  public Map<String, Object>
+  public Map<String, Object> fetchCommit
   /**
    * Returns a list of all stored session IDs
    * @return list of session ID strings
