@@ -26,7 +26,7 @@ import java.util.concurrent.ExecutionException;
 // Need to sort out the structure of the database to make this properly
 // probably: "session" -> session_name -> {level: number}, {document: however we are storing documents}
 public class FirebaseUtilities implements StorageInterface {
-  private List<String> commitIds = new ArrayList<>();
+  private final List<String> commitIds = new ArrayList<>();
 
   public FirebaseUtilities() throws IOException {
     // Create /resources/ folder with firebase_config.json and
@@ -97,7 +97,7 @@ public class FirebaseUtilities implements StorageInterface {
       throw new IllegalArgumentException(
           "addDocument: user, collection_id, doc_id, or data cannot be null");
     }
-    // adds a new document 'doc_name' to colleciton 'collection_id' for user 'user'
+    // adds a new document 'doc_name' to collection 'collection_id' for user 'user'
     // with data payload 'data'.
 
     Firestore db = FirestoreClient.getFirestore();
@@ -162,8 +162,8 @@ public class FirebaseUtilities implements StorageInterface {
    * Method that adds set of changed files to stash collection
    * @param session_id - session_id for current game
    * @param file_map_json - json string of map of filenames to file contents
-   * @throws ExecutionException
-   * @throws InterruptedException
+   * @throws ExecutionException - for firebase actions
+   * @throws InterruptedException - for firebase actions
    */
   public void addStash(String session_id, String file_map_json) throws ExecutionException, InterruptedException {
     if (session_id == null || file_map_json == null) {
@@ -195,8 +195,8 @@ public class FirebaseUtilities implements StorageInterface {
    * @param new_branch_id - name for the new branch
    * @return - map of info for the most recent pushed commit on the current branch, to be used as the
    *           basis for new branch's contents
-   * @throws ExecutionException
-   * @throws InterruptedException
+   * @throws ExecutionException - for firebase actions
+   * @throws InterruptedException - for firebase actions
    */
   public Map<String, Object> addBranch(String session_id, String current_branch_id, String new_branch_id) throws ExecutionException, InterruptedException {
     if (session_id == null || current_branch_id == null || new_branch_id == null) {
@@ -210,8 +210,7 @@ public class FirebaseUtilities implements StorageInterface {
     List<QueryDocumentSnapshot> pushedCommits = db.collection("sessions").document(session_id)
         .collection("branches").document(current_branch_id).collection("pushed-commits")
         .get().get().getDocuments();
-    Map<String, Object> currentBranchData = pushedCommits.get(pushedCommits.size()-1).getData();
-    return currentBranchData;
+    return pushedCommits.get(pushedCommits.size()-1).getData();
   }
 
   /**
@@ -220,8 +219,8 @@ public class FirebaseUtilities implements StorageInterface {
    * @param session_id - unique session id for current game
    * @param branch_id - branch id for currently checked out branch
    * @param file_map_json - json string of all files the user would like to track changes for on Git
-   * @throws ExecutionException
-   * @throws InterruptedException
+   * @throws ExecutionException - for firebase actions
+   * @throws InterruptedException - for firebase actions
    */
   public void addChange(String session_id, String branch_id, String file_map_json) throws ExecutionException, InterruptedException {
     if (session_id == null || branch_id == null || file_map_json == null) {
@@ -241,17 +240,38 @@ public class FirebaseUtilities implements StorageInterface {
   }
 
   /**
+   * Method for getting the last staged commits, used for showing the difference between any of the
+   * user's uncommitted files and committed files.
+   * @param session_id - unique session id for current game
+   * @param branch_id - branch id for currently checked out branch
+   * @return - map of commit data representing most recently committed changes to files
+   * @throws ExecutionException - for firebase actions
+   * @throws InterruptedException - for firebase actions
+   */
+  public Map<String, Object> getLatestStagedCommit(String session_id, String branch_id) throws ExecutionException, InterruptedException {
+    if (session_id == null || branch_id == null) {
+      throw new IllegalArgumentException("getLatestStagedCommit: session_id, branch_id cannot be null");
+    }
+    Firestore db = FirestoreClient.getFirestore();
+    List<QueryDocumentSnapshot> stagedCommits = db.collection("sessions").document(session_id)
+        .collection("branches").document(branch_id).collection("staged-commits")
+        .get().get().getDocuments();
+    //return last added commit
+    return stagedCommits.get(stagedCommits.size()-1).getData();
+  }
+
+  /**
    * Method that generates a 6 character ID to be used for saved commits and stashes
    * @return - 6-character string
    */
   public String generateCommitId() {
     String alphaNum = "ABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890";
     Random random = new Random();
-    String commitId = "";
+    StringBuilder commitId = new StringBuilder();
     for (int i = 0; i < 6; i++) {
-      commitId += alphaNum.charAt(random.nextInt(alphaNum.length()));
+      commitId.append(alphaNum.charAt(random.nextInt(alphaNum.length())));
     }
-    return commitId;
+    return commitId.toString();
   }
 
   /**
@@ -260,8 +280,8 @@ public class FirebaseUtilities implements StorageInterface {
    * @param session_id - unique session id for current game
    * @param branch_id - branch id for currently checked out branch
    * @param commit_message - corresponding message for commit
-   * @throws ExecutionException
-   * @throws InterruptedException
+   * @throws ExecutionException - for firebase actions
+   * @throws InterruptedException - for firebase actions
    */
   public void commitChange(String session_id, String branch_id, String commit_message) throws ExecutionException, InterruptedException {
     if (session_id == null || branch_id == null) {
@@ -293,8 +313,8 @@ public class FirebaseUtilities implements StorageInterface {
    * pushed-commits collection.
    * @param session_id - unique session id for current game
    * @param branch_id - branch id for currently checked out branch
-   * @throws ExecutionException
-   * @throws InterruptedException
+   * @throws ExecutionException - for firebase actions
+   * @throws InterruptedException - for firebase actions
    */
   public void pushCommit(String session_id, String branch_id) throws ExecutionException, InterruptedException {
     if (session_id == null || branch_id == null) {
@@ -315,12 +335,86 @@ public class FirebaseUtilities implements StorageInterface {
     deleteCollection(stagedCommitsCollection);
   }
 
-  public Map<String, Object> fetchCommit
+  /**
+   * Method for returning the data for a specified commit.
+   * @param session_id - unique session id for current game
+   * @param branch_id - branch id for branch currently checked out
+   * @param commit_id - commit id to search for
+   * @return null if commit_id does not exist, otherwise a map of stored commit data for specified commit
+   * @throws ExecutionException - for firebase actions
+   * @throws InterruptedException - for firebase actions
+   */
+  public Map<String, Object> getCommit(String session_id, String branch_id, String commit_id) throws ExecutionException, InterruptedException {
+    if (session_id == null || branch_id == null || commit_id == null) {
+      throw new IllegalArgumentException("getCommit: session_id, branch_id, and commit_id cannot be null");
+    }
+    //check pushed commits for desired commit
+    Firestore db = FirestoreClient.getFirestore();
+    Map<String, Object> foundCommit = db.collection("sessions").document(session_id).collection("branches")
+        .document(branch_id).collection("pushed-commits").document(commit_id).get().get().getData();
+
+    //if commit can't be found in pushed commits, search through staged commits
+    if (foundCommit == null) {
+      foundCommit = db.collection("sessions").document(session_id).collection("branches")
+          .document(branch_id).collection("staged-commits").document(commit_id).get().get().getData();
+    }
+    return foundCommit;
+  }
+
+  /**
+   * Method for returning the most current version of the specified branch, used for git pull.
+   * @param session_id - unique session id for current game
+   * @param branch_id - branch id for currently checked out branch
+   * @return - a map of the most recent commit data
+   * @throws ExecutionException - for firebase actions
+   * @throws InterruptedException - for firebase actions
+   */
+  public Map<String, Object> fetch(String session_id, String branch_id) throws ExecutionException, InterruptedException {
+    if (session_id == null || branch_id == null) {
+      throw new IllegalArgumentException("getCommit: session_id and branch_id cannot be null");
+    }
+    Firestore db = FirestoreClient.getFirestore();
+    List<QueryDocumentSnapshot> pushedCommits = db.collection("sessions").document(session_id).collection("branches")
+        .document(branch_id).collection("pushed-commits").get().get().getDocuments();
+    //return last added commit
+    return pushedCommits.get(pushedCommits.size()-1).getData();
+  }
+
+  /**
+   * Method for returning all staged and pushed commits, used for git log
+   * @param session_id - unique session id for current game
+   * @param branch_id - branch id for currently checked out branch
+   * @return - a list of all stored commit data
+   * @throws ExecutionException - for firebase actions
+   * @throws InterruptedException - for firebase actions
+   */
+  public List<Map<String, Object>> getAllCommits(String session_id, String branch_id) throws ExecutionException, InterruptedException {
+    if (session_id == null || branch_id == null) {
+      throw new IllegalArgumentException("getAllCommits: session_id, branch_id cannot be null");
+    }
+    Firestore db = FirestoreClient.getFirestore();
+    List<Map<String, Object>> allCommits = new ArrayList<>();
+
+    //add all pushed commits
+    List<QueryDocumentSnapshot> pushedCommits = db.collection("sessions").document(session_id).collection("branches")
+        .document(branch_id).collection("pushed-commits").get().get().getDocuments();
+    for (QueryDocumentSnapshot commit : pushedCommits) {
+      allCommits.add(commit.getData());
+    }
+    //add all staged commits
+    List<QueryDocumentSnapshot> stagedCommits = db.collection("sessions").document(session_id).collection("branches")
+        .document(branch_id).collection("staged-commits").get().get().getDocuments();
+    for (QueryDocumentSnapshot commit : stagedCommits) {
+      allCommits.add(commit.getData());
+    }
+    return allCommits;
+  }
+
   /**
    * Returns a list of all stored session IDs
    * @return list of session ID strings
-   * @throws ExecutionException
-   * @throws InterruptedException
+   * @throws ExecutionException - for firebase actions
+   * @throws InterruptedException - for firebase actions
    */
   public List<String> getAllSessions() throws ExecutionException, InterruptedException {
     Firestore db = FirestoreClient.getFirestore();
@@ -338,8 +432,8 @@ public class FirebaseUtilities implements StorageInterface {
    * Deletes all stored information for a session, which can be used when users finish the game so
    * session IDs can be reused.
    * @param session_id - unique session id of current game
-   * @throws ExecutionException
-   * @throws InterruptedException
+   * @throws ExecutionException - for firebase actions
+   * @throws InterruptedException - for firebase actions
    */
   public void deleteSession(String session_id) throws ExecutionException, InterruptedException {
     if (session_id == null) {
@@ -349,6 +443,4 @@ public class FirebaseUtilities implements StorageInterface {
     DocumentReference docRef = db.collection("sessions").document(session_id);
     deleteDocument(docRef);
   }
-
-
 }
