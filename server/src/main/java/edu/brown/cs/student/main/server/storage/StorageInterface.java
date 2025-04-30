@@ -14,4 +14,27 @@ public interface StorageInterface {
   List<Map<String, Object>> getCompleteCollection() throws InterruptedException, ExecutionException;
 
   void clearUser(String user) throws InterruptedException, ExecutionException;
+
+  void addStash(String session_id, String file_map_json) throws ExecutionException, InterruptedException;
+
+  Map<String, Object> addBranch(String session_id, String current_branch_id, String new_branch_id) throws ExecutionException, InterruptedException;
+
+  void addChange(String session_id, String branch_id, String file_map_json) throws ExecutionException, InterruptedException;
+
+  Map<String, Object> getLatestStagedCommit(String session_id, String branch_id) throws ExecutionException, InterruptedException;
+
+  void commitChange(String session_id, String branch_id, String commit_message) throws ExecutionException, InterruptedException;
+
+  void pushCommit(String session_id, String branch_id) throws ExecutionException, InterruptedException;
+
+  Map<String, Object> getCommit(String session_id, String branch_id, String commit_id) throws ExecutionException, InterruptedException;
+
+  Map<String, Object> fetch(String session_id, String branch_id) throws ExecutionException, InterruptedException;
+
+  List<Map<String, Object>> getAllCommits(String session_id, String branch_id) throws ExecutionException, InterruptedException;
+
+  List<String> getAllSessions() throws ExecutionException, InterruptedException;
+
+  void deleteSession(String session_id) throws ExecutionException, InterruptedException;
+
 }

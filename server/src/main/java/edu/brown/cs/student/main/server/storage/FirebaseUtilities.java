@@ -48,6 +48,7 @@ public class FirebaseUtilities implements StorageInterface {
     FirebaseApp.initializeApp(options);
   }
 
+  //****************************NOT USED, CONSIDER DELETING**************************
   @Override
   public List<Map<String, Object>> getCollection(String user, String collection_id)
       throws InterruptedException, ExecutionException, IllegalArgumentException {
@@ -126,6 +127,8 @@ public class FirebaseUtilities implements StorageInterface {
     }
   }
 
+  //*************************** USED AS HELPER METHODS ***************************
+
   private void deleteDocument(DocumentReference doc) {
     // for each subcollection, run deleteCollection()
     Iterable<CollectionReference> collections = doc.listCollections();
@@ -165,6 +168,7 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws ExecutionException - for firebase actions
    * @throws InterruptedException - for firebase actions
    */
+  @Override
   public void addStash(String session_id, String file_map_json) throws ExecutionException, InterruptedException {
     if (session_id == null || file_map_json == null) {
       throw new IllegalArgumentException("addStash: session_id, stash_id, and  cannot be null");
@@ -198,6 +202,7 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws ExecutionException - for firebase actions
    * @throws InterruptedException - for firebase actions
    */
+  @Override
   public Map<String, Object> addBranch(String session_id, String current_branch_id, String new_branch_id) throws ExecutionException, InterruptedException {
     if (session_id == null || current_branch_id == null || new_branch_id == null) {
       throw new IllegalArgumentException("addBranch: session_id, current_branch_id, and new_branch_id cannot be null");
@@ -222,6 +227,7 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws ExecutionException - for firebase actions
    * @throws InterruptedException - for firebase actions
    */
+  @Override
   public void addChange(String session_id, String branch_id, String file_map_json) throws ExecutionException, InterruptedException {
     if (session_id == null || branch_id == null || file_map_json == null) {
       throw new IllegalArgumentException("addChange: session_id, branch_id, and file_map_json cannot be null");
@@ -248,6 +254,7 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws ExecutionException - for firebase actions
    * @throws InterruptedException - for firebase actions
    */
+  @Override
   public Map<String, Object> getLatestStagedCommit(String session_id, String branch_id) throws ExecutionException, InterruptedException {
     if (session_id == null || branch_id == null) {
       throw new IllegalArgumentException("getLatestStagedCommit: session_id, branch_id cannot be null");
@@ -264,7 +271,7 @@ public class FirebaseUtilities implements StorageInterface {
    * Method that generates a 6 character ID to be used for saved commits and stashes
    * @return - 6-character string
    */
-  public String generateCommitId() {
+  private String generateCommitId() {
     String alphaNum = "ABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890";
     Random random = new Random();
     StringBuilder commitId = new StringBuilder();
@@ -283,6 +290,7 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws ExecutionException - for firebase actions
    * @throws InterruptedException - for firebase actions
    */
+  @Override
   public void commitChange(String session_id, String branch_id, String commit_message) throws ExecutionException, InterruptedException {
     if (session_id == null || branch_id == null) {
       throw new IllegalArgumentException("commitChange: session_id, branch_id, and commit_message cannot be null");
@@ -316,6 +324,7 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws ExecutionException - for firebase actions
    * @throws InterruptedException - for firebase actions
    */
+  @Override
   public void pushCommit(String session_id, String branch_id) throws ExecutionException, InterruptedException {
     if (session_id == null || branch_id == null) {
       throw new IllegalArgumentException("pushCommit: session_id, branch_id cannot be null");
@@ -344,6 +353,7 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws ExecutionException - for firebase actions
    * @throws InterruptedException - for firebase actions
    */
+  @Override
   public Map<String, Object> getCommit(String session_id, String branch_id, String commit_id) throws ExecutionException, InterruptedException {
     if (session_id == null || branch_id == null || commit_id == null) {
       throw new IllegalArgumentException("getCommit: session_id, branch_id, and commit_id cannot be null");
@@ -369,6 +379,7 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws ExecutionException - for firebase actions
    * @throws InterruptedException - for firebase actions
    */
+  @Override
   public Map<String, Object> fetch(String session_id, String branch_id) throws ExecutionException, InterruptedException {
     if (session_id == null || branch_id == null) {
       throw new IllegalArgumentException("getCommit: session_id and branch_id cannot be null");
@@ -388,6 +399,7 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws ExecutionException - for firebase actions
    * @throws InterruptedException - for firebase actions
    */
+  @Override
   public List<Map<String, Object>> getAllCommits(String session_id, String branch_id) throws ExecutionException, InterruptedException {
     if (session_id == null || branch_id == null) {
       throw new IllegalArgumentException("getAllCommits: session_id, branch_id cannot be null");
@@ -416,6 +428,7 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws ExecutionException - for firebase actions
    * @throws InterruptedException - for firebase actions
    */
+  @Override
   public List<String> getAllSessions() throws ExecutionException, InterruptedException {
     Firestore db = FirestoreClient.getFirestore();
     CollectionReference dataRef = db.collection("sessions");
@@ -435,6 +448,7 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws ExecutionException - for firebase actions
    * @throws InterruptedException - for firebase actions
    */
+  @Override
   public void deleteSession(String session_id) throws ExecutionException, InterruptedException {
     if (session_id == null) {
       throw new IllegalArgumentException("deleteSession: session_id cannot be null");

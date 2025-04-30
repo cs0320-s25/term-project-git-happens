@@ -2,6 +2,7 @@ package edu.brown.cs.student.main.server.handlers;
 
 import edu.brown.cs.student.main.server.storage.StorageInterface;
 import java.util.HashMap;
+import java.util.List;
 import spark.Request;
 import spark.Response;
 
@@ -37,6 +38,7 @@ public class CreateSessionHandler extends AbstractEndpointHandler {
     }
 
     // TODO: check if session already exists
+    List<String> existingSessionNames = storage.getAllSessions();
     //     if (// check if session exists) {
     //       return returnErrorResponse("error_bad_request", "session_name_already_in_use");
     //     }
