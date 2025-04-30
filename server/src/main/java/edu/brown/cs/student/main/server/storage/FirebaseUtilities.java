@@ -7,6 +7,7 @@ import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
+import com.google.cloud.firestore.SetOptions;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
@@ -15,13 +16,16 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
 // Need to sort out the structure of the database to make this properly
 // probably: "session" -> session_name -> {level: number}, {document: however we are storing documents}
 public class FirebaseUtilities implements StorageInterface {
+  private List<String> commitIds = new ArrayList<>();
 
   public FirebaseUtilities() throws IOException {
     // Create /resources/ folder with firebase_config.json and
@@ -151,4 +155,198 @@ public class FirebaseUtilities implements StorageInterface {
       System.err.println("Error deleting collection : " + e.getMessage());
     }
   }
+  //********************************** GAME SPECIFIC METHODS ************************************
+
+  /**
+   * Method that adds set of changed files to stash collection
+   * @param session_id - session_id for current game
+   * @param file_map_json - json string of map of filenames to file contents
+   * @throws ExecutionException
+   * @throws InterruptedException
+   */
+  public void addStash(String session_id, String file_map_json) throws ExecutionException, InterruptedException {
+    if (session_id == null || file_map_json == null) {
+      throw new IllegalArgumentException("addStash: session_id, stash_id, and  cannot be null");
+    }
+    Map<String, Object> data = new HashMap<>();
+    data.put("file_map", file_map_json);
+    Firestore db = FirestoreClient.getFirestore();
+    // Make sure session document exists (safe no-op if it already does)
+    db.collection("sessions").document(session_id).set(Map.of(), SetOptions.merge());
+    // Find collection of stashes
+    CollectionReference stashesRef = db.collection("sessions").document(session_id)
+        .collection("stashes");
+    //generate a unique id for stash
+    String stash_id = generateCommitId();
+    while (commitIds.contains(stash_id)) {
+      stash_id = generateCommitId();
+    }
+    commitIds.add(stash_id);
+    data.put("stash_id", stash_id);
+    //add stash data
+    stashesRef.document(stash_id).set(data);
+  }
+
+  /**
+   * Method for adding a branch, which uses the contents of current branch for use by the new branch
+   * @param session_id - unique session id for current game
+   * @param current_branch_id - branch the user currently has checked out
+   * @param new_branch_id - name for the new branch
+   * @return - map of info for the most recent pushed commit on the current branch, to be used as the
+   *           basis for new branch's contents
+   * @throws ExecutionException
+   * @throws InterruptedException
+   */
+  public Map<String, Object> addBranch(String session_id, String current_branch_id, String new_branch_id) throws ExecutionException, InterruptedException {
+    if (session_id == null || current_branch_id == null || new_branch_id == null) {
+      throw new IllegalArgumentException("addBranch: session_id, current_branch_id, and new_branch_id cannot be null");
+    }
+    Firestore db = FirestoreClient.getFirestore();
+    // Make sure session document exists (safe no-op if it already does)
+    db.collection("sessions").document(session_id).set(Map.of(), SetOptions.merge());
+
+    //get most current version of the checked out branch and return it for new branch's setup
+    List<QueryDocumentSnapshot> pushedCommits = db.collection("sessions").document(session_id)
+        .collection("branches").document(current_branch_id).collection("pushed-commits")
+        .get().get().getDocuments();
+    Map<String, Object> currentBranchData = pushedCommits.get(pushedCommits.size()-1).getData();
+    return currentBranchData;
+  }
+
+  /**
+   * Method for add -A or rm command, as well as results of merging, which saves the most current
+   * changes to the files in the changes collection
+   * @param session_id - unique session id for current game
+   * @param branch_id - branch id for currently checked out branch
+   * @param file_map_json - json string of all files the user would like to track changes for on Git
+   * @throws ExecutionException
+   * @throws InterruptedException
+   */
+  public void addChange(String session_id, String branch_id, String file_map_json) throws ExecutionException, InterruptedException {
+    if (session_id == null || branch_id == null || file_map_json == null) {
+      throw new IllegalArgumentException("addChange: session_id, branch_id, and file_map_json cannot be null");
+    }
+    Map<String, Object> data = new HashMap<>();
+    data.put("file_map", file_map_json);
+    Firestore db = FirestoreClient.getFirestore();
+    //make sure document exists
+    db.collection("sessions").document(session_id).set(Map.of(), SetOptions.merge());
+
+    CollectionReference changesCollection = db.collection("sessions").document(session_id)
+        .collection("branches").document(branch_id).collection("changes");
+    //add most recent changes
+    changesCollection.document("change-" +
+        changesCollection.get().get().getDocuments().size()).set(data);
+  }
+
+  /**
+   * Method that generates a 6 character ID to be used for saved commits and stashes
+   * @return - 6-character string
+   */
+  public String generateCommitId() {
+    String alphaNum = "ABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890";
+    Random random = new Random();
+    String commitId = "";
+    for (int i = 0; i < 6; i++) {
+      commitId += alphaNum.charAt(random.nextInt(alphaNum.length()));
+    }
+    return commitId;
+  }
+
+  /**
+   * Method for commiting most recent changes. Moves most current version of the filemap to the staged-commits
+   * collection and clears the former changes, which can no longer be referenced
+   * @param session_id - unique session id for current game
+   * @param branch_id - branch id for currently checked out branch
+   * @param commit_message - corresponding message for commit
+   * @throws ExecutionException
+   * @throws InterruptedException
+   */
+  public void commitChange(String session_id, String branch_id, String commit_message) throws ExecutionException, InterruptedException {
+    if (session_id == null || branch_id == null) {
+      throw new IllegalArgumentException("commitChange: session_id, branch_id, and commit_message cannot be null");
+    }
+    Map<String, Object> data = new HashMap<>();
+    Firestore db = FirestoreClient.getFirestore();
+    CollectionReference changesCollection = db.collection("sessions").document(session_id)
+        .collection("branches").document(branch_id).collection("changes");
+    List<QueryDocumentSnapshot> changes = changesCollection.get().get().getDocuments();
+    Map<String, Object> latestChange = changes.get(changes.size()-1).getData();
+    data.put("commit_message", commit_message);
+    data.put("file_map", latestChange.get("file_map"));
+    String commitId = generateCommitId();
+    while (commitIds.contains(commitId)) {
+      commitId = generateCommitId();
+    }
+    commitIds.add(commitId);
+    data.put("commit_id", commitId);
+    db.collection("sessions").document(session_id).collection("branches")
+        .document(branch_id).collection("staged-commits").document(commitId).set(data);
+    deleteCollection(changesCollection);
+  }
+
+  /**
+   * Method for push command, which moves all staged commits to pushed commits collection, then clears
+   * the staged commits collection. The most recently staged commit will now be the last commit in the
+   * pushed-commits collection.
+   * @param session_id - unique session id for current game
+   * @param branch_id - branch id for currently checked out branch
+   * @throws ExecutionException
+   * @throws InterruptedException
+   */
+  public void pushCommit(String session_id, String branch_id) throws ExecutionException, InterruptedException {
+    if (session_id == null || branch_id == null) {
+      throw new IllegalArgumentException("pushCommit: session_id, branch_id cannot be null");
+    }
+    Firestore db = FirestoreClient.getFirestore();
+    //get all staged commits
+    CollectionReference stagedCommitsCollection = db.collection("sessions").document(session_id).
+        collection("branches").document(branch_id).collection("staged-commits");
+    List<QueryDocumentSnapshot> stagedCommits = stagedCommitsCollection.get().get().getDocuments();
+    //add each staged commit to pushed commits, with the most recent commit being added last
+    for (QueryDocumentSnapshot stagedCommit : stagedCommits) {
+      db.collection("sessions").document(session_id).collection("branches").document(branch_id)
+          .collection("pushed-commits").document((String) stagedCommit.getData().get("commit_id"))
+          .set(stagedCommit.getData());
+    }
+    //clear staged commits, as they have all now been pushed
+    deleteCollection(stagedCommitsCollection);
+  }
+
+  public Map<String, Object>
+  /**
+   * Returns a list of all stored session IDs
+   * @return list of session ID strings
+   * @throws ExecutionException
+   * @throws InterruptedException
+   */
+  public List<String> getAllSessions() throws ExecutionException, InterruptedException {
+    Firestore db = FirestoreClient.getFirestore();
+    CollectionReference dataRef = db.collection("sessions");
+    QuerySnapshot dataQuery = dataRef.get().get();
+
+    List<String> sessions = new ArrayList<>();
+    for (QueryDocumentSnapshot doc : dataQuery.getDocuments()) {
+      sessions.add(doc.getId());
+    }
+    return sessions;
+  }
+
+  /**
+   * Deletes all stored information for a session, which can be used when users finish the game so
+   * session IDs can be reused.
+   * @param session_id - unique session id of current game
+   * @throws ExecutionException
+   * @throws InterruptedException
+   */
+  public void deleteSession(String session_id) throws ExecutionException, InterruptedException {
+    if (session_id == null) {
+      throw new IllegalArgumentException("deleteSession: session_id cannot be null");
+    }
+    Firestore db = FirestoreClient.getFirestore();
+    DocumentReference docRef = db.collection("sessions").document(session_id);
+    deleteDocument(docRef);
+  }
+
+
 }
