@@ -1,5 +1,6 @@
 import "../styles/App.css";
-import { Select } from "./select/Select";
+import { Game } from "./game/Game";
+import { Branch } from "./branch/Branch";
 
 /**
  * This is the highest level of Mock which builds the component APP;
@@ -26,16 +27,19 @@ function App() {
     //       <h1 aria-label="Mock Header" className="mock-header">
     //         Mock
     //       </h1>
-		//   <div className= "header-buttons" aria-label="header-buttons" id="header-buttons" tabIndex={11}>
-		// 	<UserButton aria-label="user-button" />
-		// 	<SignOutButton aria-label="sign-out-button"/>
-		//   </div>
+    //   <div className= "header-buttons" aria-label="header-buttons" id="header-buttons" tabIndex={11}>
+    // 	<UserButton aria-label="user-button" />
+    // 	<SignOutButton aria-label="sign-out-button"/>
+    //   </div>
     //     </div>
     //     <Select />
     //   </SignedIn>
     // </div>
     <div className="App">
-    <Select />
+      <div className="flex-row">
+        <Game />
+        <Branch />
+      </div>
     </div>
   );
 }

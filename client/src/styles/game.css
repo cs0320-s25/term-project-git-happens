@@ -1,0 +1,48 @@
+.plate-container {
+  width: 400px;
+  height: 500px;
+  border: 1px solid red;
+}
+
+.plate-order-flex {
+  display: flex;
+  flex-direction: row;
+}
+
+.order-container {
+  width: 200px;
+  height: 200px;
+  border: 1px solid red;
+}
+
+.ingredients-container {
+  width: 200px;
+  height: 300px;
+  border: 1px solid red;
+}
+
+.workstation-container {
+  width: 600px;
+  height: 400px;
+  border: 1px solid red;
+}
+
+.workstation-ingredients {
+  width: 600px;
+  height: 150px;
+  overflow: auto;
+}
+
+.terminal-history {
+  width: 600px;
+  height: 125px;
+  text-align: left;
+  overflow: auto;
+  border: 1px solid blue;
+}
+
+.terminal-input {
+  width: 600px;
+  height: 25px;
+  box-sizing: border-box;
+}
