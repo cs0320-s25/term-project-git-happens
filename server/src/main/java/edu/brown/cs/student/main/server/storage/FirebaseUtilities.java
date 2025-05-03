@@ -211,11 +211,53 @@ public class FirebaseUtilities implements StorageInterface {
     // Make sure session document exists (safe no-op if it already does)
     db.collection("sessions").document(session_id).set(Map.of(), SetOptions.merge());
 
+    List<String> allBranches = this.getAllBranches(session_id);
+    if (allBranches.contains(new_branch_id)) {
+      throw new IllegalArgumentException("addBranch: branch_id already exists");
+    }
     //get most current version of the checked out branch and return it for new branch's setup
     List<QueryDocumentSnapshot> pushedCommits = db.collection("sessions").document(session_id)
         .collection("branches").document(current_branch_id).collection("pushed-commits")
         .get().get().getDocuments();
     return pushedCommits.get(pushedCommits.size()-1).getData();
+  }
+
+  @Override
+  public void deleteBranch(String session_id, String branch_id) throws ExecutionException, InterruptedException {
+    if (session_id == null || branch_id == null) {
+      throw new IllegalArgumentException("deleteBranch: session_id, branch_id cannot be null");
+    }
+    Firestore db = FirestoreClient.getFirestore();
+    List<String> allBranches = this.getAllBranches(session_id);
+    if (!this.getAllBranches(session_id).contains(branch_id)) {
+      throw new IllegalArgumentException("deleteBranch: branch_id does not exist");
+    }
+    DocumentReference branchRef = db.collection("sessions").document(session_id).collection("branches").document(branch_id);
+
+    deleteDocument(branchRef);
+  }
+
+  /**
+   * Method for returning a list of all branch IDs for the current session.
+   * @param session_id - unique session id for current game
+   * @return - a list of branch names
+   * @throws ExecutionException - for firebase actions
+   * @throws InterruptedException - for firebase actions
+   */
+  @Override
+  public List<String> getAllBranches(String session_id) throws ExecutionException, InterruptedException {
+    if (session_id == null) {
+      throw new IllegalArgumentException("getAllBranches: session_id cannot be null");
+    }
+    List<String> branchIds = new ArrayList<>();
+    Firestore db = FirestoreClient.getFirestore();
+    List<QueryDocumentSnapshot> branches = db.collection("sessions").document(session_id).
+        collection("branches").get().get().getDocuments();
+
+    for (QueryDocumentSnapshot doc : branches) {
+      branchIds.add(doc.getId());
+    }
+    return branchIds;
   }
 
   /**

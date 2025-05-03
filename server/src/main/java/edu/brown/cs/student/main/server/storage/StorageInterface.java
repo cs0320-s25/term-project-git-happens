@@ -19,6 +19,10 @@ public interface StorageInterface {
 
   Map<String, Object> addBranch(String session_id, String current_branch_id, String new_branch_id) throws ExecutionException, InterruptedException;
 
+  void deleteBranch(String session_id, String branch_id) throws ExecutionException, InterruptedException;
+
+  List<String> getAllBranches(String session_id) throws ExecutionException, InterruptedException;
+
   void addChange(String session_id, String branch_id, String file_map_json) throws ExecutionException, InterruptedException;
 
   Map<String, Object> getLatestStagedCommit(String session_id, String branch_id) throws ExecutionException, InterruptedException;

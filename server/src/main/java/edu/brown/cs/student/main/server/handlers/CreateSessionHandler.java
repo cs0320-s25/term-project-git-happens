@@ -27,28 +27,24 @@ public class CreateSessionHandler extends AbstractEndpointHandler {
    */
   @Override
   public Object handle(final Request request, final Response response) throws Exception {
+    try {
     responseMap = new HashMap<>();
-    // request must contain "session_name"
 
-    final String sessionName = request.queryParams("session_name");
+    // request must contain "session_name"
+    final String sessionName = request.queryParams("session_id");
     if (sessionName == null) {
       return returnErrorResponse("error_bad_request", "null_parameter", "session_name");
     } else {
-      responseMap.put("session_name", sessionName);
+      responseMap.put("session_id", sessionName);
     }
-
-    // TODO: check if session already exists
+    // check if session already exists
     List<String> existingSessionNames = storage.getAllSessions();
-    //     if (// check if session exists) {
-    //       return returnErrorResponse("error_bad_request", "session_name_already_in_use");
-    //     }
-
-    try {
-      // make session
-    } catch (Exception e) {
-      return returnErrorResponse("error_bad_request", "session_creation_failed");
+    if (existingSessionNames.contains(sessionName)) {
+      return returnErrorResponse("error_bad_request", "session_name_already_in_use");
     }
-
+    } catch (Exception e) {
+      return returnErrorResponse("error_database", "session_creation_failed: " + e.getMessage());
+    }
     return returnSuccessResponse();
   }
 }
