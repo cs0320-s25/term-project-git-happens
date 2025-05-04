@@ -26,7 +26,11 @@ import java.util.concurrent.ExecutionException;
 // Need to sort out the structure of the database to make this properly
 // probably: "session" -> session_name -> {level: number}, {document: however we are storing documents}
 public class FirebaseUtilities implements StorageInterface {
+  //holds all randomly generated commit ids
   private final List<String> commitIds = new ArrayList<>();
+  //stores the local version of each branch's files for the user, used to check for changes against what is stored in firebase (the most current pushed changes of the project)
+  // when switching branches or pushing local changes
+  private final Map<String, Map<String, Object>> localState = new HashMap<>();
 
   public FirebaseUtilities() throws IOException {
     // Create /resources/ folder with firebase_config.json and
