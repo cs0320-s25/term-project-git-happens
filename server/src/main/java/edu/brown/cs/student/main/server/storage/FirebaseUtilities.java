@@ -18,6 +18,7 @@ import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -31,6 +32,8 @@ public class FirebaseUtilities implements StorageInterface {
   //stores the local version of each branch's files for the user, used to check for changes against what is stored in firebase (the most current pushed changes of the project)
   // when switching branches or pushing local changes
   private final Map<String, Map<String, Object>> localState = new HashMap<>();
+  // user's local stashes
+  private final Map<String, Object> stashes = new LinkedHashMap<>();
 
   public FirebaseUtilities() throws IOException {
     // Create /resources/ folder with firebase_config.json and
@@ -165,51 +168,45 @@ public class FirebaseUtilities implements StorageInterface {
   }
   //********************************** GAME SPECIFIC METHODS ************************************
 
-  /**
-   * Method that adds set of changed files to stash collection
-   * @param session_id - session_id for current game
-   * @param file_map_json - json string of map of filenames to file contents
-   * @throws ExecutionException - for firebase actions
-   * @throws InterruptedException - for firebase actions
-   */
   @Override
-  public void addStash(String session_id, String file_map_json) throws ExecutionException, InterruptedException {
-    if (session_id == null || file_map_json == null) {
-      throw new IllegalArgumentException("addStash: session_id, stash_id, and  cannot be null");
+  public Map<String, Map<String, Object>> getLocalState() {
+    Map<String, Map<String, Object>> localStateCopy = localState;
+    return localStateCopy;
+  }
+
+  @Override
+  public void updateLocalState(String branch_id, Map<String, Object> branchLocalState) {
+    localState.put(branch_id, branchLocalState);
+  }
+
+
+  public void addStash(String file_map_json) throws ExecutionException, InterruptedException {
+    if (file_map_json == null) {
+      throw new IllegalArgumentException("addStash: file_map_json  cannot be null");
     }
-    Map<String, Object> data = new HashMap<>();
-    data.put("file_map", file_map_json);
-    Firestore db = FirestoreClient.getFirestore();
-    // Make sure session document exists (safe no-op if it already does)
-    db.collection("sessions").document(session_id).set(Map.of(), SetOptions.merge());
-    // Find collection of stashes
-    CollectionReference stashesRef = db.collection("sessions").document(session_id)
-        .collection("stashes");
     //generate a unique id for stash
     String stash_id = generateCommitId();
     while (commitIds.contains(stash_id)) {
       stash_id = generateCommitId();
     }
     commitIds.add(stash_id);
-    data.put("stash_id", stash_id);
-    //add stash data
-    stashesRef.document(stash_id).set(data);
+    stashes.put(stash_id, file_map_json);
   }
 
   /**
    * Method for adding a branch, which uses the contents of current branch for use by the new branch
    * @param session_id - unique session id for current game
-   * @param current_branch_id - branch the user currently has checked out
    * @param new_branch_id - name for the new branch
+   * @param file_map_json - json string of local state of files in currently checked out branch
    * @return - map of info for the most recent pushed commit on the current branch, to be used as the
    *           basis for new branch's contents
    * @throws ExecutionException - for firebase actions
    * @throws InterruptedException - for firebase actions
    */
   @Override
-  public Map<String, Object> addBranch(String session_id, String current_branch_id, String new_branch_id) throws ExecutionException, InterruptedException {
-    if (session_id == null || current_branch_id == null || new_branch_id == null) {
-      throw new IllegalArgumentException("addBranch: session_id, current_branch_id, and new_branch_id cannot be null");
+  public void addBranch(String session_id, String new_branch_id, String file_map_json) throws ExecutionException, InterruptedException {
+    if (session_id == null || new_branch_id == null || file_map_json == null) {
+      throw new IllegalArgumentException("addBranch: session_id, new_branch_id, and file_map_json cannot be null");
     }
     Firestore db = FirestoreClient.getFirestore();
     // Make sure session document exists (safe no-op if it already does)
@@ -219,11 +216,10 @@ public class FirebaseUtilities implements StorageInterface {
     if (allBranches.contains(new_branch_id)) {
       throw new IllegalArgumentException("addBranch: branch_id already exists");
     }
-    //get most current version of the checked out branch and return it for new branch's setup
-    List<QueryDocumentSnapshot> pushedCommits = db.collection("sessions").document(session_id)
-        .collection("branches").document(current_branch_id).collection("pushed-commits")
-        .get().get().getDocuments();
-    return pushedCommits.get(pushedCommits.size()-1).getData();
+    Map<String, Object> branchLocalState = new HashMap<>();
+    branchLocalState.put("file_map_json", file_map_json);
+    branchLocalState.put("latest_commit", null);
+    localState.put(new_branch_id, branchLocalState);
   }
 
   @Override
@@ -232,13 +228,13 @@ public class FirebaseUtilities implements StorageInterface {
       throw new IllegalArgumentException("deleteBranch: session_id, branch_id cannot be null");
     }
     Firestore db = FirestoreClient.getFirestore();
-    List<String> allBranches = this.getAllBranches(session_id);
     if (!this.getAllBranches(session_id).contains(branch_id)) {
       throw new IllegalArgumentException("deleteBranch: branch_id does not exist");
     }
     DocumentReference branchRef = db.collection("sessions").document(session_id).collection("branches").document(branch_id);
 
     deleteDocument(branchRef);
+    this.localState.remove(branch_id);
   }
 
   /**
@@ -289,6 +285,7 @@ public class FirebaseUtilities implements StorageInterface {
     //add most recent changes
     changesCollection.document("change-" +
         changesCollection.get().get().getDocuments().size()).set(data);
+    this.localState.get(branch_id).put("file_map_json", file_map_json);
   }
 
   /**
@@ -317,7 +314,7 @@ public class FirebaseUtilities implements StorageInterface {
    * Method that generates a 6 character ID to be used for saved commits and stashes
    * @return - 6-character string
    */
-  private String generateCommitId() {
+  public String generateCommitId() {
     String alphaNum = "ABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890";
     Random random = new Random();
     StringBuilder commitId = new StringBuilder();
@@ -337,7 +334,7 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws InterruptedException - for firebase actions
    */
   @Override
-  public void commitChange(String session_id, String branch_id, String commit_message) throws ExecutionException, InterruptedException {
+  public String commitChange(String session_id, String branch_id, String commit_message) throws ExecutionException, InterruptedException {
     if (session_id == null || branch_id == null) {
       throw new IllegalArgumentException("commitChange: session_id, branch_id, and commit_message cannot be null");
     }
@@ -358,7 +355,10 @@ public class FirebaseUtilities implements StorageInterface {
     data.put("commit_id", commitId);
     db.collection("sessions").document(session_id).collection("branches")
         .document(branch_id).collection("staged-commits").document(commitId).set(data);
+    localState.get(branch_id).put("file_map_json", data.get("file_map"));
+    localState.get(branch_id).put("latest_commit_id", commitId);
     deleteCollection(changesCollection);
+    return commitId;
   }
 
   /**

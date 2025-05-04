@@ -3,6 +3,7 @@ package edu.brown.cs.student.main.server.handlers;
 import edu.brown.cs.student.main.server.storage.StorageInterface;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import spark.Request;
 import spark.Response;
 
@@ -32,6 +33,7 @@ public class CreateSessionHandler extends AbstractEndpointHandler {
 
     // request must contain "session_name"
     final String sessionName = request.queryParams("session_id");
+    final String originalFileMap = request.queryParams("file_map_json");
     if (sessionName == null) {
       return returnErrorResponse("error_bad_request", "null_parameter", "session_name");
     } else {
@@ -41,6 +43,15 @@ public class CreateSessionHandler extends AbstractEndpointHandler {
     List<String> existingSessionNames = storage.getAllSessions();
     if (existingSessionNames.contains(sessionName)) {
       return returnErrorResponse("error_bad_request", "session_name_already_in_use");
+    } else {
+      Map<String, Object> originalGameState = new HashMap<>();
+      storage.addChange(sessionName, "main", originalFileMap);
+      String commitId = storage.commitChange(sessionName, "main", "Initial commit");
+      storage.pushCommit(sessionName, "main");
+      originalGameState.put("file_map_json", originalFileMap);
+      originalGameState.put("latest_commit_id", commitId);
+      storage.updateLocalState("main", originalGameState);
+      responseMap.put("action", "session_created");
     }
     } catch (Exception e) {
       return returnErrorResponse("error_database", "session_creation_failed: " + e.getMessage());

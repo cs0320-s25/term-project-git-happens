@@ -9,7 +9,7 @@ public MockShape(String type, String color) {
 }
   @Override
   public boolean equals(Object obj) {
-  if (obj instanceof MockShape && ((MockShape) obj).type.equals(type) && ((MockShape) obj).color.equals(color)) {
+  if (((MockShape) obj).type.equals(type) && ((MockShape) obj).color.equals(color)) {
     return true;
   }
   return false;

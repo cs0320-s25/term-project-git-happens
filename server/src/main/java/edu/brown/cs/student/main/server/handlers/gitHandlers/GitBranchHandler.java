@@ -46,11 +46,11 @@ public class GitBranchHandler extends AbstractEndpointHandler {
       } else {
         //create branch with given string name
         String newBranch = request.queryParams("new_branch_id");
-        String currentBranch = request.queryParams("current_branch_id");
-        if (newBranch == null || currentBranch == null) {
-          returnErrorResponse("error_bad_request", "null parameter(s)", newBranch==null? "new_branch_id" : "" + currentBranch==null? ", current_branch_id" : "");
+        String currentProjectState = request.queryParams("file_map_json");
+        if (newBranch == null || currentProjectState == null) {
+          returnErrorResponse("error_bad_request", "null parameter(s)", newBranch==null? "new_branch_id" : "" + currentProjectState==null? ", file_map_json" : "");
         }
-        storage.addBranch(sessionId, newBranch, currentBranch);
+        storage.addBranch(sessionId, newBranch, currentProjectState);
         responseMap.put("session_id", sessionId);
         responseMap.put("action", "add branch");
         responseMap.put("branch_id", newBranch);
