@@ -1,7 +1,9 @@
 package edu.brown.cs.student.main.server.handlers;
 
 import edu.brown.cs.student.main.server.storage.StorageInterface;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import spark.Request;
@@ -45,11 +47,16 @@ public class CreateSessionHandler extends AbstractEndpointHandler {
       return returnErrorResponse("error_bad_request", "session_name_already_in_use");
     } else {
       Map<String, Object> originalGameState = new HashMap<>();
-      storage.addChange(sessionName, "main", originalFileMap);
-      String commitId = storage.commitChange(sessionName, "main", "Initial commit");
+      storage.addChange("main", originalFileMap);
+      String commitId = storage.commitChange("main", "Initial commit");
       storage.pushCommit(sessionName, "main");
-      originalGameState.put("file_map_json", originalFileMap);
+      originalGameState.put("local_file_map_json", originalFileMap);
       originalGameState.put("latest_commit_id", commitId);
+      originalGameState.put("changes", null);
+      LinkedHashMap<String, Object> stagedCommits = new LinkedHashMap<>();
+      LinkedHashMap<String, Object> pushedCommits = new LinkedHashMap<>();
+      originalGameState.put("staged_commits", stagedCommits);
+      originalGameState.put("pushed_commits", pushedCommits);
       storage.updateLocalState("main", originalGameState);
       responseMap.put("action", "session_created");
     }
