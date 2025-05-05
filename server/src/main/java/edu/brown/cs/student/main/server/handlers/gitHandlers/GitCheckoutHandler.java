@@ -3,6 +3,7 @@ package edu.brown.cs.student.main.server.handlers.gitHandlers;
 import edu.brown.cs.student.main.server.handlers.AbstractEndpointHandler;
 import edu.brown.cs.student.main.server.storage.StorageInterface;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import spark.Request;
 import spark.Response;
@@ -24,18 +25,18 @@ public class GitCheckoutHandler extends AbstractEndpointHandler {
     final String fileMapJson = request.queryParams("file_map_json");
 
     if (sessionId == null || currentBranch == null || newBranch == null || fileMapJson == null) {
-      String errorArg = sessionId==null?"session_id":"" + currentBranch==null?", current_branch_id":""
-          + newBranch==null?", new_branch_id":"" + fileMapJson==null?", file_map_json":"" + fileMapJson;
+      String errorArg = (sessionId==null?"session_id":"") + (currentBranch==null?", current_branch_id":"")
+          + (newBranch==null?", new_branch_id":"") + (fileMapJson==null?", file_map_json":"");
       return returnErrorResponse("error_bad_request", "Null parameter(s)", errorArg);
     }
     try {
-      Map<String, Object> currentBranchLatestCommit = storage.getLatestStagedCommit(sessionId, currentBranch);
-      if (currentBranchLatestCommit == null) {
-        currentBranchLatestCommit = storage.fetch(sessionId, newBranch);
+      Map<String, Object> latestCommit = storage.getLocalState().get("latest_commit");
+      if (latestCommit == null) {
+        //TODO: check file_map_json against local storage for changes that need to be committed. if so prompt commit
+      } else {
+        //TODO: check if the current project state matches the last commit, if not, prompt commit
       }
-      //TODO: check if the latest committed changes match what the user has locally
-
-      //TODO: if the user has uncommitted changes, tell them to commit them
+      //TODO: if all changes have been committed, save local state of filemap and switch branches
 
     } catch (Exception e) {
       return returnErrorResponse("", "");

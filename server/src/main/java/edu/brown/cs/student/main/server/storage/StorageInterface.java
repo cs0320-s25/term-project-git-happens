@@ -15,19 +15,21 @@ public interface StorageInterface {
 
   void clearUser(String user) throws InterruptedException, ExecutionException;
 
-  void addStash(String session_id, String file_map_json) throws ExecutionException, InterruptedException;
+  void updateLocalState(String branch_id, Map<String, Object> branchLocalState);
 
-  Map<String, Object> addBranch(String session_id, String current_branch_id, String new_branch_id) throws ExecutionException, InterruptedException;
+  Map<String, Map<String, Object>> getLocalState();
+
+  void addBranch(String session_id, String new_branch_id, String file_map_json) throws ExecutionException, InterruptedException;
 
   void deleteBranch(String session_id, String branch_id) throws ExecutionException, InterruptedException;
 
   List<String> getAllBranches(String session_id) throws ExecutionException, InterruptedException;
 
-  void addChange(String session_id, String branch_id, String file_map_json) throws ExecutionException, InterruptedException;
+  void addChange(String branch_id, String file_map_json);
 
-  Map<String, Object> getLatestStagedCommit(String session_id, String branch_id) throws ExecutionException, InterruptedException;
+  //Map<String, Object> getLatestStagedCommit(String session_id, String branch_id) throws ExecutionException, InterruptedException;
 
-  void commitChange(String session_id, String branch_id, String commit_message) throws ExecutionException, InterruptedException;
+  String commitChange(String branch_id, String commit_message) throws ExecutionException, InterruptedException;
 
   void pushCommit(String session_id, String branch_id) throws ExecutionException, InterruptedException;
 

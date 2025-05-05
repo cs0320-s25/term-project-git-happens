@@ -1,5 +1,6 @@
 package edu.brown.cs.student.main.server.storage;
 
+import com.google.api.client.util.DateTime;
 import com.google.api.core.ApiFuture;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.CollectionReference;
@@ -18,6 +19,7 @@ import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -31,6 +33,8 @@ public class FirebaseUtilities implements StorageInterface {
   //stores the local version of each branch's files for the user, used to check for changes against what is stored in firebase (the most current pushed changes of the project)
   // when switching branches or pushing local changes
   private final Map<String, Map<String, Object>> localState = new HashMap<>();
+  // user's local stashes
+  private final Map<String, Object> stashes = new LinkedHashMap<>();
 
   public FirebaseUtilities() throws IOException {
     // Create /resources/ folder with firebase_config.json and
@@ -166,79 +170,97 @@ public class FirebaseUtilities implements StorageInterface {
   //********************************** GAME SPECIFIC METHODS ************************************
 
   /**
-   * Method that adds set of changed files to stash collection
-   * @param session_id - session_id for current game
-   * @param file_map_json - json string of map of filenames to file contents
-   * @throws ExecutionException - for firebase actions
-   * @throws InterruptedException - for firebase actions
+   * Method that returns the project information stored on the user's local repository
+   * @return - a copy of the local state of the project
    */
   @Override
-  public void addStash(String session_id, String file_map_json) throws ExecutionException, InterruptedException {
-    if (session_id == null || file_map_json == null) {
-      throw new IllegalArgumentException("addStash: session_id, stash_id, and  cannot be null");
+  public Map<String, Map<String, Object>> getLocalState() {
+    Map<String, Map<String, Object>> localStateCopy = localState;
+    return localStateCopy;
+  }
+
+  /**
+   * Method that updates the locally stored project information for a specific branch
+   * @param branch_id - name of branch the user would like to update
+   * @param branchLocalState - map of strings : objects representing project information
+   */
+  @Override
+  public void updateLocalState(String branch_id, Map<String, Object> branchLocalState) {
+    localState.put(branch_id, branchLocalState);
+  }
+
+  /**
+   * Method for adding a stashed change to the user's locally stored stashes
+   * @param file_map_json - map of the state of the project at time of stash
+   */
+  public void addStash(String file_map_json) {
+    if (file_map_json == null) {
+      throw new IllegalArgumentException("addStash: file_map_json  cannot be null");
     }
-    Map<String, Object> data = new HashMap<>();
-    data.put("file_map", file_map_json);
-    Firestore db = FirestoreClient.getFirestore();
-    // Make sure session document exists (safe no-op if it already does)
-    db.collection("sessions").document(session_id).set(Map.of(), SetOptions.merge());
-    // Find collection of stashes
-    CollectionReference stashesRef = db.collection("sessions").document(session_id)
-        .collection("stashes");
     //generate a unique id for stash
     String stash_id = generateCommitId();
     while (commitIds.contains(stash_id)) {
       stash_id = generateCommitId();
     }
     commitIds.add(stash_id);
-    data.put("stash_id", stash_id);
-    //add stash data
-    stashesRef.document(stash_id).set(data);
+    //store new stash locally
+    stashes.put(stash_id, file_map_json);
   }
 
   /**
    * Method for adding a branch, which uses the contents of current branch for use by the new branch
    * @param session_id - unique session id for current game
-   * @param current_branch_id - branch the user currently has checked out
    * @param new_branch_id - name for the new branch
-   * @return - map of info for the most recent pushed commit on the current branch, to be used as the
-   *           basis for new branch's contents
+   * @param file_map_json - json string of local state of files in currently checked out branch
    * @throws ExecutionException - for firebase actions
    * @throws InterruptedException - for firebase actions
    */
   @Override
-  public Map<String, Object> addBranch(String session_id, String current_branch_id, String new_branch_id) throws ExecutionException, InterruptedException {
-    if (session_id == null || current_branch_id == null || new_branch_id == null) {
-      throw new IllegalArgumentException("addBranch: session_id, current_branch_id, and new_branch_id cannot be null");
+  public void addBranch(String session_id, String new_branch_id, String file_map_json) throws ExecutionException, InterruptedException {
+    if (session_id == null || new_branch_id == null || file_map_json == null) {
+      throw new IllegalArgumentException("addBranch: session_id, new_branch_id, and file_map_json cannot be null");
     }
     Firestore db = FirestoreClient.getFirestore();
     // Make sure session document exists (safe no-op if it already does)
     db.collection("sessions").document(session_id).set(Map.of(), SetOptions.merge());
 
+    //check that branch_id isn't already in use
     List<String> allBranches = this.getAllBranches(session_id);
     if (allBranches.contains(new_branch_id)) {
       throw new IllegalArgumentException("addBranch: branch_id already exists");
     }
-    //get most current version of the checked out branch and return it for new branch's setup
-    List<QueryDocumentSnapshot> pushedCommits = db.collection("sessions").document(session_id)
-        .collection("branches").document(current_branch_id).collection("pushed-commits")
-        .get().get().getDocuments();
-    return pushedCommits.get(pushedCommits.size()-1).getData();
+    //setup new branch using project state of currently checked out branch
+    Map<String, Object> branchLocalState = new HashMap<>();
+    branchLocalState.put("local_file_map_json", file_map_json);
+    branchLocalState.put("latest_commit", null);
+    branchLocalState.put("changes", null);
+    branchLocalState.put("staged_commits", new LinkedHashMap<String, Map<String, Object>>());
+    branchLocalState.put("pushed_commits", new LinkedHashMap<String, Map<String, Object>>());
+    localState.put(new_branch_id, branchLocalState);
   }
 
+  /**
+   * Method for deleting a branch locally and remotely.
+   * @param session_id - unique session id of current game
+   * @param branch_id - name of branch to be deleted
+   * @throws ExecutionException - for firebase actions
+   * @throws InterruptedException - for firebase actions
+   */
   @Override
   public void deleteBranch(String session_id, String branch_id) throws ExecutionException, InterruptedException {
     if (session_id == null || branch_id == null) {
-      throw new IllegalArgumentException("deleteBranch: session_id, branch_id cannot be null");
+      throw new IllegalArgumentException("deleteBranch: session_id and branch_id cannot be null");
     }
     Firestore db = FirestoreClient.getFirestore();
-    List<String> allBranches = this.getAllBranches(session_id);
+    //check that branch exists
     if (!this.getAllBranches(session_id).contains(branch_id)) {
       throw new IllegalArgumentException("deleteBranch: branch_id does not exist");
     }
     DocumentReference branchRef = db.collection("sessions").document(session_id).collection("branches").document(branch_id);
-
+    //delete remote copy of branch
     deleteDocument(branchRef);
+    //delete local copy of branch if it exists
+    this.localState.remove(branch_id);
   }
 
   /**
@@ -255,9 +277,11 @@ public class FirebaseUtilities implements StorageInterface {
     }
     List<String> branchIds = new ArrayList<>();
     Firestore db = FirestoreClient.getFirestore();
+    //get all documents in branches collection
     List<QueryDocumentSnapshot> branches = db.collection("sessions").document(session_id).
         collection("branches").get().get().getDocuments();
 
+    //add branch_id for each document
     for (QueryDocumentSnapshot doc : branches) {
       branchIds.add(doc.getId());
     }
@@ -267,57 +291,47 @@ public class FirebaseUtilities implements StorageInterface {
   /**
    * Method for add -A or rm command, as well as results of merging, which saves the most current
    * changes to the files in the changes collection
-   * @param session_id - unique session id for current game
    * @param branch_id - branch id for currently checked out branch
    * @param file_map_json - json string of all files the user would like to track changes for on Git
-   * @throws ExecutionException - for firebase actions
-   * @throws InterruptedException - for firebase actions
    */
   @Override
-  public void addChange(String session_id, String branch_id, String file_map_json) throws ExecutionException, InterruptedException {
-    if (session_id == null || branch_id == null || file_map_json == null) {
-      throw new IllegalArgumentException("addChange: session_id, branch_id, and file_map_json cannot be null");
+  public void addChange(String branch_id, String file_map_json) {
+    if (branch_id == null || file_map_json == null) {
+      throw new IllegalArgumentException("addChange: branch_id and file_map_json cannot be null");
     }
-    Map<String, Object> data = new HashMap<>();
-    data.put("file_map", file_map_json);
-    Firestore db = FirestoreClient.getFirestore();
-    //make sure document exists
-    db.collection("sessions").document(session_id).set(Map.of(), SetOptions.merge());
-
-    CollectionReference changesCollection = db.collection("sessions").document(session_id)
-        .collection("branches").document(branch_id).collection("changes");
-    //add most recent changes
-    changesCollection.document("change-" +
-        changesCollection.get().get().getDocuments().size()).set(data);
+    //take the opportunity to update known local state of the project
+    this.localState.get(branch_id).put("local_file_map_json", file_map_json);
+    //add changes
+    this.localState.get(branch_id).put("changes", file_map_json);
   }
 
-  /**
-   * Method for getting the last staged commits, used for showing the difference between any of the
-   * user's uncommitted files and committed files.
-   * @param session_id - unique session id for current game
-   * @param branch_id - branch id for currently checked out branch
-   * @return - map of commit data representing most recently committed changes to files
-   * @throws ExecutionException - for firebase actions
-   * @throws InterruptedException - for firebase actions
-   */
-  @Override
-  public Map<String, Object> getLatestStagedCommit(String session_id, String branch_id) throws ExecutionException, InterruptedException {
-    if (session_id == null || branch_id == null) {
-      throw new IllegalArgumentException("getLatestStagedCommit: session_id, branch_id cannot be null");
-    }
-    Firestore db = FirestoreClient.getFirestore();
-    List<QueryDocumentSnapshot> stagedCommits = db.collection("sessions").document(session_id)
-        .collection("branches").document(branch_id).collection("staged-commits")
-        .get().get().getDocuments();
-    //return last added commit
-    return stagedCommits.get(stagedCommits.size()-1).getData();
-  }
+//  /**
+//   * Method for getting the last staged commits, used for showing the difference between any of the
+//   * user's uncommitted files and committed files.
+//   * @param session_id - unique session id for current game
+//   * @param branch_id - branch id for currently checked out branch
+//   * @return - map of commit data representing most recently committed changes to files
+//   * @throws ExecutionException - for firebase actions
+//   * @throws InterruptedException - for firebase actions
+//   */
+//  @Override
+//  public Map<String, Object> getLatestStagedCommit(String session_id, String branch_id) throws ExecutionException, InterruptedException {
+//    if (session_id == null || branch_id == null) {
+//      throw new IllegalArgumentException("getLatestStagedCommit: session_id, branch_id cannot be null");
+//    }
+//    Firestore db = FirestoreClient.getFirestore();
+//    List<QueryDocumentSnapshot> stagedCommits = db.collection("sessions").document(session_id)
+//        .collection("branches").document(branch_id).collection("staged-commits")
+//        .get().get().getDocuments();
+//    //return last added commit
+//    return stagedCommits.get(stagedCommits.size()-1).getData();
+//  }
 
   /**
    * Method that generates a 6 character ID to be used for saved commits and stashes
    * @return - 6-character string
    */
-  private String generateCommitId() {
+  public String generateCommitId() {
     String alphaNum = "ABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890";
     Random random = new Random();
     StringBuilder commitId = new StringBuilder();
@@ -330,35 +344,40 @@ public class FirebaseUtilities implements StorageInterface {
   /**
    * Method for commiting most recent changes. Moves most current version of the filemap to the staged-commits
    * collection and clears the former changes, which can no longer be referenced
-   * @param session_id - unique session id for current game
    * @param branch_id - branch id for currently checked out branch
    * @param commit_message - corresponding message for commit
-   * @throws ExecutionException - for firebase actions
-   * @throws InterruptedException - for firebase actions
    */
   @Override
-  public void commitChange(String session_id, String branch_id, String commit_message) throws ExecutionException, InterruptedException {
-    if (session_id == null || branch_id == null) {
-      throw new IllegalArgumentException("commitChange: session_id, branch_id, and commit_message cannot be null");
+  public String commitChange(String branch_id, String commit_message) {
+    if (branch_id == null || commit_message == null) {
+      throw new IllegalArgumentException("commitChange: branch_id and commit_message cannot be null");
     }
-    Map<String, Object> data = new HashMap<>();
-    Firestore db = FirestoreClient.getFirestore();
-    CollectionReference changesCollection = db.collection("sessions").document(session_id)
-        .collection("branches").document(branch_id).collection("changes");
-    List<QueryDocumentSnapshot> changes = changesCollection.get().get().getDocuments();
-    Map<String, Object> latestChange = changes.get(changes.size()-1).getData();
-    data.put("commit_message", commit_message);
-    data.put("date_time", ZonedDateTime.now());
-    data.put("file_map", latestChange.get("file_map"));
+    Map<String, Object> newCommit = new HashMap<>();
+    //generate unique commit id
     String commitId = generateCommitId();
     while (commitIds.contains(commitId)) {
       commitId = generateCommitId();
     }
     commitIds.add(commitId);
-    data.put("commit_id", commitId);
-    db.collection("sessions").document(session_id).collection("branches")
-        .document(branch_id).collection("staged-commits").document(commitId).set(data);
-    deleteCollection(changesCollection);
+
+    //if there are staged changes, create a new commit
+    Object changes = localState.get(branch_id).get("changes");
+    localState.get(branch_id).put("changes", null);
+    if (changes == null) {
+      return null;
+    }
+    newCommit.put("file_map_json", changes);
+    newCommit.put("commit_message", commit_message);
+    newCommit.put("commit_id", commitId);
+    newCommit.put("date_time", ZonedDateTime.now());
+
+    //update staged commits locally
+    LinkedHashMap<String, Object> stagedCommits = (LinkedHashMap<String, Object>) localState.get(branch_id).get("staged_commits");
+    stagedCommits.put(commitId, newCommit);
+    localState.get(branch_id).put("staged_commits", stagedCommits);
+    //store new commit as latest commit for easy access
+    localState.get(branch_id).put("latest_commit", newCommit);
+    return commitId;
   }
 
   /**
@@ -376,18 +395,21 @@ public class FirebaseUtilities implements StorageInterface {
       throw new IllegalArgumentException("pushCommit: session_id, branch_id cannot be null");
     }
     Firestore db = FirestoreClient.getFirestore();
-    //get all staged commits
-    CollectionReference stagedCommitsCollection = db.collection("sessions").document(session_id).
-        collection("branches").document(branch_id).collection("staged-commits");
-    List<QueryDocumentSnapshot> stagedCommits = stagedCommitsCollection.get().get().getDocuments();
-    //add each staged commit to pushed commits, with the most recent commit being added last
-    for (QueryDocumentSnapshot stagedCommit : stagedCommits) {
+    //get all staged and pushed commits
+    LinkedHashMap<String, Object> stagedCommits = (LinkedHashMap<String, Object>) localState.get(branch_id).get("staged_commits");
+    LinkedHashMap<String, Object> pushedCommits = (LinkedHashMap<String, Object>) localState.get(branch_id).get("pushed_commits");
+
+    //add each staged commit to pushed commits locally and remotely, in order of insertion
+    for (Map.Entry<String, Object> commit : stagedCommits.entrySet()) {
       db.collection("sessions").document(session_id).collection("branches").document(branch_id)
-          .collection("pushed-commits").document((String) stagedCommit.getData().get("commit_id"))
-          .set(stagedCommit.getData());
+          .collection("pushed-commits").document(commit.getKey())
+          .set(commit.getValue());
+      pushedCommits.put(commit.getKey(), commit.getValue());
     }
     //clear staged commits, as they have all now been pushed
-    deleteCollection(stagedCommitsCollection);
+    localState.get(branch_id).put("pushed_commits", pushedCommits);
+    stagedCommits.clear();
+    localState.get(branch_id).put("staged_commits", stagedCommits);
   }
 
   /**
@@ -409,10 +431,10 @@ public class FirebaseUtilities implements StorageInterface {
     Map<String, Object> foundCommit = db.collection("sessions").document(session_id).collection("branches")
         .document(branch_id).collection("pushed-commits").document(commit_id).get().get().getData();
 
-    //if commit can't be found in pushed commits, search through staged commits
+    //if commit can't be found in pushed commits, search through local staged commits
     if (foundCommit == null) {
-      foundCommit = db.collection("sessions").document(session_id).collection("branches")
-          .document(branch_id).collection("staged-commits").document(commit_id).get().get().getData();
+      LinkedHashMap<String, Object> stagedCommits = (LinkedHashMap<String, Object>) localState.get(branch_id).get("staged_commits");
+      foundCommit = (Map<String, Object>) stagedCommits.get(commit_id);
     }
     return foundCommit;
   }
@@ -431,14 +453,15 @@ public class FirebaseUtilities implements StorageInterface {
       throw new IllegalArgumentException("getCommit: session_id and branch_id cannot be null");
     }
     Firestore db = FirestoreClient.getFirestore();
+    //get all pushed commits
     List<QueryDocumentSnapshot> pushedCommits = db.collection("sessions").document(session_id).collection("branches")
         .document(branch_id).collection("pushed-commits").get().get().getDocuments();
-    //return last added commit
+    //return last pushed commit
     return pushedCommits.get(pushedCommits.size()-1).getData();
   }
 
   /**
-   * Method for returning all staged and pushed commits, used for git log
+   * Method for returning all pushed commits, used for git log
    * @param session_id - unique session id for current game
    * @param branch_id - branch id for currently checked out branch
    * @return - a list of all stored commit data
@@ -457,12 +480,6 @@ public class FirebaseUtilities implements StorageInterface {
     List<QueryDocumentSnapshot> pushedCommits = db.collection("sessions").document(session_id).collection("branches")
         .document(branch_id).collection("pushed-commits").get().get().getDocuments();
     for (QueryDocumentSnapshot commit : pushedCommits) {
-      allCommits.add(commit.getData());
-    }
-    //add all staged commits
-    List<QueryDocumentSnapshot> stagedCommits = db.collection("sessions").document(session_id).collection("branches")
-        .document(branch_id).collection("staged-commits").get().get().getDocuments();
-    for (QueryDocumentSnapshot commit : stagedCommits) {
       allCommits.add(commit.getData());
     }
     return allCommits;
@@ -502,5 +519,6 @@ public class FirebaseUtilities implements StorageInterface {
     Firestore db = FirestoreClient.getFirestore();
     DocumentReference docRef = db.collection("sessions").document(session_id);
     deleteDocument(docRef);
+    localState.clear();
   }
 }
