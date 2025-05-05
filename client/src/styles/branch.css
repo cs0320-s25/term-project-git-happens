@@ -1,0 +1,24 @@
+.branch-vis {
+  width: 600px;
+  height: 700px;
+  border: 1px solid lime;
+}
+
+.svg-container {
+  max-height: 700px;
+  overflow-y: auto;
+  position: relative;
+}
+
+.svg-vis {
+  border: 1px solid cyan;
+  background: "transparent";
+}
+
+.branch-headers {
+  border: 1px solid magenta;
+}
+
+.commit-node {
+  cursor: pointer;
+}

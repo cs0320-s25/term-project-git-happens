@@ -2,12 +2,23 @@ import { Dispatch, SetStateAction, useState, useEffect, useRef } from "react";
 import "../../../../styles/game.css";
 import { parseCommand } from "./commandParser";
 import { IngredientImage } from "../../Game";
+import type { CommitData, BranchData } from "../../../App";
 
 interface TerminalProps {
   workstationItems: IngredientImage[];
   setWorkstationItems: Dispatch<SetStateAction<IngredientImage[]>>;
   plateItems: IngredientImage[];
   setPlateItems: Dispatch<SetStateAction<IngredientImage[]>>;
+  branchData: {
+    commits: CommitData[];
+    branches: BranchData[];
+  };
+  setBranchData: Dispatch<
+    SetStateAction<{
+      commits: CommitData[];
+      branches: BranchData[];
+    }>
+  >;
 }
 
 export interface Command {
@@ -56,6 +67,20 @@ export function Terminal(props: TerminalProps) {
       case "add all":
         props.setPlateItems(props.workstationItems);
         setCommandHistory((prev) => [...prev, terminalResponse]);
+        break;
+      case "commit":
+        const commits = props.branchData.commits;
+        const branches = props.branchData.branches;
+        const newCommit = {
+          commit_hash: "m",
+          message: "added commit",
+          branch: "main",
+          parent_commits: ["l"],
+          contents: ["aaaaa"],
+        };
+        commits.push(newCommit);
+
+        props.setBranchData({ commits: commits, branches: branches });
         break;
       default:
         setCommandHistory((prev) => [...prev, terminalResponse]);

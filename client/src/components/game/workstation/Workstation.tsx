@@ -2,12 +2,23 @@ import { Dispatch, SetStateAction, useState, useEffect } from "react";
 import "../../../styles/game.css";
 import { IngredientImage } from "../Game";
 import { Terminal } from "./terminal/Terminal";
+import type { CommitData, BranchData } from "../../App";
 
 interface WorkstationProps {
   workstationItems: IngredientImage[];
   setWorkstationItems: Dispatch<SetStateAction<IngredientImage[]>>;
   plateItems: IngredientImage[];
   setPlateItems: Dispatch<SetStateAction<IngredientImage[]>>;
+  branchData: {
+    commits: CommitData[];
+    branches: BranchData[];
+  };
+  setBranchData: Dispatch<
+    SetStateAction<{
+      commits: CommitData[];
+      branches: BranchData[];
+    }>
+  >;
 }
 
 export function Workstation(props: WorkstationProps) {
@@ -36,6 +47,8 @@ export function Workstation(props: WorkstationProps) {
         setWorkstationItems={props.setWorkstationItems}
         plateItems={props.plateItems}
         setPlateItems={props.setPlateItems}
+        branchData={props.branchData}
+        setBranchData={props.setBranchData}
       />
 
       <p>{textDisplay}</p>

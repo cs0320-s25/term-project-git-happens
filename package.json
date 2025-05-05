@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "react-vis-network": "^1.0.0",
+    "vis-network": "^9.1.9"
+  }
+}
