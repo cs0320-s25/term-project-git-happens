@@ -17,6 +17,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -165,6 +167,97 @@ public class FirebaseUtilities implements StorageInterface {
   }
   //********************************** GAME SPECIFIC METHODS ************************************
 
+  public void addSession(String session_id, String user_id, String file_map_json) throws ExecutionException, InterruptedException {
+    if (session_id == null || user_id == null || file_map_json == null) {
+      throw new IllegalArgumentException(
+          "addSession: session_id and file_map_json cannot be null");
+    }
+    Map<String, Object> remoteFileMap = new HashMap<>();
+
+    Map<String, Object> parentBranch = new HashMap<>();
+    Map<String, Object> head = new HashMap<>();
+    Map<String, Object> changes = new HashMap<>();
+    List<Map<String, Object>> stagedCommits = new ArrayList<>();
+    List<Map<String, Object>> pushedCommits = new ArrayList<>();
+
+    Firestore db = FirestoreClient.getFirestore();
+    db.collection("sessions").document(session_id).set(Map.of(), SetOptions.merge());
+    //create remote repository if this is the first user to log into the session
+    if (db.collection("sessions").document(session_id).collection("remote-branches").get().get()
+        .getDocuments().isEmpty()) {
+
+      //generate unique commit id
+      String initialCommitId = this.generateCommitId();
+      while (this.commitIds.contains(initialCommitId)) {
+        initialCommitId = this.generateCommitId();
+      }
+      commitIds.add(initialCommitId);
+
+      //create initial commit
+      Map<String, Object> initialCommit = new HashMap<>();
+      initialCommit.put("file_map_json", file_map_json);
+      initialCommit.put("commit_id", initialCommitId);
+      initialCommit.put("author", "game");
+      initialCommit.put("date_time", ZonedDateTime.now());
+      initialCommit.put("commit_message", "Initial commit");
+
+      //setup branch info
+      db.collection("sessions").document(session_id).collection("remote-branches").document("main").collection("branch-info").document("parent-branch").set(
+          Collections.singletonMap("parent_branch_id", null));
+      db.collection("sessions").document(session_id).collection("remote-branches").document("main").collection("branch-info").document("remote-file-map-json").set(
+          Collections.singletonMap("remote_file_map_json", file_map_json));
+      db.collection("sessions").document(session_id).collection("remote-branches").document("main").collection("branch-info").document("head").set(
+          initialCommit);
+
+      //setup pushed remote commits
+      List<Map<String, Object>> remoteCommits = new ArrayList<>();
+      remoteCommits.add(initialCommit);
+      db.collection("sessions").document(session_id)
+          .collection("remote-branches")
+          .document("main").collection("pushed-commits").document("commits").set(
+              Collections.singletonMap("commits", remoteCommits));
+    }
+    //setup user's local branch info
+    String mainParentBranchId = db.collection("sessions").document(session_id).collection("remote-branches").document("main").collection("branch-info").document("parent-branch").get().get().getString("parent_branch_id");
+    String mainFileMapJson = db.collection("sessions").document(session_id).collection("remote-branches").document("main").collection("branch-info").document("remote-file-map-json").get().get().getString("remote_file_map_json");
+    Map<String, Object> mainHead = db.collection("sessions").document(session_id).collection("remote-branches").document("main").collection("branch-info").document("head").get().get().getData();
+
+    //set local file map
+    db.collection("sessions").document(session_id)
+        .collection("local-store").document(user_id).collection("branches")
+        .document("main").collection("branch-info").document("local-file-map-json").set(Collections.singletonMap("local_file_map_json", mainFileMapJson));
+
+    //set parent branch
+    db.collection("sessions").document(session_id)
+        .collection("local-store").document(user_id).collection("branches")
+        .document("main").collection("branch-info").document("parent-branch").set(Collections.singletonMap("parent_branch_id", parentBranch));
+
+    //set head
+    db.collection("sessions").document(session_id)
+        .collection("local-store").document(user_id).collection("branches")
+        .document("main").collection("branch-info").document("head").set(Collections.singletonMap("head", mainHead));
+
+    //set pushed commits to match main
+    List<Map<String, Object>> mainCommits = (List<Map<String, Object>>) db.collection("sessions").document(session_id)
+        .collection("remote-branches")
+        .document("main").collection("pushed-commits").document("commits").get().get().get("commits");
+    db.collection("sessions").document(session_id)
+        .collection("local-store").document(user_id).collection("branches")
+        .document("main").collection("pushed-commits").document("commits").set(Collections.singletonMap("commits", mainCommits));
+
+    //set staged commits to empty list
+    List<Map<String, Object>> localStagedCommits = new ArrayList<>();
+    db.collection("sessions").document(session_id)
+        .collection("local-store").document(user_id).collection("branches")
+        .document("main").collection("staged-commits").document("commits").set(Collections.singletonMap("commits", localStagedCommits));
+
+    //set changes to empty map
+    Map<String, Object> localChanges = new HashMap<>();
+    db.collection("sessions").document(session_id)
+        .collection("local-store").document(user_id).collection("branches")
+        .document("main").collection("changes").document("changes").set(localChanges);
+  }
+
   /**
    * Method that adds set of changed files to stash collection
    * @param session_id - session_id for current game
@@ -178,7 +271,7 @@ public class FirebaseUtilities implements StorageInterface {
       throw new IllegalArgumentException("addStash: session_id, user_id, and file_map_json cannot be null");
     }
     Map<String, Object> data = new HashMap<>();
-    data.put("file_map", file_map_json);
+    data.put("file_map_json", file_map_json);
     data.put("user_id", user_id);
     Firestore db = FirestoreClient.getFirestore();
     // Make sure session document exists (safe no-op if it already does)
@@ -207,7 +300,7 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws InterruptedException - for firebase actions
    */
   @Override
-  public Map<String, Object> addBranch(String session_id, String user_id, String current_branch_id, String new_branch_id, String file_map_json)
+  public void addBranch(String session_id, String user_id, String current_branch_id, String new_branch_id, String file_map_json)
       throws ExecutionException, InterruptedException {
     if (session_id == null || user_id == null || current_branch_id == null || new_branch_id == null || file_map_json == null) {
       throw new IllegalArgumentException("addBranch: session_id, user_id, current_branch_id, new_branch_id, "
@@ -222,11 +315,49 @@ public class FirebaseUtilities implements StorageInterface {
     if (allBranches.contains(new_branch_id)) {
       throw new IllegalArgumentException("addBranch: branch_id already exists");
     }
-    //get most current version of the checked out branch and return it for new branch's setup
-    List<QueryDocumentSnapshot> pushedCommits = db.collection("sessions").document(session_id)
-        .collection("branches").document(current_branch_id).collection("pushed-commits")
-        .get().get().getDocuments();
-    return pushedCommits.get(pushedCommits.size()-1).getData();
+    //take opportunity to update current branch's local state
+    db.collection("sessions").document(session_id)
+        .collection("local-store").document(user_id).collection("branches")
+        .document(current_branch_id).collection("branch-info").document("local-file-map-json").set(Collections.singletonMap("local_file_map_json", file_map_json);
+
+    //set new branch's head
+    Map<String, Object> head = this.getLatestLocalCommit(session_id, user_id, current_branch_id);
+    db.collection("sessions").document(session_id)
+        .collection("local-store").document(user_id).collection("branches")
+        .document(new_branch_id).collection("branch-info").document("head").set(Collections.singletonMap("head", head));
+
+    //set new branch's parent branch
+    db.collection("sessions").document(session_id)
+        .collection("local-store").document(user_id).collection("branches")
+        .document(new_branch_id).collection("branch-info").document("parent-branch").set(Collections.singletonMap("parent_branch_id", current_branch_id));
+
+    //set new branch's stored local file map
+    db.collection("sessions").document(session_id)
+        .collection("local-store").document(user_id).collection("branches")
+        .document(new_branch_id).collection("branch-info").document("local-file-map-json").set(Collections.singletonMap("local_file_map_json", file_map_json));
+
+    //set new branch's staged commits to reflect current branch's
+    List<Map<String, Object>> stagedCommits = (List<Map<String, Object>>) db.collection("sessions").document(session_id)
+        .collection("local-store").document(user_id).collection("branches")
+        .document(current_branch_id).collection("commits").document("staged-commits").get().get().get("staged-commits");
+    db.collection("sessions").document(session_id)
+        .collection("local-store").document(user_id).collection("branches")
+        .document(new_branch_id).collection("commits").document("staged-commits").set(
+            Collections.singletonMap("commits", stagedCommits));
+
+    //set new branch's pushed commits to reflect current branch's
+    List<Map<String, Object>> pushedCommits = (List<Map<String, Object>>) db.collection("sessions").document(session_id)
+        .collection("local-store").document(user_id).collection("branches")
+        .document(current_branch_id).collection("commits").document("pushed-commits").get().get().get("pushed-commits");
+    db.collection("sessions").document(session_id)
+        .collection("local-store").document(user_id).collection("branches")
+        .document(new_branch_id).collection("commits").document("pushed-commits").set(Collections.singletonMap("commits", pushedCommits));
+
+    //add branch to remote repository for convenience
+    db.collection("sessions").document(session_id).collection("remote-branches").document(new_branch_id).collection("branch-info").document("parent-branch").set(Collections.singletonMap("parent_branch_id", current_branch_id));
+    db.collection("sessions").document(session_id).collection("remote-branches").document(new_branch_id).collection("branch-info").document("head").set(Collections.singletonMap("head", head));
+    db.collection("sessions").document(session_id).collection("remote-branches").document(new_branch_id).collection("branch-info").document("local-file-map-json").set(Collections.singletonMap("local_file_map_json", file_map_json));
+    db.collection("sessions").document(session_id).collection("remote-branches").document(new_branch_id).collection("pushed-commits").document("commits").set(Collections.singletonMap("commits", pushedCommits));
   }
 
   /**
@@ -246,9 +377,9 @@ public class FirebaseUtilities implements StorageInterface {
     if (!this.getAllBranches(session_id).contains(branch_id)) {
       throw new IllegalArgumentException("deleteBranch: branch_id does not exist");
     }
-    DocumentReference branchRef = db.collection("sessions").document(session_id).collection("branches").document(branch_id);
-
-    deleteDocument(branchRef);
+    //delete local copy of branch
+    CollectionReference localBranchRef = db.collection("sessions").document(session_id).collection("local-store").document("branches").collection(branch_id);
+    deleteCollection(localBranchRef);
   }
 
   /**
@@ -259,15 +390,32 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws InterruptedException - for firebase actions
    */
   @Override
-  public List<String> getAllBranches(String session_id) throws ExecutionException, InterruptedException {
+  public List<String> getAllRemoteBranches(String session_id) throws ExecutionException, InterruptedException {
     if (session_id == null) {
       throw new IllegalArgumentException("getAllBranches: session_id cannot be null");
     }
     List<String> branchIds = new ArrayList<>();
     Firestore db = FirestoreClient.getFirestore();
-    //get all documents in branches collection
+    //get all documents in remote branches collection
     List<QueryDocumentSnapshot> branches = db.collection("sessions").document(session_id).
-        collection("branches").get().get().getDocuments();
+        collection("remote-branches").get().get().getDocuments();
+
+    //add branch_id for each document
+    for (QueryDocumentSnapshot doc : branches) {
+      branchIds.add(doc.getId());
+    }
+    return branchIds;
+  }
+
+  public List<String> getAllLocalBranches(String session_id, String user_id) throws ExecutionException, InterruptedException {
+    if (session_id == null || user_id == null) {
+      throw new IllegalArgumentException("getAllLocalBranches: session_id and user_id cannot be null");
+    }
+    List<String> branchIds = new ArrayList<>();
+    Firestore db = FirestoreClient.getFirestore();
+    //get all documents in user's local branches collection
+    List<QueryDocumentSnapshot> branches = db.collection("sessions").document(session_id).
+        collection("local-store").document(user_id).collection("branches").get().get().getDocuments();
 
     //add branch_id for each document
     for (QueryDocumentSnapshot doc : branches) {
@@ -285,21 +433,18 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws InterruptedException - for firebase actions
    */
   @Override
-  public void addChange(String session_id, String branch_id, String file_map_json) throws ExecutionException, InterruptedException {
-    if (session_id == null || branch_id == null || file_map_json == null) {
-      throw new IllegalArgumentException("addChange: session_id, branch_id, and file_map_json cannot be null");
+  public void addChange(String session_id, String user_id, String branch_id, String file_map_json) throws ExecutionException, InterruptedException {
+    if (session_id == null || user_id == null || branch_id == null || file_map_json == null) {
+      throw new IllegalArgumentException("addChange: session_id, user_id, branch_id, and file_map_json cannot be null");
     }
-    Map<String, Object> data = new HashMap<>();
-    data.put("file_map", file_map_json);
-    Firestore db = FirestoreClient.getFirestore();
-    //make sure document exists
-    db.collection("sessions").document(session_id).set(Map.of(), SetOptions.merge());
 
-    CollectionReference changesCollection = db.collection("sessions").document(session_id)
-        .collection("branches").document(branch_id).collection("changes");
-    //add most recent changes
-    changesCollection.document("change-" +
-        changesCollection.get().get().getDocuments().size()).set(data);
+    Firestore db = FirestoreClient.getFirestore();
+    //set changes document to new version of file map
+    db.collection("sessions").document(session_id)
+        .collection("local-store").document(user_id).collection("branches").document(branch_id).collection("changes").document("changes").set(Collections.singletonMap("local_file_map_json", file_map_json));
+    //take opportunity to update local file map in branch info
+    db.collection("sessions").document(session_id)
+        .collection("local-store").document(user_id).collection("branches").document(branch_id).collection("branch-info").document("local_file_map_json").set(Collections.singletonMap("local_file_map_json", file_map_json));
   }
 
   /**
@@ -312,16 +457,30 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws InterruptedException - for firebase actions
    */
   @Override
-  public Map<String, Object> getLatestStagedCommit(String session_id, String branch_id) throws ExecutionException, InterruptedException {
-    if (session_id == null || branch_id == null) {
-      throw new IllegalArgumentException("getLatestStagedCommit: session_id, branch_id cannot be null");
+  public Map<String, Object> getLatestLocalCommit(String session_id, String user_id, String branch_id) throws ExecutionException, InterruptedException {
+    if (session_id == null || user_id == null || branch_id == null) {
+      throw new IllegalArgumentException("getLatestStagedCommit: session_id, user_id, and branch_id cannot be null");
     }
+    //retrieve head stored in local branch
     Firestore db = FirestoreClient.getFirestore();
-    List<QueryDocumentSnapshot> stagedCommits = db.collection("sessions").document(session_id)
-        .collection("branches").document(branch_id).collection("staged-commits")
-        .get().get().getDocuments();
+    Map<String, Object> latestCommit = db.collection("sessions").document(session_id)
+        .collection("local-store").document(user_id).collection("branches")
+        .document(branch_id).collection("branch-info").document("head").get().get().getData();
     //return last added commit
-    return stagedCommits.get(stagedCommits.size()-1).getData();
+    return latestCommit;
+  }
+
+  public Map<String, Object> getLatestRemoteCommit(String session_id, String branch_id) throws ExecutionException, InterruptedException {
+    if (session_id == null || branch_id == null) {
+      throw new IllegalArgumentException("getLatestStagedCommit: session_id and branch_id cannot be null");
+    }
+    //retrieve head stored in local branch
+    Firestore db = FirestoreClient.getFirestore();
+    Map<String, Object> latestCommit = db.collection("sessions").document(session_id)
+        .collection("remote-branches").document(branch_id).collection("branch-info")
+        .document("head").get().get().getData();
+    //return last added commit
+    return latestCommit;
   }
 
   /**
@@ -348,16 +507,16 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws InterruptedException - for firebase actions
    */
   @Override
-  public void commitChange(String session_id, String branch_id, String commit_message) throws ExecutionException, InterruptedException {
-    if (session_id == null || branch_id == null) {
-      throw new IllegalArgumentException("commitChange: session_id, branch_id, and commit_message cannot be null");
+  public void commitChange(String session_id, String user_id, String branch_id, String commit_message) throws ExecutionException, InterruptedException {
+    if (session_id == null || user_id == null || branch_id == null) {
+      throw new IllegalArgumentException("commitChange: session_id, user_id, branch_id, and commit_message cannot be null");
     }
-    Map<String, Object> data = new HashMap<>();
+    //get last stored changes
     Firestore db = FirestoreClient.getFirestore();
-    CollectionReference changesCollection = db.collection("sessions").document(session_id)
-        .collection("branches").document(branch_id).collection("changes");
-    List<QueryDocumentSnapshot> changes = changesCollection.get().get().getDocuments();
-    Map<String, Object> latestChange = changes.get(changes.size()-1).getData();
+    String changedFileMapJson = db.collection("sessions").document(session_id)
+        .collection("local-store").document(user_id).collection("branches").document(branch_id).collection("changes").document("changes").get().get().getString("changes");
+
+    Map<String, Object> newCommit = new HashMap<>();
     data.put("commit_message", commit_message);
     data.put("date_time", ZonedDateTime.now());
     data.put("file_map", latestChange.get("file_map"));
