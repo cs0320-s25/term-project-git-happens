@@ -173,18 +173,19 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws InterruptedException - for firebase actions
    */
   @Override
-  public void addStash(String session_id, String file_map_json) throws ExecutionException, InterruptedException {
-    if (session_id == null || file_map_json == null) {
-      throw new IllegalArgumentException("addStash: session_id, stash_id, and  cannot be null");
+  public void addStash(String session_id, String user_id, String file_map_json) throws ExecutionException, InterruptedException {
+    if (session_id == null || user_id == null || file_map_json == null) {
+      throw new IllegalArgumentException("addStash: session_id, user_id, and file_map_json cannot be null");
     }
     Map<String, Object> data = new HashMap<>();
     data.put("file_map", file_map_json);
+    data.put("user_id", user_id);
     Firestore db = FirestoreClient.getFirestore();
     // Make sure session document exists (safe no-op if it already does)
     db.collection("sessions").document(session_id).set(Map.of(), SetOptions.merge());
     // Find collection of stashes
-    CollectionReference stashesRef = db.collection("sessions").document(session_id)
-        .collection("stashes");
+    CollectionReference stashesCollection = db.collection("sessions").document(session_id)
+        .collection("local-store").document(user_id).collection("stashes");
     //generate a unique id for stash
     String stash_id = generateCommitId();
     while (commitIds.contains(stash_id)) {
@@ -193,7 +194,7 @@ public class FirebaseUtilities implements StorageInterface {
     commitIds.add(stash_id);
     data.put("stash_id", stash_id);
     //add stash data
-    stashesRef.document(stash_id).set(data);
+    stashesCollection.document(stash_id).set(data);
   }
 
   /**
@@ -207,9 +208,11 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws InterruptedException - for firebase actions
    */
   @Override
-  public Map<String, Object> addBranch(String session_id, String current_branch_id, String new_branch_id) throws ExecutionException, InterruptedException {
-    if (session_id == null || current_branch_id == null || new_branch_id == null) {
-      throw new IllegalArgumentException("addBranch: session_id, current_branch_id, and new_branch_id cannot be null");
+  public Map<String, Object> addBranch(String session_id, String user_id, String current_branch_id, String new_branch_id, String file_map_json)
+      throws ExecutionException, InterruptedException {
+    if (session_id == null || user_id == null || current_branch_id == null || new_branch_id == null || file_map_json == null) {
+      throw new IllegalArgumentException("addBranch: session_id, user_id, current_branch_id, new_branch_id, "
+                                        + "and file_map_json cannot be null");
     }
     Firestore db = FirestoreClient.getFirestore();
     // Make sure session document exists (safe no-op if it already does)
