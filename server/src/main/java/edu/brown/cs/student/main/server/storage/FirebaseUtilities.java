@@ -202,8 +202,7 @@ public class FirebaseUtilities implements StorageInterface {
    * @param session_id - unique session id for current game
    * @param current_branch_id - branch the user currently has checked out
    * @param new_branch_id - name for the new branch
-   * @return - map of info for the most recent pushed commit on the current branch, to be used as the
-   *           basis for new branch's contents
+   * @param file_map_json - json string of local state of files in currently checked out branch
    * @throws ExecutionException - for firebase actions
    * @throws InterruptedException - for firebase actions
    */
@@ -218,6 +217,7 @@ public class FirebaseUtilities implements StorageInterface {
     // Make sure session document exists (safe no-op if it already does)
     db.collection("sessions").document(session_id).set(Map.of(), SetOptions.merge());
 
+    //check that branch_id isn't already in use
     List<String> allBranches = this.getAllBranches(session_id);
     if (allBranches.contains(new_branch_id)) {
       throw new IllegalArgumentException("addBranch: branch_id already exists");
@@ -229,13 +229,20 @@ public class FirebaseUtilities implements StorageInterface {
     return pushedCommits.get(pushedCommits.size()-1).getData();
   }
 
+  /**
+   * Method for deleting a branch locally and remotely.
+   * @param session_id - unique session id of current game
+   * @param branch_id - name of branch to be deleted
+   * @throws ExecutionException - for firebase actions
+   * @throws InterruptedException - for firebase actions
+   */
   @Override
   public void deleteBranch(String session_id, String branch_id) throws ExecutionException, InterruptedException {
     if (session_id == null || branch_id == null) {
-      throw new IllegalArgumentException("deleteBranch: session_id, branch_id cannot be null");
+      throw new IllegalArgumentException("deleteBranch: session_id and branch_id cannot be null");
     }
     Firestore db = FirestoreClient.getFirestore();
-    List<String> allBranches = this.getAllBranches(session_id);
+    //check that branch exists
     if (!this.getAllBranches(session_id).contains(branch_id)) {
       throw new IllegalArgumentException("deleteBranch: branch_id does not exist");
     }
@@ -258,9 +265,11 @@ public class FirebaseUtilities implements StorageInterface {
     }
     List<String> branchIds = new ArrayList<>();
     Firestore db = FirestoreClient.getFirestore();
+    //get all documents in branches collection
     List<QueryDocumentSnapshot> branches = db.collection("sessions").document(session_id).
         collection("branches").get().get().getDocuments();
 
+    //add branch_id for each document
     for (QueryDocumentSnapshot doc : branches) {
       branchIds.add(doc.getId());
     }
@@ -270,7 +279,6 @@ public class FirebaseUtilities implements StorageInterface {
   /**
    * Method for add -A or rm command, as well as results of merging, which saves the most current
    * changes to the files in the changes collection
-   * @param session_id - unique session id for current game
    * @param branch_id - branch id for currently checked out branch
    * @param file_map_json - json string of all files the user would like to track changes for on Git
    * @throws ExecutionException - for firebase actions
@@ -434,14 +442,15 @@ public class FirebaseUtilities implements StorageInterface {
       throw new IllegalArgumentException("getCommit: session_id and branch_id cannot be null");
     }
     Firestore db = FirestoreClient.getFirestore();
+    //get all pushed commits
     List<QueryDocumentSnapshot> pushedCommits = db.collection("sessions").document(session_id).collection("branches")
         .document(branch_id).collection("pushed-commits").get().get().getDocuments();
-    //return last added commit
+    //return last pushed commit
     return pushedCommits.get(pushedCommits.size()-1).getData();
   }
 
   /**
-   * Method for returning all staged and pushed commits, used for git log
+   * Method for returning all pushed commits, used for git log
    * @param session_id - unique session id for current game
    * @param branch_id - branch id for currently checked out branch
    * @return - a list of all stored commit data
