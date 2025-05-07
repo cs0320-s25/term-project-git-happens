@@ -111,6 +111,7 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws ExecutionException - for firebase methods
    * @throws InterruptedException - for firebase methods
    */
+  @Override
   public void addSession(String session_id, String user_id, String file_map_json)
       throws IllegalArgumentException, ExecutionException, InterruptedException {
 
@@ -280,7 +281,7 @@ public class FirebaseUtilities implements StorageInterface {
     //check that branch_id isn't already in use
     List<String> allBranches = this.getAllRemoteBranches(session_id);
     if (allBranches.contains(new_branch_id)) {
-      throw new IllegalArgumentException("branch_id already exists");
+      throw new IllegalArgumentException("addBranch: branch_id already exists");
     }
     //take opportunity to update current branch's local state
     db.collection("sessions").document(session_id)
@@ -357,7 +358,7 @@ public class FirebaseUtilities implements StorageInterface {
     Firestore db = FirestoreClient.getFirestore();
     //check that branch exists
     if (!this.getAllRemoteBranches(session_id).contains(branch_id)) {
-      throw new IllegalArgumentException("branch_id does not exist");
+      throw new IllegalArgumentException("deleteBranch: branch_id does not exist");
     }
     //delete local copy of branch
     CollectionReference localBranchRef = db.collection("sessions").document(session_id)
@@ -396,6 +397,7 @@ public class FirebaseUtilities implements StorageInterface {
    * @return - a list of local branch names
    * @throws IllegalArgumentException - if any parameters are null
    */
+  @Override
   public List<String> getAllLocalBranches(String session_id, String user_id)
       throws IllegalArgumentException {
 
@@ -478,6 +480,7 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws ExecutionException - for firebase methods
    * @throws InterruptedException - for firebase methods
    */
+  @Override
   public Map<String, Object> getLatestRemoteCommit(String session_id, String branch_id)
       throws IllegalArgumentException, ExecutionException, InterruptedException {
     if (session_id == null || branch_id == null) {
@@ -503,6 +506,7 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws ExecutionException - for firebase methods
    * @throws InterruptedException - for firebase methods
    */
+  @Override
   public String getLatestLocalChanges(String session_id, String user_id, String branch_id)
       throws IllegalArgumentException, ExecutionException, InterruptedException {
     if (session_id == null || user_id == null || branch_id == null) {
@@ -627,6 +631,7 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws ExecutionException - for firebase methods
    * @throws InterruptedException - for firebase methods
    */
+  @Override
   public Map<String, List<Map<String, Object>>> getAllLocalCommits(String session_id, String user_id, String branch_id)
       throws IllegalArgumentException, ExecutionException, InterruptedException {
     if (session_id == null || user_id == null || branch_id == null) {
@@ -658,6 +663,7 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws ExecutionException - for firebase methods
    * @throws InterruptedException - for firebase methods
    */
+  @Override
   public List<Map<String, Object>> getAllRemoteCommits(String session_id, String user_id, String branch_id)
       throws IllegalArgumentException, ExecutionException, InterruptedException {
     if (session_id == null || user_id == null || branch_id == null) {

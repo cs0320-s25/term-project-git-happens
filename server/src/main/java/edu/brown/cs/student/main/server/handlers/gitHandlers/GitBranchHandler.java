@@ -2,6 +2,7 @@ package edu.brown.cs.student.main.server.handlers.gitHandlers;
 
 import edu.brown.cs.student.main.server.handlers.AbstractEndpointHandler;
 import edu.brown.cs.student.main.server.storage.StorageInterface;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import spark.Request;
@@ -61,31 +62,36 @@ public class GitBranchHandler extends AbstractEndpointHandler {
       }
       else if (branchRequest.equals("-a")) {
         List<String> localBranchNames = storage.getAllLocalBranches(sessionId, userId);
-
+        List<String> remoteBranchNames = storage.getAllRemoteBranches(sessionId);
+        List<String> updatedRemoteBranchNames = new ArrayList<>();
+        for (String remoteBranchName : remoteBranchNames) {
+          updatedRemoteBranchNames.add("origin/" + remoteBranchName);
+        }
+        responseMap.put("local_branch_names", localBranchNames);
+        responseMap.put("remote_branch_names", updatedRemoteBranchNames);
+        responseMap.put("action", "list remote and local branches");
       }
         // Fetch and delete specified branch
       else if (branchRequest.equals("-d")) {
         String branchToDelete = request.queryParams("delete_branch_id");
         if (branchToDelete == null) {
-          returnErrorResponse("error_bad_request", "null parameter(s)", "branch");
+          returnErrorResponse("error_bad_request", "null parameter", "delete_branch_id");
         }
         if (branchToDelete.equals(currentBranch)) {
           returnErrorResponse("error_bad_request", "cannot delete current branch");
         }
-        storage.deleteBranch(sessionId, branchToDelete);
-        responseMap.put("session_id", sessionId);
+        storage.deleteBranch(sessionId, userId, branchToDelete);
         responseMap.put("action", "delete local branch");
-        responseMap.put("branch_id", branchToDelete);
+        responseMap.put("delete_branch_id", branchToDelete);
       } else {
         //create branch with given string name
         String currentFilemap = request.queryParams("file_map_json");
         if (currentFilemap == null) {
-          return returnErrorResponse("error_bad_request", "null parameter(s)", "file_map_json");
+          return returnErrorResponse("error_bad_request", "null parameter", "file_map_json");
         }
-        storage.addBranch(sessionId, branchRequest, currentFilemap);
-        responseMap.put("session_id", sessionId);
+        storage.addBranch(sessionId, userId, currentBranch, branchRequest, currentFilemap);
         responseMap.put("action", "add branch");
-        responseMap.put("branch_id", branchRequest);
+        responseMap.put("new_branch_id", branchRequest);
       }
     } catch (Exception e) {
       return returnErrorResponse("error_database", "branch request failed: " + e.getMessage());

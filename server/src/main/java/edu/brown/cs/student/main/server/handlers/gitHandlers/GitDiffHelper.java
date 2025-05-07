@@ -6,8 +6,8 @@ import java.util.Map;
 public class GitDiffHelper {
 
   public GitDiffHelper() {}
-  public boolean differenceDetected(Map<String, List<Object>> localState, Map<String, List<Object>> remoteState) {
-    if (localState.size() != remoteState.size()) {
+  public boolean differenceDetected(Map<String, List<Object>> localState, Map<String, List<Object>> incomingState) {
+    if (localState.size() != incomingState.size()) {
       return true;
     }
   }
