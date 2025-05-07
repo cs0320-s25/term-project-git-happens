@@ -34,25 +34,33 @@ public class CreateSessionHandler extends AbstractEndpointHandler {
     responseMap = new HashMap<>();
 
     // request must contain "session_id"
-    final String sessionName = request.queryParams("session_id");
+    final String sessionId = request.queryParams("session_id");
+    //request must contain user_id
+      final String userId = request.queryParams("user_id");
     //file map of what the user sees at the beginning of each game session
     final String originalFileMap = request.queryParams("file_map_json");
-    if (sessionName == null) {
-      return returnErrorResponse("error_bad_request", "null_parameter", "session_name");
+    if (sessionId == null) {
+      return returnErrorResponse("error_bad_request", "null_parameter", "session_id");
     } else {
-      responseMap.put("session_id", sessionName);
+      responseMap.put("session_id", sessionId);
     }
+      if (userId == null) {
+        return returnErrorResponse("error_bad_request", "null_parameter", "user_id");
+      } else {
+        responseMap.put("user_id", userId);
+      }
+      if (originalFileMap == null) {
+        return returnErrorResponse("error_bad_request", "null_parameter", "file_map_json");
+      } else {
+        responseMap.put("file_map_json", originalFileMap);
+      }
     // check if session already exists
-    List<String> existingSessionNames = storage.getAllSessions();
-    if (existingSessionNames.contains(sessionName)) {
+    List<String> existingSessionIds = storage.getAllSessions();
+    if (existingSessionIds.contains(sessionId)) {
       return returnErrorResponse("error_bad_request", "session_name_already_in_use");
     } else {
       //setup main branch for the game and push original game state as first commit
-      storage.addBranch(sessionName, "main", originalFileMap);
-      storage.addChange("main", originalFileMap);
-      storage.commitChange("main", "Initial commit");
-      storage.pushCommit(sessionName, "main");
-
+      storage.addSession(sessionId, userId, originalFileMap);
       responseMap.put("action", "session_created");
     }
     } catch (Exception e) {

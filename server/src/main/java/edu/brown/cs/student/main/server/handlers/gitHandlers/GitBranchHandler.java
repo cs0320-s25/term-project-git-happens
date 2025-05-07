@@ -19,23 +19,49 @@ public class GitBranchHandler extends AbstractEndpointHandler {
   public Object handle(final Request request, final Response response) throws Exception {
     responseMap = new HashMap<>();
     //unique session id
-    final String sessionId = request.session().attribute("session_id");
-    //either "" for viewing all branches, "-d" for deleting branch, or "<new branch id>" for adding branch
+    final String sessionId = request.queryParams("session_id");
+    //user id
+    final String userId = request.queryParams("user_id");
+    //either "" for viewing all local branches, "-a" for viewing local and remote branches,
+    // "-d" for deleting branch, or "<new branch id>" for adding branch
     final String branchRequest = request.queryParams("branch_request");
     //branch id of currently checked out branch
     final String currentBranch = request.queryParams("current_branch_id");
-    if (branchRequest == null || sessionId == null || currentBranch == null) {
-      returnErrorResponse("error_bad_request", "null parameter(s)",
-          (branchRequest==null? "branch_request" : "") + (sessionId==null? ", session_id" : "")
-              + (currentBranch==null? ", current_branch_id" : ""));
+
+    if (sessionId == null) {
+      returnErrorResponse("error_bad_request", "null parameter",
+          "session_id");
+    } else {
+      responseMap.put("session_id", sessionId);
+    }
+    if (userId == null) {
+      returnErrorResponse("error_bad_request", "null parameter",
+          "user_id");
+    } else {
+      responseMap.put("user_id", userId);
+    }
+    if (branchRequest == null) {
+      returnErrorResponse("error_bad_request", "null parameter",
+          "branch_request");
+    } else {
+      responseMap.put("branch_request", branchRequest);
+    }
+    if (currentBranch == null) {
+      returnErrorResponse("error_bad_request", "null parameter",
+          "current_branch_id");
+    } else {
+      responseMap.put("current_branch_id", currentBranch);
     }
     try {
         // Fetch and return List of local branch names
       if (branchRequest.equals("")) {
-        List<String> branchNames = storage.getAllBranches(sessionId);
-        responseMap.put("session_id", sessionId);
-        responseMap.put("branch_names", branchNames);
+        List<String> localBranchNames = storage.getAllLocalBranches(sessionId, userId);
+        responseMap.put("local_branch_names", localBranchNames);
         responseMap.put("action", "list local branches");
+      }
+      else if (branchRequest.equals("-a")) {
+        List<String> localBranchNames = storage.getAllLocalBranches(sessionId, userId);
+
       }
         // Fetch and delete specified branch
       else if (branchRequest.equals("-d")) {

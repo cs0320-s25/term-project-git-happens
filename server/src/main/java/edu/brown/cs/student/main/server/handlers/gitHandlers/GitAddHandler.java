@@ -17,17 +17,37 @@ public class GitAddHandler extends AbstractEndpointHandler {
   @Override
   public Object handle(final Request request, final Response response) throws Exception {
     try {
-    responseMap = new HashMap<>();
-    //name of currently checked out branch
-    String branchId = request.queryParams("branch_id");
-    //Map<String, List<Object>> map of all current filename : file entries, assuming user always using add -A
-    String fileMapJson = request.queryParams("file_map_json");
+      responseMap = new HashMap<>();
+      //session id
+      String sessionId = request.queryParams("session_id");
+      //user id
+      String userId = request.queryParams("user_id");
+      //name of currently checked out branch
+      String branchId = request.queryParams("branch_id");
+      //Map<String, List<Object>> map of all current filename : file entries, assuming user always using add -A
+      String fileMapJson = request.queryParams("file_map_json");
 
-    if (branchId == null || fileMapJson == null) {
-      return returnErrorResponse("error_bad_request", "null parameter(s)", (branchId==null?"branch_id, ":"") + (fileMapJson==null?"file_map_json":fileMapJson));
-    }
-    storage.addChange(branchId, fileMapJson);
-    responseMap.put("branch_id", branchId);
+      if (sessionId == null) {
+        return returnErrorResponse("error_bad_request", "null parameter", sessionId);
+      } else {
+        responseMap.put("session_id", sessionId);
+      }
+      if (userId == null) {
+        return returnErrorResponse("error_bad_request", "null parameter", userId);
+      } else {
+        responseMap.put("user_id", userId);
+      }
+      if (branchId == null) {
+        return returnErrorResponse("error_bad_request", "null parameter", branchId);
+      } else {
+        responseMap.put("branch_id", branchId);
+      }
+      if (fileMapJson == null) {
+        return returnErrorResponse("error_bad_request", "null parameter", fileMapJson);
+      } else {
+        responseMap.put("file_map_json", fileMapJson);
+      }
+    storage.addChange(sessionId, userId, branchId, fileMapJson);
     responseMap.put("action", "add -A");
     } catch (Exception e) {
       return returnErrorResponse("error_database", "git add failed: " + e.getMessage());
