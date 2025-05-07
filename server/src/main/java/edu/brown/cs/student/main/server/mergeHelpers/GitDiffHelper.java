@@ -1,4 +1,4 @@
-package edu.brown.cs.student.main.server.handlers.gitHandlers;
+package edu.brown.cs.student.main.server.mergeHelpers;
 
 import java.util.List;
 import java.util.Map;

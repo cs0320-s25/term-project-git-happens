@@ -1,4 +1,4 @@
-package edu.brown.cs.student.main.server.handlers.gitHandlers;
+package edu.brown.cs.student.main.server.mergeHelpers;
 
 public class MockShape extends Object {
 private String type;
