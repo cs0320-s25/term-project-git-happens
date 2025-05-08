@@ -20,8 +20,8 @@ public class GitCommitHandler extends AbstractEndpointHandler {
 
     final String branchName = request.queryParams("branch_name");
     final String commitMessage = request.queryParams("commit_message");
-//    final String changeHash = request.queryParams("change_hash"); // Instead of storing by
-//    changeHash, store staged files in an array and for commit, pull the top item
+    //    final String changeHash = request.queryParams("change_hash"); // Instead of storing by
+    //    changeHash, store staged files in an array and for commit, pull the top item
 
     try {
 

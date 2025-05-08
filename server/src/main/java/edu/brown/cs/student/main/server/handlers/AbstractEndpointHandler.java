@@ -93,6 +93,7 @@ public abstract class AbstractEndpointHandler implements Route {
   /**
    * Deserializes a json string into a map of filename : file contents, where file contents is a
    * list of shape objects.
+   *
    * @param fileMapJson - json string
    * @return map of strings to list of objects
    */
@@ -104,9 +105,11 @@ public abstract class AbstractEndpointHandler implements Route {
       // Initializes an adapter to a parametrized List class then uses it to parse the JSON.
       Type type =
           Types.newParameterizedType(
-              Map.class, String.class, Types.newParameterizedType(List.class, MockFileObject.class));
+              Map.class,
+              String.class,
+              Types.newParameterizedType(List.class, MockFileObject.class));
 
-      JsonAdapter <Map<String, List<MockFileObject>>> adapter = moshi.adapter(type);
+      JsonAdapter<Map<String, List<MockFileObject>>> adapter = moshi.adapter(type);
 
       Map<String, List<MockFileObject>> fileMap = adapter.fromJson(fileMapJson);
 
@@ -120,6 +123,7 @@ public abstract class AbstractEndpointHandler implements Route {
 
   /**
    * Deserializes json string into a set of filename strings
+   *
    * @param fileListJson - json string
    * @return a set of filenames
    */
@@ -129,8 +133,7 @@ public abstract class AbstractEndpointHandler implements Route {
       Moshi moshi = new Moshi.Builder().build();
 
       // Initializes an adapter to a parametrized List class then uses it to parse the JSON.
-      Type type =
-          Types.newParameterizedType(List.class, String.class);
+      Type type = Types.newParameterizedType(List.class, String.class);
 
       JsonAdapter<List<String>> adapter = moshi.adapter(type);
 

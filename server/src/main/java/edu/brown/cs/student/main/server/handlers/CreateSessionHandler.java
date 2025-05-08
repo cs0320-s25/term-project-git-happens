@@ -1,11 +1,8 @@
 package edu.brown.cs.student.main.server.handlers;
 
 import edu.brown.cs.student.main.server.storage.StorageInterface;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import spark.Request;
 import spark.Response;
 
@@ -31,19 +28,19 @@ public class CreateSessionHandler extends AbstractEndpointHandler {
   @Override
   public Object handle(final Request request, final Response response) throws Exception {
     try {
-    responseMap = new HashMap<>();
+      responseMap = new HashMap<>();
 
-    // request must contain "session_id"
-    final String sessionId = request.queryParams("session_id");
-    //request must contain user_id
+      // request must contain "session_id"
+      final String sessionId = request.queryParams("session_id");
+      // request must contain user_id
       final String userId = request.queryParams("user_id");
-    //file map of what the user sees at the beginning of each game session
-    final String originalFileMap = request.queryParams("file_map_json");
-    if (sessionId == null) {
-      return returnErrorResponse("error_bad_request", "null_parameter", "session_id");
-    } else {
-      responseMap.put("session_id", sessionId);
-    }
+      // file map of what the user sees at the beginning of each game session
+      final String originalFileMap = request.queryParams("file_map_json");
+      if (sessionId == null) {
+        return returnErrorResponse("error_bad_request", "null_parameter", "session_id");
+      } else {
+        responseMap.put("session_id", sessionId);
+      }
       if (userId == null) {
         return returnErrorResponse("error_bad_request", "null_parameter", "user_id");
       } else {
@@ -54,15 +51,15 @@ public class CreateSessionHandler extends AbstractEndpointHandler {
       } else {
         responseMap.put("file_map_json", originalFileMap);
       }
-    // check if session already exists
-    List<String> existingSessionIds = storage.getAllSessions();
-    if (existingSessionIds.contains(sessionId)) {
-      return returnErrorResponse("error_bad_request", "session_name_already_in_use");
-    } else {
-      //setup main branch for the game and push original game state as first commit
-      storage.addSession(sessionId, userId, originalFileMap);
-      responseMap.put("action", "session_created");
-    }
+      // check if session already exists
+      List<String> existingSessionIds = storage.getAllSessions();
+      if (existingSessionIds.contains(sessionId)) {
+        return returnErrorResponse("error_bad_request", "session_name_already_in_use");
+      } else {
+        // setup main branch for the game and push original game state as first commit
+        storage.addSession(sessionId, userId, originalFileMap);
+        responseMap.put("action", "session_created");
+      }
     } catch (Exception e) {
       return returnErrorResponse("error_database", "session_creation_failed: " + e.getMessage());
     }
