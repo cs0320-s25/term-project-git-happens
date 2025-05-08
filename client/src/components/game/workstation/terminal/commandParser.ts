@@ -68,10 +68,12 @@ export function parseCommand(command: string): Command {
 
 export function gitCommand(splitCommand: string[]): Command {
   const arg1 = splitCommand?.[1] ?? null;
+  const arg2 = splitCommand?.[2] ?? null;
+  const arg3 = splitCommand?.[3] ?? null;
 
   switch (arg1) {
     case "add":
-      const arg2 = splitCommand?.[2] ?? null;
+      // const arg2 = splitCommand?.[2] ?? null;
       switch (arg2) {
         case "-A":
           return {
@@ -81,25 +83,92 @@ export function gitCommand(splitCommand: string[]): Command {
         case null:
           return {
             commandStr: "add null",
-            terminalResponse: "Nothing specified, nothing added.",
+            terminalResponse: "Error: Command not available",
           };
         default:
           return {
-            commandStr: "add file",
-            terminalResponse: "Add file",
+            commandStr: "add null",
+            terminalResponse: "Error: Command not available",
           };
       }
 
     case "commit":
-      return {
-        commandStr: "commit",
-        terminalResponse: "commit",
-      };
+      switch (arg2) {
+        case "-m":
+          return { // Todo: HANDLE COMMIT MESSAGE???
+            commandStr: "commit",
+            terminalResponse: "commit",
+          };
+        case null:
+          return {
+            commandStr: "commit null",
+            terminalResponse: "Error: Command not available",
+          };
+        default:
+          return {
+            commandStr: "commit null",
+            terminalResponse: "Error: Command not available",
+          };
+      }
 
     case "push":
       return {
         commandStr: "push",
-        terminalResponse: "push",
+        terminalResponse: "Pushing local repository",
+      };
+
+    case "branch":
+      return {
+        commandStr: "", // Todo: Fill
+        terminalResponse: "", // Todo: Fill
+      };
+
+    case "diff":
+      return {
+        commandStr: "", // Todo: Fill
+        terminalResponse: "", // Todo: Fill
+      };
+
+    case "log":
+      return {
+        commandStr: "log",
+        terminalResponse: "Fetching Log",
+      };
+
+    case "merge":
+      return {
+        commandStr: "", // Todo: Fill
+        terminalResponse: "", // Todo: Fill
+      };
+
+    case "pull":
+      return {
+        commandStr: "", // Todo: Fill
+        terminalResponse: "", // Todo: Fill
+      };
+
+    case "reset":
+      return {
+        commandStr: "", // Todo: Fill
+        terminalResponse: "", // Todo: Fill
+      };
+
+    case "rm":
+      return {
+        commandStr: "", // Todo: Fill
+        terminalResponse: "", // Todo: Fill
+      };
+
+    case "stash":
+      return {
+        commandStr: "", // Todo: Fill
+        terminalResponse: "", // Todo: Fill
+      };
+
+    case "status":
+      return {
+        commandStr: "status",
+        terminalResponse: "Fetching Status",
       };
 
     case null:
