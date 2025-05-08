@@ -3,6 +3,7 @@ package edu.brown.cs.student.main.server.handlers;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
+import edu.brown.cs.student.main.server.mergeHelpers.MockFileObject;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
@@ -95,7 +96,7 @@ public abstract class AbstractEndpointHandler implements Route {
    * @param fileMapJson - json string
    * @return map of strings to list of objects
    */
-  public static Map<String, List<Object>> deserializeFileMap(String fileMapJson) {
+  public static Map<String, List<MockFileObject>> deserializeFileMap(String fileMapJson) {
     try {
       // Initializes Moshi
       Moshi moshi = new Moshi.Builder().build();
@@ -103,11 +104,11 @@ public abstract class AbstractEndpointHandler implements Route {
       // Initializes an adapter to a parametrized List class then uses it to parse the JSON.
       Type type =
           Types.newParameterizedType(
-              Map.class, String.class, Types.newParameterizedType(List.class, Object.class));
+              Map.class, String.class, Types.newParameterizedType(List.class, MockFileObject.class));
 
-      JsonAdapter <Map<String, List<Object>>> adapter = moshi.adapter(type);
+      JsonAdapter <Map<String, List<MockFileObject>>> adapter = moshi.adapter(type);
 
-      Map<String, List<Object>> fileMap = adapter.fromJson(fileMapJson);
+      Map<String, List<MockFileObject>> fileMap = adapter.fromJson(fileMapJson);
 
       return fileMap;
     } catch (Exception e) {
