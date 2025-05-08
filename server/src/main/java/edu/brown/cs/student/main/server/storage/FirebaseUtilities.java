@@ -281,8 +281,56 @@ public class FirebaseUtilities implements StorageInterface {
     //check that branch_id isn't already in use
     List<String> allBranches = this.getAllRemoteBranches(session_id);
     if (allBranches.contains(new_branch_id)) {
-      throw new IllegalArgumentException("addBranch: branch_id already exists");
+      //if user has the branch locally, throw error, action not allowed
+      List<String> allLocalBranches = this.getAllLocalBranches(session_id, user_id);
+      if (allLocalBranches.contains(current_branch_id)) {
+        throw new IllegalArgumentException("addBranch: branch '" + new_branch_id + "' already exists");
+      } else {
+        //create a new local branch that reflects the existing remote branch
+
+        //set local branch's head
+        Map<String, Object> head = this.getLatestRemoteCommit(session_id, new_branch_id);
+        db.collection("sessions").document(session_id)
+            .collection("local-store").document("users").collection(user_id)
+            .document("branches")
+            .collection(new_branch_id).document("head")
+            .set(Collections.singletonMap("head", head));
+
+        //set local branch's parent branch
+        String parentId = db.collection("sessions").document(session_id).collection("remote-store")
+            .document("branches").collection(new_branch_id).document("parent-branch").get().get().getString("parent_branch_id");
+        db.collection("sessions").document(session_id).collection("local-store")
+            .document("users").collection(user_id).document("branches").collection(current_branch_id)
+            .document("parent-branch").set(Collections.singletonMap("parent_branch_id", parentId));
+
+        //set local branch's stored local file map
+        db.collection("sessions").document(session_id)
+            .collection("local-store").document("users").collection(user_id)
+            .document("branches").collection(current_branch_id).document("local-file-map-json")
+            .set(Collections.singletonMap("local_file_map_json", file_map_json));
+
+        //set local branch's staged commits to reflect remote branch's
+        List<Map<String, Object>> stagedCommits = (List<Map<String, Object>>) db.collection("sessions")
+            .document(session_id).collection("local-store").document("users")
+            .collection(user_id).document("branches").collection(current_branch_id)
+            .document("staged-commits").get().get().get("commits");
+        db.collection("sessions").document(session_id).collection("local-store")
+            .document("users").collection(user_id).document("branches").collection(new_branch_id)
+            .document("staged-commits").set(Collections.singletonMap("commits", stagedCommits));
+
+        //set local branch's pushed commits to reflect remote branch's
+        List<Map<String, Object>> pushedCommits = (List<Map<String, Object>>) db.collection("sessions")
+            .document(session_id).collection("local-store").document("users")
+            .collection(user_id).document("branches").collection(current_branch_id)
+            .document("pushed-commits").get().get().get("commits");
+        db.collection("sessions").document(session_id).collection("local-store").
+            document("users").collection(user_id).document("branches").collection(current_branch_id)
+            .document("pushed-commits").set(Collections.singletonMap("commits", pushedCommits));
+
+      }
     }
+    //TODO: change firebase local_file_map_json to be local_untracked_changes
+    //TODO:
     //take opportunity to update current branch's local state
     db.collection("sessions").document(session_id)
         .collection("local-store").document("users").collection(user_id)
@@ -295,18 +343,18 @@ public class FirebaseUtilities implements StorageInterface {
     db.collection("sessions").document(session_id)
         .collection("local-store").document("users").collection(user_id)
         .document("branches")
-        .collection(current_branch_id).document("head")
+        .collection(new_branch_id).document("head")
         .set(Collections.singletonMap("head", head));
 
     //set new branch's parent branch
     db.collection("sessions").document(session_id).collection("local-store")
-        .document("users").collection(user_id).document("branches").collection(current_branch_id)
+        .document("users").collection(user_id).document("branches").collection(new_branch_id)
         .document("parent-branch").set(Collections.singletonMap("parent_branch_id", current_branch_id));
 
     //set new branch's stored local file map
     db.collection("sessions").document(session_id)
         .collection("local-store").document("users").collection(user_id)
-        .document("branches").collection(current_branch_id).document("local-file-map-json")
+        .document("branches").collection(new_branch_id).document("local-file-map-json")
         .set(Collections.singletonMap("local_file_map_json", file_map_json));
 
     //set new branch's staged commits to reflect current branch's
@@ -315,7 +363,7 @@ public class FirebaseUtilities implements StorageInterface {
         .collection(user_id).document("branches").collection(current_branch_id)
         .document("staged-commits").get().get().get("commits");
     db.collection("sessions").document(session_id).collection("local-store")
-        .document("users").collection(user_id).document("branches").collection(current_branch_id)
+        .document("users").collection(user_id).document("branches").collection(new_branch_id)
         .document("staged-commits").set(Collections.singletonMap("commits", stagedCommits));
 
     //set new branch's pushed commits to reflect current branch's
@@ -324,7 +372,7 @@ public class FirebaseUtilities implements StorageInterface {
         .collection(user_id).document("branches").collection(current_branch_id)
         .document("pushed-commits").get().get().get("commits");
     db.collection("sessions").document(session_id).collection("local-store").
-        document("users").collection(user_id).document("branches").collection(current_branch_id)
+        document("users").collection(user_id).document("branches").collection(new_branch_id)
         .document("pushed-commits").set(Collections.singletonMap("commits", pushedCommits));
 
     //add branch to remote repository for convenience

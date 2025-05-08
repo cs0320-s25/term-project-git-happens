@@ -78,7 +78,10 @@ public class GitCheckoutHandler extends AbstractEndpointHandler {
         responseMap.put("difference_detected", false);
         //check that desired branch exists
         List<String> allRemoteBranches = storage.getAllRemoteBranches(sessionId);
-        if (!allRemoteBranches.contains(newBranch)) {}
+        if (!allRemoteBranches.contains(newBranch)) {
+          returnErrorResponse("error_database", "pathspec '" + newBranch + "' did not match any branches known to git", newBranch);
+        }
+        //get local state of branch if user has it, else
       }
 
     } catch (Exception e) {

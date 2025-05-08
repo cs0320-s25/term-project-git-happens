@@ -60,6 +60,17 @@ public class GitBranchHandler extends AbstractEndpointHandler {
         responseMap.put("local_branch_names", localBranchNames);
         responseMap.put("action", "list local branches");
       }
+      // Fetch and return List of remote branch names
+      else if (branchRequest.equals("-r")) {
+        List<String> remoteBranchNames = storage.getAllRemoteBranches(sessionId);
+        List<String> updatedRemoteBranchNames = new ArrayList<>();
+        for (String remoteBranchName : remoteBranchNames) {
+          updatedRemoteBranchNames.add("origin/" + remoteBranchName);
+        }
+        responseMap.put("remote_branch_names", updatedRemoteBranchNames);
+        responseMap.put("action", "list remote branches");
+      }
+      //Fetch and return all local and remote branch names
       else if (branchRequest.equals("-a")) {
         List<String> localBranchNames = storage.getAllLocalBranches(sessionId, userId);
         List<String> remoteBranchNames = storage.getAllRemoteBranches(sessionId);
