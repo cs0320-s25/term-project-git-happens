@@ -18,13 +18,14 @@ public class GitAddHandler extends AbstractEndpointHandler {
   public Object handle(final Request request, final Response response) throws Exception {
     try {
       responseMap = new HashMap<>();
-      //session id
+      // session id
       String sessionId = request.queryParams("session_id");
-      //user id
+      // user id
       String userId = request.queryParams("user_id");
-      //name of currently checked out branch
+      // name of currently checked out branch
       String branchId = request.queryParams("branch_id");
-      //Map<String, List<Object>> map of all current filename : file entries, assuming user always using add -A
+      // Map<String, List<Object>> map of all current filename : file entries, assuming user always
+      // using add -A
       String fileMapJson = request.queryParams("file_map_json");
 
       if (sessionId == null) {
@@ -47,8 +48,8 @@ public class GitAddHandler extends AbstractEndpointHandler {
       } else {
         responseMap.put("file_map_json", fileMapJson);
       }
-    storage.addChange(sessionId, userId, branchId, fileMapJson);
-    responseMap.put("action", "add -A");
+      storage.addChange(sessionId, userId, branchId, fileMapJson);
+      responseMap.put("action", "add -A");
     } catch (Exception e) {
       return returnErrorResponse("error_database", "git add failed: " + e.getMessage());
     }

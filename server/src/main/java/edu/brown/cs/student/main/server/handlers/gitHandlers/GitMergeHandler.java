@@ -24,10 +24,9 @@ public class GitMergeHandler extends AbstractEndpointHandler {
     try {
 
       // TODO: compare current branch to fetched branch branchName
-        //  create helper class to compare current branch state with pulled branch,
-        //  if there are no conflicts, add pulled branch to response map
-        //  if there are conflicts, return error response for merging
-
+      //  create helper class to compare current branch state with pulled branch,
+      //  if there are no conflicts, add pulled branch to response map
+      //  if there are conflicts, return error response for merging
 
     } catch (Exception e) {
       return returnErrorResponse("", "");

@@ -5,8 +5,6 @@ import edu.brown.cs.student.main.server.mergeHelpers.GitDiffHelper;
 import edu.brown.cs.student.main.server.mergeHelpers.MockFileObject;
 import edu.brown.cs.student.main.server.storage.StorageInterface;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,15 +23,16 @@ public class GitCheckoutHandler extends AbstractEndpointHandler {
   public Object handle(final Request request, final Response response) throws Exception {
     responseMap = new HashMap<>();
     GitDiffHelper diffHelper = new GitDiffHelper();
-    //unique session id
+    // unique session id
     final String sessionId = request.queryParams("session_id");
-    //unique user id
+    // unique user id
     final String userId = request.queryParams("user_id");
-    //id of currently checked out branch
+    // id of currently checked out branch
     final String currentBranch = request.queryParams("current_branch_id");
-    //id of branch user would like to check out
+    // id of branch user would like to check out
     final String newBranch = request.queryParams("new_branch_id");
-    //file map of current state of project on current branch (should include any changes that haven't been staged)
+    // file map of current state of project on current branch (should include any changes that
+    // haven't been staged)
     final String fileMapJson = request.queryParams("file_map_json");
 
     if (sessionId == null) {
@@ -63,20 +62,26 @@ public class GitCheckoutHandler extends AbstractEndpointHandler {
     }
 
     try {
-      //check for any changes between user's last local commit and current files state
-      Map<String, Object> latestCommit = storage.getLatestLocalCommit(sessionId, userId, currentBranch);
-      Map<String, List<MockFileObject>> commitedFileMap = deserializeFileMap((String) latestCommit.get("file_map_json"));
+      // check for any changes between user's last local commit and current files state
+      Map<String, Object> latestCommit =
+          storage.getLatestLocalCommit(sessionId, userId, currentBranch);
+      Map<String, List<MockFileObject>> commitedFileMap =
+          deserializeFileMap((String) latestCommit.get("file_map_json"));
       Map<String, List<MockFileObject>> currentFileMap = deserializeFileMap(fileMapJson);
-      Set<String> filesWithDifferences = diffHelper.differenceDetected(currentFileMap, commitedFileMap);
-      //if there are differences, return error message for terminal display
+      Set<String> filesWithDifferences =
+          diffHelper.differenceDetected(currentFileMap, commitedFileMap);
+      // if there are differences, return error message for terminal display
       if (!filesWithDifferences.isEmpty()) {
         responseMap.put("difference_detected", true);
         responseMap.put("files_with_differences", filesWithDifferences);
-        responseMap.put("instructions", "Please commit your changes or stash them before you switch branches.");
-        returnErrorResponse("error_untracked_changes", "Your local changes to the following files would be overwritten by checkout:")
+        responseMap.put(
+            "instructions", "Please commit your changes or stash them before you switch branches.");
+        returnErrorResponse(
+            "error_untracked_changes",
+            "Your local changes to the following files would be overwritten by checkout:");
       } else {
         responseMap.put("difference_detected", false);
-        //check that desired branch exists
+        // check that desired branch exists
         List<String> allRemoteBranches = storage.getAllRemoteBranches(sessionId);
         if (!allRemoteBranches.contains(newBranch)) {}
       }

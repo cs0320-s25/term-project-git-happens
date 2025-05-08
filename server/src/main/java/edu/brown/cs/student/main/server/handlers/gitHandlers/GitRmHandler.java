@@ -18,13 +18,13 @@ public class GitRmHandler extends AbstractEndpointHandler {
   public Object handle(final Request request, final Response response) throws Exception {
     responseMap = new HashMap<>();
 
-    //unique session id
+    // unique session id
     final String sessionId = request.queryParams("session_id");
-    //unique user id
+    // unique user id
     final String userId = request.queryParams("user_id");
-    //id of currently checked out branch
+    // id of currently checked out branch
     final String branchId = request.queryParams("branch_id");
-    //json of file map with file the user wishes to delete already removed
+    // json of file map with file the user wishes to delete already removed
     final String fileMapJson = request.queryParams("file_map_json");
 
     if (sessionId == null) {
