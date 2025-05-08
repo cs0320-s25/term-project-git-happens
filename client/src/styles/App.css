@@ -115,3 +115,9 @@
     border-radius: 20px !important;
   }
 }
+
+.instructions {
+  border: 1px solid white;
+  width: 300px;
+  text-align: left;
+}

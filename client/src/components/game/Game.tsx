@@ -5,6 +5,7 @@ import { Order } from "./order/Order";
 import { Ingredients } from "./ingredients/Ingredients";
 import { Workstation } from "./workstation/Workstation";
 import type { CommitData, BranchData } from "../App";
+import { burger_top, burger_bottom } from "../../assets/images";
 
 export interface IngredientImage {
   imgStr: string;
@@ -30,13 +31,17 @@ export function Game(props: GameProps) {
   );
   const [plateItems, setPlateItems] = useState<IngredientImage[]>([]);
 
+  const [orderItems, setOrderItems] = useState<IngredientImage[]>([
+    { imgStr: burger_top, imgName: "1" },
+    { imgStr: burger_bottom, imgName: "1" },
+  ]);
+
   return (
     <div className="game">
-      <p>Game</p>
       <div>
         <div className="plate-order-flex">
           <div className="order-ingredients-container">
-            <Order />
+            <Order orderItems={orderItems} setOrderItems={setOrderItems} />
             <Ingredients
               workstationItems={workstationItems}
               setWorkstationItems={setWorkstationItems}
