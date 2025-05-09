@@ -117,27 +117,29 @@ public class FirebaseUtilities implements StorageInterface {
   public void addSession(String session_id, String user_id, String file_map_json)
       throws IllegalArgumentException, ExecutionException, InterruptedException {
 
-    if (session_id == null || user_id == null || file_map_json == null) {
-      throw new IllegalArgumentException("addSession: session_id and file_map_json cannot be null");
-    }
-
-    Firestore db = FirestoreClient.getFirestore();
-    db.collection("sessions").document(session_id).set(Map.of(), SetOptions.merge());
-    // create remote repository if this is the first user to log into the session
-    if (db.collection("sessions")
-        .document(session_id)
-        .collection("remote-store")
-        .get()
-        .get()
-        .getDocuments()
-        .isEmpty()) {
-
-      // generate unique commit id
-      String initialCommitId = this.generateCommitId();
-      while (this.commitIds.contains(initialCommitId)) {
-        initialCommitId = this.generateCommitId();
+    try {
+      if (session_id == null || user_id == null || file_map_json == null) {
+        throw new IllegalArgumentException(
+            "addSession: session_id and file_map_json cannot be null");
       }
-      commitIds.add(initialCommitId);
+
+      Firestore db = FirestoreClient.getFirestore();
+      db.collection("sessions").document(session_id).set(Map.of(), SetOptions.merge());
+      // create remote repository if this is the first user to log into the session
+      if (db.collection("sessions")
+          .document(session_id)
+          .collection("remote_store")
+          .get()
+          .get()
+          .getDocuments()
+          .isEmpty()) {
+
+        // generate unique commit id
+        String initialCommitId = this.generateCommitId();
+        while (this.commitIds.contains(initialCommitId)) {
+          initialCommitId = this.generateCommitId();
+        }
+        commitIds.add(initialCommitId);
 
       // create initial commit
       Map<String, Object> initialCommit = new HashMap<>();
@@ -147,150 +149,154 @@ public class FirebaseUtilities implements StorageInterface {
       initialCommit.put("date_time", ZonedDateTime.now());
       initialCommit.put("commit_message", "Initial commit");
 
-      // setup branch info
-      db.collection("sessions")
-          .document(session_id)
-          .collection("remote-store")
-          .document("branches")
-          .collection("main")
-          .document("parent-branch")
-          .set(Collections.singletonMap("parent_branch_id", null));
-      db.collection("sessions")
-          .document(session_id)
-          .collection("remote-store")
-          .document("branches")
-          .collection("main")
-          .document("remote-file-map-json")
-          .set(Collections.singletonMap("remote_file_map_json", file_map_json));
-      db.collection("sessions")
-          .document(session_id)
-          .collection("remote-store")
-          .document("branches")
-          .collection("main")
-          .document("head")
-          .set(initialCommit);
-
-      // setup pushed remote commits
-      List<Map<String, Object>> remoteCommits = new ArrayList<>();
-      remoteCommits.add(initialCommit);
-      db.collection("sessions")
-          .document(session_id)
-          .collection("remote-store")
-          .document("branches")
-          .collection("main")
-          .document("pushed-commits")
-          .set(Collections.singletonMap("commits", remoteCommits));
-    }
-    // setup user's local branch info
-    String mainFileMapJson =
+        // setup branch info
         db.collection("sessions")
             .document(session_id)
-            .collection("remote-store")
+            .collection("remote_store")
             .document("branches")
             .collection("main")
-            .document("remote-file-map-json")
-            .get()
-            .get()
-            .getString("remote_file_map_json");
-    Map<String, Object> mainHead =
+            .document("parent_branch")
+            .set(Collections.singletonMap("parent_branch_id", null));
         db.collection("sessions")
             .document(session_id)
-            .collection("remote-store")
+            .collection("remote_store")
+            .document("branches")
+            .collection("main")
+            .document("remote_file_map_json")
+            .set(Collections.singletonMap("remote_file_map_json", file_map_json));
+        db.collection("sessions")
+            .document(session_id)
+            .collection("remote_store")
             .document("branches")
             .collection("main")
             .document("head")
-            .get()
-            .get()
-            .getData();
+            .set(initialCommit);
 
-    // set local file map
-    db.collection("sessions")
-        .document(session_id)
-        .collection("local-store")
-        .document("users")
-        .collection(user_id)
-        .document("branches")
-        .collection("main")
-        .document("local-file-map-json")
-        .set(Collections.singletonMap("local_file_map_json", mainFileMapJson));
+        // setup pushed remote commits
+        List<Map<String, Object>> remoteCommits = new ArrayList<>();
+        remoteCommits.add(initialCommit);
+        db.collection("sessions")
+            .document(session_id)
+            .collection("remote_store")
+            .document("branches")
+            .collection("main")
+            .document("pushed_commits")
+            .set(Collections.singletonMap("commits", remoteCommits));
+      }
+      // setup user's local branch info
+      String mainFileMapJson =
+          db.collection("sessions")
+              .document(session_id)
+              .collection("remote_store")
+              .document("branches")
+              .collection("main")
+              .document("remote_file_map_json")
+              .get()
+              .get()
+              .getString("remote_file_map_json");
+      Map<String, Object> mainHead =
+          db.collection("sessions")
+              .document(session_id)
+              .collection("remote_store")
+              .document("branches")
+              .collection("main")
+              .document("head")
+              .get()
+              .get()
+              .getData();
 
-    // set parent branch
-    db.collection("sessions")
-        .document(session_id)
-        .collection("local-store")
-        .document("users")
-        .collection(user_id)
-        .document("branches")
-        .collection("main")
-        .document("parent-branch")
-        .set(Collections.singletonMap("parent_branch_id", null));
+      // set local file map
+      db.collection("sessions")
+          .document(session_id)
+          .collection("local_store")
+          .document("users")
+          .collection(user_id)
+          .document("branches")
+          .collection("main")
+          .document("local_file_map_json")
+          .set(Collections.singletonMap("local_file_map_json", mainFileMapJson));
 
-    // set head
-    db.collection("sessions")
-        .document(session_id)
-        .collection("local-store")
-        .document("users")
-        .collection(user_id)
-        .document("branches")
-        .collection("main")
-        .document("head")
-        .set(Collections.singletonMap("head", mainHead));
+      // set parent branch
+      db.collection("sessions")
+          .document(session_id)
+          .collection("local_store")
+          .document("users")
+          .collection(user_id)
+          .document("branches")
+          .collection("main")
+          .document("parent_branch")
+          .set(Collections.singletonMap("parent_branch_id", null));
 
-    // set pushed commits to match main
-    List<Map<String, Object>> mainCommits =
-        (List<Map<String, Object>>)
-            db.collection("sessions")
-                .document(session_id)
-                .collection("remote-store")
-                .document("branches")
-                .collection("main")
-                .document("pushed-commits")
-                .get()
-                .get()
-                .get("commits");
-    db.collection("sessions")
-        .document(session_id)
-        .collection("local-store")
-        .document("users")
-        .collection(user_id)
-        .document("branches")
-        .collection("main")
-        .document("pushed-commits")
-        .set(Collections.singletonMap("commits", mainCommits));
+      // set head
+      db.collection("sessions")
+          .document(session_id)
+          .collection("local_store")
+          .document("users")
+          .collection(user_id)
+          .document("branches")
+          .collection("main")
+          .document("head")
+          .set(Collections.singletonMap("head", mainHead));
 
-    // set staged commits to empty list
-    List<Map<String, Object>> localStagedCommits = new ArrayList<>();
-    db.collection("sessions")
-        .document(session_id)
-        .collection("local-store")
-        .document("users")
-        .collection(user_id)
-        .document("branches")
-        .collection("main")
-        .document("staged-commits")
-        .set(Collections.singletonMap("commits", localStagedCommits));
+      // set pushed commits to match main
+      List<Map<String, Object>> mainCommits =
+          (List<Map<String, Object>>)
+              db.collection("sessions")
+                  .document(session_id)
+                  .collection("remote_store")
+                  .document("branches")
+                  .collection("main")
+                  .document("pushed_commits")
+                  .get()
+                  .get()
+                  .get("commits");
+      db.collection("sessions")
+          .document(session_id)
+          .collection("local_store")
+          .document("users")
+          .collection(user_id)
+          .document("branches")
+          .collection("main")
+          .document("pushed_commits")
+          .set(Collections.singletonMap("commits", mainCommits));
 
-    // set changes to empty map
-    Map<String, Object> localChanges = new HashMap<>();
-    db.collection("sessions")
-        .document(session_id)
-        .collection("local-store")
-        .document("users")
-        .collection(user_id)
-        .document("branches")
-        .collection("main")
-        .document("changes")
-        .set(localChanges);
+      // set staged commits to empty list
+      List<Map<String, Object>> localStagedCommits = new ArrayList<>();
+      db.collection("sessions")
+          .document(session_id)
+          .collection("local_store")
+          .document("users")
+          .collection(user_id)
+          .document("branches")
+          .collection("main")
+          .document("staged_commits")
+          .set(Collections.singletonMap("commits", localStagedCommits));
 
-    // set stashes to empty list of maps
-    List<Map<String, Object>> stashes = new ArrayList<>();
-    db.collection("sessions")
-        .document(session_id)
-        .collection("local-store")
-        .document("users")
-        .collection(user_id)
-        .document("stashes")
-        .set(Collections.singletonMap("stashes", stashes));
+      // set changes to empty map
+      Map<String, Object> localChanges = new HashMap<>();
+      db.collection("sessions")
+          .document(session_id)
+          .collection("local_store")
+          .document("users")
+          .collection(user_id)
+          .document("branches")
+          .collection("main")
+          .document("changes")
+          .set(localChanges);
+
+      // set stashes to empty list of maps
+      List<Map<String, Object>> stashes = new ArrayList<>();
+      db.collection("sessions")
+          .document(session_id)
+          .collection("local_store")
+          .document("users")
+          .collection(user_id)
+          .document("stashes")
+          .set(Collections.singletonMap("stashes", stashes));
+    } catch (Exception e) {
+      System.err.println(e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -318,7 +324,7 @@ public class FirebaseUtilities implements StorageInterface {
     DocumentReference stashesRef =
         db.collection("sessions")
             .document(session_id)
-            .collection("local-store")
+            .collection("local_store")
             .document("users")
             .collection(user_id)
             .document("stashes");
@@ -340,7 +346,7 @@ public class FirebaseUtilities implements StorageInterface {
     stashes.add(stash);
     db.collection("sessions")
         .document(session_id)
-        .collection("local-store")
+        .collection("local_store")
         .document("users")
         .collection(user_id)
         .document("stashes")
@@ -486,24 +492,22 @@ public class FirebaseUtilities implements StorageInterface {
             .set(Collections.singletonMap("commits", pushedCommits));
       }
     }
-    // TODO: change firebase local_file_map_json to be local_untracked_changes
-    // TODO:
     // take opportunity to update current branch's local state
     db.collection("sessions")
         .document(session_id)
-        .collection("local-store")
+        .collection("local_store")
         .document("users")
         .collection(user_id)
         .document("branches")
         .collection(current_branch_id)
-        .document("local-file-map-json")
+        .document("local_file_map_json")
         .set(Collections.singletonMap("local_file_map_json", file_map_json));
 
     // set new branch's head
     Map<String, Object> head = this.getLatestLocalCommit(session_id, user_id, current_branch_id);
     db.collection("sessions")
         .document(session_id)
-        .collection("local-store")
+        .collection("local_store")
         .document("users")
         .collection(user_id)
         .document("branches")
@@ -514,23 +518,23 @@ public class FirebaseUtilities implements StorageInterface {
     // set new branch's parent branch
     db.collection("sessions")
         .document(session_id)
-        .collection("local-store")
+        .collection("local_store")
         .document("users")
         .collection(user_id)
         .document("branches")
         .collection(new_branch_id)
-        .document("parent-branch")
+        .document("parent_branch")
         .set(Collections.singletonMap("parent_branch_id", current_branch_id));
 
     // set new branch's stored local file map
     db.collection("sessions")
         .document(session_id)
-        .collection("local-store")
+        .collection("local_store")
         .document("users")
         .collection(user_id)
         .document("branches")
         .collection(new_branch_id)
-        .document("local-file-map-json")
+        .document("local_file_map_json")
         .set(Collections.singletonMap("local_file_map_json", file_map_json));
 
     // set new branch's staged commits to reflect current branch's
@@ -538,23 +542,23 @@ public class FirebaseUtilities implements StorageInterface {
         (List<Map<String, Object>>)
             db.collection("sessions")
                 .document(session_id)
-                .collection("local-store")
+                .collection("local_store")
                 .document("users")
                 .collection(user_id)
                 .document("branches")
                 .collection(current_branch_id)
-                .document("staged-commits")
+                .document("staged_commits")
                 .get()
                 .get()
                 .get("commits");
     db.collection("sessions")
         .document(session_id)
-        .collection("local-store")
+        .collection("local_store")
         .document("users")
         .collection(user_id)
         .document("branches")
         .collection(new_branch_id)
-        .document("staged-commits")
+        .document("staged_commits")
         .set(Collections.singletonMap("commits", stagedCommits));
 
     // set new branch's pushed commits to reflect current branch's
@@ -562,53 +566,53 @@ public class FirebaseUtilities implements StorageInterface {
         (List<Map<String, Object>>)
             db.collection("sessions")
                 .document(session_id)
-                .collection("local-store")
+                .collection("local_store")
                 .document("users")
                 .collection(user_id)
                 .document("branches")
                 .collection(current_branch_id)
-                .document("pushed-commits")
+                .document("pushed_commits")
                 .get()
                 .get()
                 .get("commits");
     db.collection("sessions")
         .document(session_id)
-        .collection("local-store")
+        .collection("local_store")
         .document("users")
         .collection(user_id)
         .document("branches")
         .collection(new_branch_id)
-        .document("pushed-commits")
+        .document("pushed_commits")
         .set(Collections.singletonMap("commits", pushedCommits));
 
     // add branch to remote repository for convenience
     db.collection("sessions")
         .document(session_id)
-        .collection("remote-store")
+        .collection("remote_store")
         .document("branches")
         .collection(new_branch_id)
-        .document("parent-branch")
+        .document("parent_branch")
         .set(Collections.singletonMap("parent_branch_id", current_branch_id));
     db.collection("sessions")
         .document(session_id)
-        .collection("remote-store")
+        .collection("remote_store")
         .document("branches")
         .collection(new_branch_id)
         .document("head")
         .set(Collections.singletonMap("head", head));
     db.collection("sessions")
         .document(session_id)
-        .collection("remote-store")
+        .collection("remote_store")
         .document("branches")
         .collection(new_branch_id)
-        .document("local-file-map-json")
+        .document("local_file_map_json")
         .set(Collections.singletonMap("local_file_map_json", file_map_json));
     db.collection("sessions")
         .document(session_id)
-        .collection("remote-store")
+        .collection("remote_store")
         .document("branches")
         .collection(new_branch_id)
-        .document("pushed-commits")
+        .document("pushed_commits")
         .set(Collections.singletonMap("commits", pushedCommits));
   }
 
@@ -636,7 +640,7 @@ public class FirebaseUtilities implements StorageInterface {
     CollectionReference localBranchRef =
         db.collection("sessions")
             .document(session_id)
-            .collection("local-store")
+            .collection("local_store")
             .document("users")
             .collection(user_id)
             .document("branches")
@@ -662,7 +666,7 @@ public class FirebaseUtilities implements StorageInterface {
     Iterable<CollectionReference> branches =
         db.collection("sessions")
             .document(session_id)
-            .collection("remote-store")
+            .collection("remote_store")
             .document("branches")
             .listCollections();
 
@@ -695,7 +699,7 @@ public class FirebaseUtilities implements StorageInterface {
     Iterable<CollectionReference> branches =
         db.collection("sessions")
             .document(session_id)
-            .collection("local-store")
+            .collection("local_store")
             .document("users")
             .collection(user_id)
             .document("branches")
@@ -730,7 +734,7 @@ public class FirebaseUtilities implements StorageInterface {
     // set changes document to new version of file map
     db.collection("sessions")
         .document(session_id)
-        .collection("local-store")
+        .collection("local_store")
         .document("users")
         .collection(user_id)
         .document("branches")
@@ -740,7 +744,7 @@ public class FirebaseUtilities implements StorageInterface {
     // take opportunity to update local file map in branch info
     db.collection("sessions")
         .document(session_id)
-        .collection("local-store")
+        .collection("local_store")
         .document("users")
         .collection(user_id)
         .document("branches")
@@ -774,7 +778,7 @@ public class FirebaseUtilities implements StorageInterface {
     Map<String, Object> latestCommit =
         db.collection("sessions")
             .document(session_id)
-            .collection("local-store")
+            .collection("local_store")
             .document("users")
             .collection(user_id)
             .document("branches")
@@ -809,7 +813,7 @@ public class FirebaseUtilities implements StorageInterface {
     Map<String, Object> latestCommit =
         db.collection("sessions")
             .document(session_id)
-            .collection("remote-store")
+            .collection("remote_store")
             .document("branches")
             .collection(branch_id)
             .document("head")
@@ -843,7 +847,7 @@ public class FirebaseUtilities implements StorageInterface {
     String fileMapJson =
         db.collection("sessions")
             .document(session_id)
-            .collection("local-store")
+            .collection("local_store")
             .document("users")
             .collection(user_id)
             .document("branches")
@@ -898,7 +902,7 @@ public class FirebaseUtilities implements StorageInterface {
     CollectionReference localBranchRef =
         db.collection("sessions")
             .document(session_id)
-            .collection("local-store")
+            .collection("local_store")
             .document("users")
             .collection(user_id)
             .document("branches")
@@ -906,21 +910,21 @@ public class FirebaseUtilities implements StorageInterface {
     // update branch's staged commits
     List<Map<String, Object>> stagedCommits =
         (List<Map<String, Object>>)
-            localBranchRef.document("staged-commits").get().get().get("commits");
+            localBranchRef.document("staged_commits").get().get().get("commits");
     stagedCommits.add(newCommit);
     db.collection("sessions")
         .document(session_id)
-        .collection("local-store")
+        .collection("local_store")
         .document("users")
         .collection(user_id)
         .document("branches")
         .collection(branch_id)
-        .document("staged-commits")
+        .document("staged_commits")
         .set(Collections.singletonMap("commits", stagedCommits));
     // update branch's head
     db.collection("sessions")
         .document(session_id)
-        .collection("local-store")
+        .collection("local_store")
         .document("users")
         .collection(user_id)
         .document("branches")
@@ -930,7 +934,7 @@ public class FirebaseUtilities implements StorageInterface {
     // clear changes since they have all been committed
     db.collection("sessions")
         .document(session_id)
-        .collection("local-store")
+        .collection("local_store")
         .document("users")
         .collection(user_id)
         .document("branches")
@@ -962,10 +966,10 @@ public class FirebaseUtilities implements StorageInterface {
         (List<Map<String, Object>>)
             db.collection("sessions")
                 .document(session_id)
-                .collection("local-store")
+                .collection("local_store")
                 .document("branches")
                 .collection(branch_id)
-                .document("staged-commits")
+                .document("staged_commits")
                 .get()
                 .get()
                 .get("commits");
@@ -974,10 +978,10 @@ public class FirebaseUtilities implements StorageInterface {
         (List<Map<String, Object>>)
             db.collection("sessions")
                 .document(session_id)
-                .collection("local-store")
+                .collection("local_store")
                 .document("branches")
                 .collection(branch_id)
-                .document("pushed-commits")
+                .document("pushed_commits")
                 .get()
                 .get()
                 .get("commits");
@@ -986,10 +990,10 @@ public class FirebaseUtilities implements StorageInterface {
         (List<Map<String, Object>>)
             db.collection("sessions")
                 .document(session_id)
-                .collection("remote-store")
+                .collection("remote_store")
                 .document("branches")
                 .collection(branch_id)
-                .document("pushed-commits")
+                .document("pushed_commits")
                 .get()
                 .get()
                 .get("commits");
@@ -1004,28 +1008,28 @@ public class FirebaseUtilities implements StorageInterface {
     // update local store with new pushed commits
     db.collection("sessions")
         .document(session_id)
-        .collection("local-store")
+        .collection("local_store")
         .document("branches")
         .collection(branch_id)
-        .document("pushed-commits")
+        .document("pushed_commits")
         .set(Collections.singletonMap("commits", localPushedCommits));
     // update remote store with new pushed commits
     db.collection("sessions")
         .document(session_id)
-        .collection("remote-store")
+        .collection("remote_store")
         .document("branches")
         .collection(branch_id)
-        .document("pushed-commits")
+        .document("pushed_commits")
         .set(Collections.singletonMap("commits", remotePushedCommits));
 
     // clear staged commits, as they have all now been pushed
     List<Map<String, Object>> clearedCommits = new ArrayList<>();
     db.collection("sessions")
         .document(session_id)
-        .collection("local-store")
+        .collection("local_store")
         .document("branches")
         .collection(branch_id)
-        .document("staged-commits")
+        .document("staged_commits")
         .set(Collections.singletonMap("commits", clearedCommits));
   }
 
@@ -1054,12 +1058,12 @@ public class FirebaseUtilities implements StorageInterface {
         (List<Map<String, Object>>)
             db.collection("sessions")
                 .document(session_id)
-                .collection("local-store")
+                .collection("local_store")
                 .document("users")
                 .collection(user_id)
                 .document("branches")
                 .collection(branch_id)
-                .document("pushed-commits")
+                .document("pushed_commits")
                 .get()
                 .get()
                 .get("commits");
@@ -1067,12 +1071,12 @@ public class FirebaseUtilities implements StorageInterface {
         (List<Map<String, Object>>)
             db.collection("sessions")
                 .document(session_id)
-                .collection("local-store")
+                .collection("local_store")
                 .document("users")
                 .collection(user_id)
                 .document("branches")
                 .collection(branch_id)
-                .document("staged-commits")
+                .document("staged_commits")
                 .get()
                 .get()
                 .get("commits");
@@ -1106,10 +1110,10 @@ public class FirebaseUtilities implements StorageInterface {
         (List<Map<String, Object>>)
             db.collection("sessions")
                 .document(session_id)
-                .collection("remote-store")
+                .collection("remote_store")
                 .document("branches")
                 .collection(branch_id)
-                .document("pushed-commits")
+                .document("pushed_commits")
                 .get()
                 .get()
                 .get("commits");
