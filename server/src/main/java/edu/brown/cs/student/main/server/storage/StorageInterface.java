@@ -199,7 +199,7 @@ public interface StorageInterface {
    * @throws ExecutionException - for firebase methods
    * @throws InterruptedException - for firebase methods
    */
-  void commitChange(String session_id, String user_id, String branch_id, String commit_message)
+  String commitChange(String session_id, String user_id, String branch_id, String commit_message)
       throws IllegalArgumentException, ExecutionException, InterruptedException;
 
   /**

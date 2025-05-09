@@ -951,7 +951,7 @@ public class FirebaseUtilities implements StorageInterface {
       throws IllegalArgumentException, ExecutionException, InterruptedException {
     if (session_id == null || user_id == null || branch_id == null) {
       throw new IllegalArgumentException(
-          "getLatestStagedCommit: session_id and branch_id cannot be null");
+          "getLatestStagedCommit: session_id, user_id, and branch_id cannot be null");
     }
     Firestore db = FirestoreClient.getFirestore();
     String fileMapJson =
@@ -982,7 +982,7 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws InterruptedException - for firebase methods
    */
   @Override
-  public void commitChange(
+  public String commitChange(
       String session_id, String user_id, String branch_id, String commit_message)
       throws IllegalArgumentException, ExecutionException, InterruptedException {
     if (session_id == null || user_id == null || branch_id == null) {
@@ -1051,6 +1051,7 @@ public class FirebaseUtilities implements StorageInterface {
         .collection(branch_id)
         .document("add_changes")
         .set(Collections.singletonMap("file_map_json", null));
+    return commitId;
   }
 
   /**
