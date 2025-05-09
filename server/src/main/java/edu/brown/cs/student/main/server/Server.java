@@ -3,6 +3,18 @@ package edu.brown.cs.student.main.server;
 import static spark.Spark.after;
 
 import edu.brown.cs.student.main.server.handlers.CreateSessionHandler;
+import edu.brown.cs.student.main.server.handlers.gitHandlers.GitAddHandler;
+import edu.brown.cs.student.main.server.handlers.gitHandlers.GitBranchHandler;
+import edu.brown.cs.student.main.server.handlers.gitHandlers.GitCheckoutHandler;
+import edu.brown.cs.student.main.server.handlers.gitHandlers.GitCommitHandler;
+import edu.brown.cs.student.main.server.handlers.gitHandlers.GitLogHandler;
+import edu.brown.cs.student.main.server.handlers.gitHandlers.GitMergeHandler;
+import edu.brown.cs.student.main.server.handlers.gitHandlers.GitPullHandler;
+import edu.brown.cs.student.main.server.handlers.gitHandlers.GitPushHandler;
+import edu.brown.cs.student.main.server.handlers.gitHandlers.GitResetHandler;
+import edu.brown.cs.student.main.server.handlers.gitHandlers.GitRmHandler;
+import edu.brown.cs.student.main.server.handlers.gitHandlers.GitStashHandler;
+import edu.brown.cs.student.main.server.handlers.gitHandlers.GitStatusHandler;
 import edu.brown.cs.student.main.server.storage.FirebaseUtilities;
 import edu.brown.cs.student.main.server.storage.StorageInterface;
 import java.io.IOException;
@@ -46,11 +58,19 @@ public class Server {
 
       // Setting up the handlers for the endpoints
       Spark.get("createsession", new CreateSessionHandler(firebaseUtils));
-      //    Spark.get("joinsession", new JoinSessionHandler(firebaseUtils));
-      //    Spark.get("joinresponse", new JoinResponseHandler(firebaseUtils));
-      //    Spark.get("getfile", new GetFileHandler(firebaseUtils));
-      //    Spark.get("updatefile", new UpdateFileHandler(firebaseUtils));
-      //    Spark.get("updatesessionlevel", new UpdateSessionLevelHandler(firebaseUtils));
+      Spark.get("gitadd", new GitAddHandler(firebaseUtils));
+      Spark.get("gitbranch", new GitBranchHandler(firebaseUtils));
+      Spark.get("gitcheckout", new GitCheckoutHandler(firebaseUtils));
+      Spark.get("gitcommit", new GitCommitHandler(firebaseUtils));
+      Spark.get("gitlog", new GitLogHandler(firebaseUtils));
+      Spark.get("gitmerge", new GitMergeHandler(firebaseUtils));
+      Spark.get("gitpull", new GitPullHandler(firebaseUtils));
+      Spark.get("gitpush", new GitPushHandler(firebaseUtils));
+      Spark.get("gitreset", new GitResetHandler(firebaseUtils));
+      Spark.get("gitrm", new GitRmHandler(firebaseUtils));
+      Spark.get("gitstash", new GitStashHandler(firebaseUtils));
+      // Spark.get("gitstashpop", new GitStashPopHandler(firebaseUtils));
+      Spark.get("gitstatus", new GitStatusHandler(firebaseUtils));
 
       Spark.notFound(
           (request, response) -> {
