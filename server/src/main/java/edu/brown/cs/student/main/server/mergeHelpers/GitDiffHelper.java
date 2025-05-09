@@ -13,9 +13,8 @@ public class GitDiffHelper {
   private List<String> newLocalFiles = new ArrayList<>();
   // list of filenames which are on the remote repository but not on the local repository
   private List<String> newIncomingFiles = new ArrayList<>();
-  // map of filenames to indexes where conflicts were detected between the local and remote file
-  // list
-  private Map<String, List<Integer>> fileConflictIndexes = new HashMap<>();
+  // map of filenames to map containing the local and incoming version of the conflicting file
+  private Map<String, Map<String, List<MockFileObject>>> fileConflicts = new HashMap<>();
 
   public GitDiffHelper() {}
 
@@ -45,9 +44,9 @@ public class GitDiffHelper {
    *
    * @return - map of filenames to indexes of conflicts
    */
-  public Map<String, List<Integer>> getFileConflictIndexes() {
-    Map<String, List<Integer>> fileConflictIndexesCopy = new HashMap<>(fileConflictIndexes);
-    return fileConflictIndexesCopy;
+  public Map<String, Map<String, List<MockFileObject>>> getFileConflicts() {
+    Map<String, Map<String, List<MockFileObject>>> fileConflictsCopy = new HashMap<>(fileConflicts);
+    return fileConflictsCopy;
   }
 
   /**
@@ -116,14 +115,8 @@ public class GitDiffHelper {
     // track length of subsequence
     int i = 0;
     for (int j = 0; j < largerFile.size(); j++) {
-      if (i < smallerFile.size()) {
-        if (largerFile.get(j).equals(smallerFile.get(i))) {
-          i++;
-        } else {
-          List<Integer> conflictIndexes = fileConflictIndexes.get(fileName);
-          conflictIndexes.add(j);
-          fileConflictIndexes.put(fileName, conflictIndexes);
-        }
+      if (i < smallerFile.size() && largerFile.get(i).equals(smallerFile.get(i))) {
+        i++;
       }
     }
     // if all of smaller file's objects were a subsequence in larger file's objects
@@ -131,23 +124,25 @@ public class GitDiffHelper {
   }
 
   public List<MockFileObject> autoMergeIfPossible(
-      String fileName, List<MockFileObject> file1, List<MockFileObject> file2) {
+      String fileName, List<MockFileObject> localFile, List<MockFileObject> incomingFile) {
 
-    // create new entry in fileConflictIndexes for filename
-    fileConflictIndexes.put("filename", new ArrayList<>());
     // if files are equal, return first file by default
-    if (file1.equals(file2)) {
-      return file1;
+    if (localFile.equals(incomingFile)) {
+      return localFile;
     }
 
     // if one file is a subsequence of another, return the larger file
-    if (isSubsequence(fileName, file1, file2)) {
-      return file1;
+    if (isSubsequence(fileName, localFile, incomingFile)) {
+      return incomingFile;
     }
-    if (isSubsequence(fileName, file2, file1)) {
-      return file2;
+    if (isSubsequence(fileName, incomingFile, localFile)) {
+      return localFile;
     }
     // otherwise, return null to indicate a merge conflict
+    Map<String, List<MockFileObject>> files = new HashMap<>();
+    files.put("local", localFile);
+    files.put("incoming", incomingFile);
+    fileConflicts.put(fileName, files);
     return null;
   }
 }

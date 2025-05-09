@@ -134,7 +134,6 @@ public class GitCheckoutHandler extends AbstractEndpointHandler {
     } catch (Exception e) {
       return returnErrorResponse("", "");
     }
-
     return returnSuccessResponse();
   }
 }

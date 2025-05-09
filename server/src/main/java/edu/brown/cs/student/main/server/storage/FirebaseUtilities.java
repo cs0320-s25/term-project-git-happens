@@ -1320,7 +1320,7 @@ public class FirebaseUtilities implements StorageInterface {
       commitUpdates.put("new_commit_id", latestRemoteCommit.get("commit_id"));
     }
     fetchedChanges.put("commit_updates", commitUpdates);
-    // return last pushed commit
+    // return changes
     return fetchedChanges;
   }
 
