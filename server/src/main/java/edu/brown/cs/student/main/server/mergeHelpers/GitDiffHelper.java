@@ -85,10 +85,15 @@ public class GitDiffHelper {
     detectNewFiles(storedState, currentState);
     Set<String> filesWithDifferences = new HashSet<>();
     filesWithDifferences.addAll(newIncomingFiles);
+    filesWithDifferences.addAll(newLocalFiles);
     // check for any difference in file objects list in corresponding files between stored and
     // current state
     for (Map.Entry<String, List<MockFileObject>> storedFile : storedState.entrySet()) {
       String fileName = storedFile.getKey();
+      //if the file is not present in both the current and incoming states, no need to compare
+      if (filesWithDifferences.contains(fileName)) {
+        continue;
+      }
       List<MockFileObject> currentFileContents = currentState.get(fileName);
       List<MockFileObject> storedFileContents = storedFile.getValue();
       if (currentFileContents.size() != storedFileContents.size()) {

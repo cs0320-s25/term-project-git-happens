@@ -79,7 +79,7 @@ public class GitCheckoutHandler extends AbstractEndpointHandler {
           deserializeFileMap((String) latestCommit.get("file_map_json"));
       Map<String, List<MockFileObject>> currentFileMap = deserializeFileMap(fileMapJson);
       Set<String> filesWithDifferences =
-          diffHelper.differenceDetected(currentFileMap, commitedFileMap);
+          diffHelper.differenceDetected(commitedFileMap, currentFileMap);
       // if there are differences, return error message for terminal display
       if (!filesWithDifferences.isEmpty()) {
         responseMap.put("difference_detected", true);

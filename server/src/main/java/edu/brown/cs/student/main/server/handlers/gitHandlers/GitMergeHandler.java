@@ -1,6 +1,7 @@
 package edu.brown.cs.student.main.server.handlers.gitHandlers;
 
 import edu.brown.cs.student.main.server.handlers.AbstractEndpointHandler;
+import edu.brown.cs.student.main.server.mergeHelpers.GitDiffHelper;
 import edu.brown.cs.student.main.server.storage.StorageInterface;
 import java.util.HashMap;
 import spark.Request;
@@ -17,9 +18,37 @@ public class GitMergeHandler extends AbstractEndpointHandler {
   @Override
   public Object handle(final Request request, final Response response) throws Exception {
     responseMap = new HashMap<>();
+    GitDiffHelper diffHelper = new GitDiffHelper();
 
-    final String branchName = request.queryParams("branch_name");
-    // TODO: request.queryParams for current branch map of files
+    //unique session id
+    final String session_id = request.queryParams("session_id");
+    //unique user id
+    final String user_id = request.queryParams("user_id");
+    //id of currently checked out branch
+    final String currentBranch = request.queryParams("current_branch_id");
+    //id of branch to merge with
+    final String mergeBranch = request.queryParams("merge_branch_id");
+
+    if (session_id == null) {
+      returnErrorResponse("error_bad_request", "null parameter", "session_id");
+    } else {
+      responseMap.put("session_id", session_id);
+    }
+    if (user_id == null) {
+      returnErrorResponse("error_bad_request", "null parameter", "user_id");
+    } else {
+      responseMap.put("user_id", user_id);
+    }
+    if (currentBranch == null) {
+      returnErrorResponse("error_bad_request", "null parameter", "current_branch_id");
+    } else {
+      responseMap.put("current_branch_id", currentBranch);
+    }
+    if (mergeBranch == null) {
+      returnErrorResponse("error_bad_request", "null parameter", "merge_branch_id");
+    } else {
+      responseMap.put("merge_branch_id", mergeBranch);
+    }
 
     try {
 

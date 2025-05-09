@@ -54,25 +54,32 @@ public class GitCommitHandler extends AbstractEndpointHandler {
       responseMap.put("commit_message", commitMessage);
     }
     try {
-      //get last latest local commit's and deserialize file map
-      Map<String, Object> latestLocalCommit = storage.getLatestLocalCommit(session_id, user_id, branchId);
-      Map<String, List<MockFileObject>> latestFileMap = deserializeFileMap((String) latestLocalCommit.get("file_map_json"));
+
       //get staged changes
       String newFileMapJson = storage.getLatestLocalChanges(session_id, user_id, branchId);
-      //if there are no staged changes,
+      //if there are no staged changes, return error for terminal display
       if (newFileMapJson == null) {
-
+        returnErrorResponse("error_database", "No changes added to commit (use 'git add -A')");
       }
-      Map<String, List<MockFileObject>> newFileMap = deserializeFileMap((newFileMapJson));
+
+      //get last latest local commit and deserialize file map
+      Map<String, Object> latestLocalCommit = storage.getLatestLocalCommit(session_id, user_id, branchId);
+      Map<String, List<MockFileObject>> latestFileMap = deserializeFileMap((String) latestLocalCommit.get("file_map_json"));
 
       //check that there is a difference between the last commit and staged changes
+
+      Map<String, List<MockFileObject>> newFileMap = deserializeFileMap((newFileMapJson));
       Set<String> filesWithDifferences = diffHelper.differenceDetected(latestFileMap, newFileMap);
 
-      if (filesWithDifferences.isEmpty() &&)
-      //make new commit, get new latest local commit and deserialize file map
+      //if the filemap has not changed since last commit, return message for terminal display
+      if (filesWithDifferences.isEmpty()) {
+        returnErrorResponse("error_database", "Nothing to commit, working tree clean");
+      }
+      //make new commit, populate response map for terminal display
       String commitId = storage.commitChange(session_id, user_id, branchId, commitMessage);
-      Map<String, Object> newLocalCommit = storage.getLatestLocalCommit(session_id, user_id, branchId);
-      Map<String, List<MockFileObject>> newFileMap = deserializeFileMap((String) newLocalCommit.get("file_map_json"));
+      responseMap.put("commit_id", commitId);
+      responseMap.put("commit_message", commitMessage);
+      responseMap.put("num_files_changed", filesWithDifferences.size());
       responseMap.put("action", "commit -m");
     } catch (Exception e) {
       return returnErrorResponse("error_database", "commit_failed: " + e.getMessage());
