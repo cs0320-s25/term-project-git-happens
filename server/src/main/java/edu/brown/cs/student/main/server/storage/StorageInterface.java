@@ -116,6 +116,36 @@ public interface StorageInterface {
       throws IllegalArgumentException, ExecutionException, InterruptedException;
 
   /**
+   * Method that returns all local staged commits.
+   *
+   * @param session_id - unique session id
+   * @param user_id - unique user id
+   * @param branch_id - currently checked out branch
+   * @return - list of staged commit data maps
+   * @throws IllegalArgumentException - if any parameters are null
+   * @throws ExecutionException - for firebase methods
+   * @throws InterruptedException - for firebase methods
+   */
+ List<Map<String, Object>> getStagedCommits(
+      String session_id, String user_id, String branch_id)
+      throws IllegalArgumentException, ExecutionException, InterruptedException;
+
+  /**
+   * Method that returns all local pushed commits.
+   *
+   * @param session_id - unique session id
+   * @param user_id - unique user id
+   * @param branch_id - currently checked out branch
+   * @return - list of pushed commit data maps
+   * @throws IllegalArgumentException - if any parameters are null
+   * @throws ExecutionException - for firebase methods
+   * @throws InterruptedException - for firebase methods
+   */
+  List<Map<String, Object>> getLocalPushedCommits(
+      String session_id, String user_id, String branch_id)
+      throws IllegalArgumentException, ExecutionException, InterruptedException;
+
+  /**
    * Method that returns the head commit for a specific branch stored in the remote repository.
    *
    * @param session_id - unique session id
@@ -126,6 +156,20 @@ public interface StorageInterface {
    * @throws InterruptedException - for firebase methods
    */
   Map<String, Object> getLatestRemoteCommit(String session_id, String branch_id)
+      throws IllegalArgumentException, ExecutionException, InterruptedException;
+
+  /**
+   * Method that returns all remote pushed commits.
+   *
+   * @param session_id - unique session id
+   * @param branch_id - currently checked out branch
+   * @return - list of staged commit data maps
+   * @throws IllegalArgumentException - if any parameters are null
+   * @throws ExecutionException - for firebase methods
+   * @throws InterruptedException - for firebase methods
+   */
+  List<Map<String, Object>> getRemotePushedCommits(
+      String session_id, String branch_id)
       throws IllegalArgumentException, ExecutionException, InterruptedException;
 
   /**
@@ -191,14 +235,13 @@ public interface StorageInterface {
    * Method that returns all pushed commits for a branch on the remote repository.
    *
    * @param session_id - unique session id
-   * @param user_id - unique user id
    * @param branch_id - id of currently checked out branch
    * @return - a list of pushed commits
    * @throws IllegalArgumentException - if any parameters are null
    * @throws ExecutionException - for firebase methods
    * @throws InterruptedException - for firebase methods
    */
-  List<Map<String, Object>> getAllRemoteCommits(String session_id, String user_id, String branch_id)
+  List<Map<String, Object>> getAllRemoteCommits(String session_id, String branch_id)
       throws IllegalArgumentException, ExecutionException, InterruptedException;
 
   /**

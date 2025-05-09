@@ -36,27 +36,37 @@ public class GitCheckoutHandler extends AbstractEndpointHandler {
     final String fileMapJson = request.queryParams("file_map_json");
 
     if (sessionId == null) {
-      returnErrorResponse("error_bad_request", "null parameter", "session_id");
+      returnErrorResponse("error_bad_request",
+          "null parameter",
+          "session_id");
     } else {
       responseMap.put("session_id", sessionId);
     }
     if (userId == null) {
-      returnErrorResponse("error_bad_request", "null parameter", "user_id");
+      returnErrorResponse("error_bad_request",
+          "null parameter",
+          "user_id");
     } else {
       responseMap.put("user_id", userId);
     }
     if (currentBranch == null) {
-      returnErrorResponse("error_bad_request", "null parameter", "current_branch_id");
+      returnErrorResponse("error_bad_request",
+          "null parameter",
+          "current_branch_id");
     } else {
       responseMap.put("current_branch_id", currentBranch);
     }
     if (newBranch == null) {
-      returnErrorResponse("error_bad_request", "null parameter", "new_branch_id");
+      returnErrorResponse("error_bad_request",
+          "null parameter",
+          "new_branch_id");
     } else {
       responseMap.put("new_branch_id", newBranch);
     }
     if (fileMapJson == null) {
-      returnErrorResponse("error_bad_request", "null parameter", "file_map_json");
+      returnErrorResponse("error_bad_request",
+          "null parameter",
+          "file_map_json");
     } else {
       responseMap.put("file_map_json", fileMapJson);
     }
@@ -89,7 +99,36 @@ public class GitCheckoutHandler extends AbstractEndpointHandler {
               "pathspec '" + newBranch + "' did not match any branches known to git",
               newBranch);
         }
-        // get local state of branch if user has it, else
+        // create local branch from remote if user does not have it locally
+        if (!storage.getAllLocalBranches(sessionId, userId).contains(newBranch)) {
+          storage.addBranch(sessionId, userId, currentBranch, newBranch, fileMapJson);
+        }
+        // get local and remote head for new branch
+        Map<String, Object> latestLocalCommit = storage.getLatestLocalCommit(sessionId, userId, newBranch);
+        Map<String, Object> latestRemoteCommit = storage.getLatestRemoteCommit(sessionId, newBranch);
+        responseMap.put("file_map_json", latestLocalCommit.get("file_map_json"));
+
+        // if the heads are different, determine how
+        if (!latestLocalCommit.get("commit_id").equals(latestRemoteCommit.get("commit_id"))) {
+          List<Map<String, Object>> stagedCommits = storage.getStagedCommits(sessionId, userId, newBranch);
+
+          //local has commits that remote does not
+          if (!stagedCommits.isEmpty()) {
+            responseMap.put("message", "Your branch is ahead of 'origin/"
+                + newBranch + "' by " + stagedCommits.size() + " commits.");
+          } else {
+            //remote has commits that local does not
+            Integer remoteAheadBy = storage.getRemotePushedCommits(sessionId, newBranch).size()
+                - storage.getLocalPushedCommits(sessionId, userId, newBranch).size();
+            responseMap.put("message", "Your branch is behind 'origin/'" + newBranch
+                + "' by " + remoteAheadBy + " commits, and can be fast-forwarded.");
+          }
+          //local and remote have the same head
+        } else {
+          responseMap.put("message", "Your branch is up to date with 'origin/" + newBranch + "'.");
+        }
+        //mark action complete
+        responseMap.put("action", "switched to branch '" + newBranch + "'");
       }
 
     } catch (Exception e) {
