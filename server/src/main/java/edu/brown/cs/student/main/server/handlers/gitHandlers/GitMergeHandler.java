@@ -30,9 +30,9 @@ public class GitMergeHandler extends AbstractEndpointHandler {
     GitDiffHelper diffHelper = new GitDiffHelper();
 
     // unique session id
-    final String session_id = request.queryParams("session_id");
+    final String sessionId = request.queryParams("session_id");
     // unique user id
-    final String user_id = request.queryParams("user_id");
+    final String userId = request.queryParams("user_id");
     // id of currently checked out branch
     final String currentBranch = request.queryParams("current_branch_id");
     // id of branch to merge with
@@ -40,15 +40,15 @@ public class GitMergeHandler extends AbstractEndpointHandler {
     // json of file map representing current state of project, including unstaged changes
     final String fileMapJson = request.queryParams("file_map_json");
 
-    if (session_id == null) {
+    if (sessionId == null) {
       returnErrorResponse("error_bad_request", "null parameter", "session_id");
     } else {
-      responseMap.put("session_id", session_id);
+      responseMap.put("session_id", sessionId);
     }
-    if (user_id == null) {
+    if (userId == null) {
       returnErrorResponse("error_bad_request", "null parameter", "user_id");
     } else {
-      responseMap.put("user_id", user_id);
+      responseMap.put("user_id", userId);
     }
     if (currentBranch == null) {
       returnErrorResponse("error_bad_request", "null parameter", "current_branch_id");
@@ -70,18 +70,18 @@ public class GitMergeHandler extends AbstractEndpointHandler {
       }
 
       // if user does not have merge branch stored locally, return error for terminal display
-      List<String> allLocalBranches = storage.getAllLocalBranches(session_id, user_id);
-      if (!allLocalBranches.contains(currentBranch)) {
+      List<String> allLocalBranches = storage.getAllLocalBranches(sessionId, userId);
+      if (!allLocalBranches.contains(mergeBranch)) {
         //TODO: maybe suggest trying git fetch/offering some guidance in terminal??
         returnErrorResponse("error_database", "Merge: " + mergeBranch + " - not something we can merge.");
       }
 
       // get current branch's latest local commit for merging
-      Map<String, Object> currentLatestLocalCommit = storage.getLatestLocalCommit(session_id, user_id, currentBranch);
+      Map<String, Object> currentLatestLocalCommit = storage.getLatestLocalCommit(sessionId, userId, currentBranch);
       Map<String, List<MockFileObject>> currentCommittedFileMap = deserializeFileMap((String) currentLatestLocalCommit.get("file_map_json"));
 
       // check for uncommitted staged changes
-      String changedFileMapJson = storage.getLatestLocalChanges(session_id, user_id, currentBranch);
+      String changedFileMapJson = storage.getLatestLocalChanges(sessionId, userId, currentBranch);
 
       // if there are staged changes, check if there are any differences between the staged changes
       // and latest commit
@@ -110,7 +110,7 @@ public class GitMergeHandler extends AbstractEndpointHandler {
       }
 
       // get latest commit from branch user wishes to merge with
-      Map<String, Object> commitToMerge = storage.getLatestLocalCommit(session_id, user_id, currentBranch);
+      Map<String, Object> commitToMerge = storage.getLatestLocalCommit(sessionId, userId, currentBranch);
       Map<String, List<MockFileObject>> toMergeFileMap = deserializeFileMap((String) commitToMerge.get("file_map_json"));
 
       // add any new local files to incoming filemap
@@ -127,6 +127,7 @@ public class GitMergeHandler extends AbstractEndpointHandler {
         currentCommittedFileMap.put(fileName, toMergeFileMap.get(fileName));
       }
 
+      //stores the resulting merged files
       Map<String, List<MockFileObject>> mergedFileMap = new HashMap<>();
 
       // now that both maps have the same files, attempt to auto-merge each file and store resulting List<Ingredients>
@@ -161,14 +162,17 @@ public class GitMergeHandler extends AbstractEndpointHandler {
                 Types.newParameterizedType(List.class, MockFileObject.class));
         JsonAdapter<Map<String, List<MockFileObject>>> adapter = moshi.adapter(type);
 
-        storage.addChange(session_id, user_id, currentBranch, adapter.toJson(mergedFileMap));
-        String commitMessage = currentLatestLocalCommit.get("commit_id") + " "
-            + commitToMerge.get("commit_id") + " merged";
-        String mergeCommitId = storage.commitChange(session_id, user_id, currentBranch, commitMessage);
+        storage.addChange(sessionId, userId, currentBranch, adapter.toJson(mergedFileMap));
+        String localCommitId = (String) currentLatestLocalCommit.get("commit_id");
+        String incomingCommitId = (String) commitToMerge.get("commit_id");
+        //for updating branch map
+        responseMap.put("local_commit_id", localCommitId);
+        responseMap.put("incoming_commit_id", incomingCommitId);
+        String commitMessage = localCommitId + " " + incomingCommitId + " merged";
+        String mergeCommitId = storage.commitChange(sessionId, userId, currentBranch, commitMessage);
         responseMap.put("merge_commit_id", mergeCommitId);
         responseMap.put("message", commitMessage + " successfully and changes committed.");
       }
-
 
     } catch (Exception e) {
       return returnErrorResponse("", "");

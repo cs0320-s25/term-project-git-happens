@@ -1276,6 +1276,109 @@ public class FirebaseUtilities implements StorageInterface {
   }
 
   /**
+   * Method that pulls full list of pushed commits from the remote branch and adds them to the local
+   * commit history. Now, the local pushed commits reflect the remote pushed commits
+   * @param session_id
+   * @param user_id
+   * @param branch_id
+   * @throws IllegalArgumentException
+   * @throws ExecutionException
+   * @throws InterruptedException
+   */
+  @Override
+  public void pullRemoteCommits(String session_id, String user_id, String branch_id)
+  throws IllegalArgumentException, ExecutionException, InterruptedException {
+    if (session_id == null || user_id == null || branch_id == null) {
+      throw new IllegalArgumentException("pullRemoteCommits: session_id, user_id, and branch_id cannot be null");
+    }
+    Firestore db = FirestoreClient.getFirestore();
+    List<Map<String, Object>> remoteCommits = this.getAllRemoteCommits(session_id, branch_id);
+
+    //set local branch's pushed commits to match remote branch's history
+    db.collection("sessions")
+        .document(session_id)
+        .collection("local_store")
+        .document("users")
+        .collection(user_id)
+        .document("branches")
+        .collection(branch_id)
+        .document("pushed_commits")
+        .set(Collections.singletonMap("commits", remoteCommits));
+  }
+
+  /**
+   * Method that resets local commit history to inputted commits list for the given local branch.
+   * Staged changes and staged commits are deleted, used for git reset.
+   * @param session_id - unique session id
+   * @param user_id - unique user id
+   * @param branch_id - id of currently checked out branch
+   * @param commits - list of commit map data, representing new local commit history
+   * @throws IllegalArgumentException - if any parameters are null
+   * @throws ExecutionException - for firebase methods
+   * @throws InterruptedException - for firebase methods
+   */
+  @Override
+  public void resetLocalCommits(
+      String session_id, String user_id, String branch_id, List<Map<String, Object>> commits)
+  throws IllegalArgumentException, ExecutionException, InterruptedException {
+    if (session_id == null || user_id == null || branch_id == null) {
+      throw new IllegalArgumentException("resetLocalCommits: session_id, user_id, branch_id, and commits cannot be null");
+    }
+    Firestore db = FirestoreClient.getFirestore();
+    Map<String, Object> head = commits.get(commits.size()-1);
+
+    // replace local commits with reset commits list
+    db.collection("sessions")
+        .document(session_id)
+        .collection("local_store")
+        .document("users")
+        .collection(user_id)
+        .document("branches")
+        .collection(branch_id)
+        .document("pushed_commits")
+        .set(Collections.singletonMap("commits", commits));
+
+    // set head to last commit in list (commit you reset to)
+    db.collection("sessions")
+        .document(session_id)
+        .collection("local_store")
+        .document("users")
+        .collection(user_id)
+        .document("branches")
+        .collection(branch_id)
+        .document("head")
+        .set(head);
+
+    // clear any staged changes
+    Map<String, Object> changes = new HashMap<>();
+    changes.put("file_map_json", null);
+    db.collection("sessions")
+        .document(session_id)
+        .collection("local_store")
+        .document("users")
+        .collection(user_id)
+        .document("branches")
+        .collection(branch_id)
+        .document("add_changes")
+        .set(changes);
+
+    // clear any staged commits
+    List<Map<String, Object>> stagedCommits = new ArrayList<>();
+    db.collection("sessions")
+        .document(session_id)
+        .collection("local_store")
+        .document("users")
+        .collection(user_id)
+        .document("branches")
+        .collection(branch_id)
+        .document("staged_commits")
+        .set(Collections.singletonMap("commits", stagedCommits));
+
+
+
+  }
+
+  /**
    * Method that returns any updates to the branch that are stored remotely but not on the user's
    * local repository (new branches and latest commits).
    *
