@@ -126,8 +126,7 @@ public interface StorageInterface {
    * @throws ExecutionException - for firebase methods
    * @throws InterruptedException - for firebase methods
    */
- List<Map<String, Object>> getStagedCommits(
-      String session_id, String user_id, String branch_id)
+  List<Map<String, Object>> getStagedCommits(String session_id, String user_id, String branch_id)
       throws IllegalArgumentException, ExecutionException, InterruptedException;
 
   /**
@@ -168,8 +167,7 @@ public interface StorageInterface {
    * @throws ExecutionException - for firebase methods
    * @throws InterruptedException - for firebase methods
    */
-  List<Map<String, Object>> getRemotePushedCommits(
-      String session_id, String branch_id)
+  List<Map<String, Object>> getRemotePushedCommits(String session_id, String branch_id)
       throws IllegalArgumentException, ExecutionException, InterruptedException;
 
   /**
@@ -208,12 +206,13 @@ public interface StorageInterface {
    * will now be the last commit in the pushed-commits list.
    *
    * @param session_id - unique session id
+   * @param user_id - unique user id
    * @param branch_id - branch id for currently checked out branch
    * @throws IllegalArgumentException - if any parameters are null
    * @throws ExecutionException - for firebase methods
    * @throws InterruptedException - for firebase methods
    */
-  void pushCommit(String session_id, String branch_id)
+  void pushCommit(String session_id, String user_id, String branch_id)
       throws IllegalArgumentException, ExecutionException, InterruptedException;
 
   /**
@@ -247,6 +246,7 @@ public interface StorageInterface {
   /**
    * Method that pulls full list of pushed commits from the remote branch and adds them to the local
    * commit history. Now, the local pushed commits reflect the remote pushed commits
+   *
    * @param session_id
    * @param user_id
    * @param branch_id
@@ -260,6 +260,7 @@ public interface StorageInterface {
   /**
    * Method that resets local commit history to inputted commits list for the given local branch.
    * Staged changes and staged commits are deleted, used for git reset.
+   *
    * @param session_id - unique session id
    * @param user_id - unique user id
    * @param branch_id - id of currently checked out branch
