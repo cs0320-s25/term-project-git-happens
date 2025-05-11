@@ -29,6 +29,7 @@ function App() {
     branches: BranchData[];
   }>({ commits: [], branches: [] });
   const [visibleBranches, setVisibleBranches] = useState<string[]>([]);
+  const [currentBranch, setCurrentBranch] = useState<string | null>(null);
 
   const sampleData = {
     commits: [
@@ -164,61 +165,14 @@ function App() {
 
   return (
     <div className="App">
-      <div className="flex-row">
-        <div>
-          <h1>Level 1</h1>
-          <p className="instructions">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce sed
-            ornare neque. Aenean non metus sit amet nisi fermentum pharetra.
-            Aliquam egestas porta enim, sit amet commodo dui tempor sed.
-            Pellentesque et commodo arcu, ut vehicula quam. Nulla tristique
-            lacus a felis scelerisque suscipit. Mauris auctor in tortor quis
-            maximus. Vestibulum fermentum varius malesuada. Maecenas vestibulum
-            sagittis lorem, non dictum massa malesuada elementum. Aliquam
-            consequat elit nec turpis pharetra imperdiet. Cras quis elementum
-            elit, non porttitor orci. Nam volutpat quam id arcu hendrerit
-            porttitor. Aenean vitae leo ex. Nunc molestie non erat ac sodales.
-            Mauris consequat, ex quis bibendum pretium, erat augue dapibus
-            ligula, aliquam sollicitudin enim est at velit. Vivamus sed posuere
-            mi, a eleifend erat. Curabitur dapibus mollis purus at ultrices.
-            Vestibulum ornare, orci vitae congue dignissim, augue mauris
-            consectetur arcu, id tincidunt mauris diam vel est. Pellentesque eu
-            sollicitudin neque, vel scelerisque justo. Donec fermentum elementum
-            mauris, nec lobortis massa molestie vitae. Morbi sollicitudin
-            eleifend mi, id mollis enim fringilla et. Sed nec tortor dolor.
-            Vestibulum condimentum fringilla dui non aliquam. Vestibulum ante
-            ipsum primis in faucibus orci luctus et ultrices posuere cubilia
-            curae; Nam accumsan dapibus facilisis. Nullam dictum venenatis
-            maximus. Duis quis turpis diam. Aenean ac eleifend nulla. Aliquam in
-            odio efficitur, eleifend est quis, varius ante. Aliquam et ipsum non
-            mi viverra tempor id at nulla. Mauris malesuada sollicitudin
-            bibendum. Suspendisse pharetra eu risus quis maximus. Integer
-            euismod mollis libero, eu maximus nunc. Cras ultrices, massa sed
-            viverra lacinia, diam nulla luctus nulla, efficitur mollis arcu nunc
-            quis nunc. Etiam viverra, nisl in maximus tempus, ex ex faucibus
-            ante, ac cursus lacus mi nec neque. Cras in odio sed est tempor
-            posuere. Aliquam hendrerit arcu elit, non fermentum leo auctor id.
-            Pellentesque a justo et est sodales congue vel non leo. Cras
-            sagittis enim at venenatis pretium. Phasellus fringilla vehicula
-            est, a tincidunt massa congue vel. Phasellus vel massa mi.
-            Suspendisse sit amet neque quam. Cras eu nibh semper, porta mauris
-            non, placerat velit. Morbi dolor dolor, consectetur quis ultricies
-            sit amet, scelerisque vel augue. Maecenas turpis neque, dictum sed
-            dolor eget, lacinia porttitor ipsum. Quisque leo est, ultrices quis
-            est ut, rhoncus feugiat urna. Nam eget feugiat nisi. In scelerisque
-            at quam sit amet pharetra. Phasellus feugiat purus et euismod
-            auctor. Suspendisse pellentesque velit sed lacus vehicula, sit amet
-            sagittis massa ornare. In in venenatis turpis. Sed id molestie
-            metus. Aliquam et cursus tortor. Aenean porta nisi malesuada erat
-            molestie rhoncus. Praesent sed tristique purus. Proin dui risus,
-            ultrices id sem sit amet, eleifend consectetur orci. Nulla facilisi.
-            Sed imperdiet diam aliquam aliquam facilisis. Donec ac euismod urna,
-            ac dapibus nulla. In convallis turpis arcu, vel bibendum nisl cursus
-            vel. Pellentesque eu sagittis tortor, in tincidunt odio.
-          </p>
-        </div>
+      <div className="game-branch-container">
         <Game branchData={branchData} setBranchData={setBranchData} />
-        <Branch branchData={branchData} visibleBranches={visibleBranches} />
+        <Branch
+          currentBranch={currentBranch}
+          setCurrentBranch={setCurrentBranch}
+          branchData={branchData}
+          visibleBranches={visibleBranches}
+        />
       </div>
     </div>
   );

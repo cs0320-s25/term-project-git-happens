@@ -1,19 +1,13 @@
 # TODO / Work Tracker
 
-Updated: 4/29/2025
+Updated: 5/11/225
 
 # Work Status
 
-- Working on Game component
-- Wireframe for Game component
-- Implemented adding Ingredients from the Ingredient component to the Workstation component
-- Implemented Terminal Component
-- Implement adding Workstation to Plate with commands
-
 # Immediate Action Items
 
-- Wireframe Branch component
-- Implement adding Plate to Branch
+- Work on switching branches
+- Improve CSS
 
 # Future Action Items
 

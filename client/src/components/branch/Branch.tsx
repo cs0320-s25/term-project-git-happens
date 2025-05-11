@@ -5,6 +5,8 @@ import { GitGraph } from "./gitgraph/GitGraph";
 import type { CommitData, BranchData } from "../App";
 
 interface BranchProps {
+  currentBranch: string | null;
+  setCurrentBranch: Dispatch<SetStateAction<string | null>>;
   branchData: {
     commits: CommitData[];
     branches: BranchData[];
@@ -20,15 +22,24 @@ export function Branch(props: BranchProps) {
     "b2",
   ]);
 
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <div className="branch">
-      <p>Branch</p>
-      <div className="branch-vis">
-        <GitGraph
-          branchData={props.branchData}
-          visibleBranches={props.visibleBranches}
-        />
-      </div>
+    <div className={`sidebar ${isOpen ? "open" : "collapsed"}`}>
+      <button className="toggle-btn" onClick={() => setIsOpen(!isOpen)}>
+        {isOpen ? "⮜" : "⮞"}
+      </button>
+      {isOpen && (
+        <div className="branch">
+          <p>Branch</p>
+          <div className="branch-vis">
+            <GitGraph
+              branchData={props.branchData}
+              visibleBranches={props.visibleBranches}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

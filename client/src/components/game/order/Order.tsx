@@ -11,15 +11,15 @@ interface OrderProps {
 export function Order(props: OrderProps) {
   return (
     <div className="order-container">
-      <p>Order</p>
-      <div className="order-ingredients">
-        {props.orderItems.map((ing, index) => (
+      <div className="order-section">
+        {props.orderItems.map((ing, i) => (
           <img
-            key={ing.imgName + index}
+            key={ing.imgName}
             src={ing.imgStr}
-            alt={ing.imgName}
-            className="ingredient-image"
-            style={{ zIndex: props.orderItems.length - index }} // top bun = highest z-index
+            style={{
+              zIndex: props.orderItems.length - i,
+              position: "relative",
+            }}
           />
         ))}
       </div>

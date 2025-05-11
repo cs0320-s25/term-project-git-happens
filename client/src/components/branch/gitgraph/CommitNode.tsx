@@ -44,6 +44,7 @@ export function CommitNode({ commit, onToggleSelect }: CommitNodeProps) {
         y={commit.y + 4}
         fontSize={12}
         fontFamily="monospace"
+        fill="white"
       >
         {displayMessage}
       </text>

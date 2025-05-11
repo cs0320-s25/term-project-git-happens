@@ -32,12 +32,11 @@ h1 {
 button {
   border-radius: 8px;
   border: 1px solid #6c6565;
-  padding: 0.6em 1.2em;
-  font-size: min(2vw, 2vh);
+  padding: 0.3em 0.6em;
+  font-size: min(1vw, 1vh);
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  transition: border-color 0.25s;
 }
 
 button:hover {

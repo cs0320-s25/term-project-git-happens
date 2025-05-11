@@ -5,10 +5,18 @@ import { IngredientImage } from "../../Game";
 import type { CommitData, BranchData } from "../../../App";
 
 interface TerminalProps {
-  workstationItems: IngredientImage[];
-  setWorkstationItems: Dispatch<SetStateAction<IngredientImage[]>>;
-  plateItems: IngredientImage[];
-  setPlateItems: Dispatch<SetStateAction<IngredientImage[]>>;
+  workstation1Items: IngredientImage[];
+  setWorkstation1Items: Dispatch<SetStateAction<IngredientImage[]>>;
+  workstation2Items: IngredientImage[];
+  setWorkstation2Items: Dispatch<SetStateAction<IngredientImage[]>>;
+  workstation3Items: IngredientImage[];
+  setWorkstation3Items: Dispatch<SetStateAction<IngredientImage[]>>;
+  plate1Items: IngredientImage[];
+  setPlate1Items: Dispatch<SetStateAction<IngredientImage[]>>;
+  plate2Items: IngredientImage[];
+  setPlate2Items: Dispatch<SetStateAction<IngredientImage[]>>;
+  plate3Items: IngredientImage[];
+  setPlate3Items: Dispatch<SetStateAction<IngredientImage[]>>;
   branchData: {
     commits: CommitData[];
     branches: BranchData[];
@@ -28,6 +36,7 @@ export interface Command {
 
 export function Terminal(props: TerminalProps) {
   const [commandHistory, setCommandHistory] = useState<string[]>([]);
+  const [terminalHistory, setTerminalHistory] = useState<string[]>([]);
   const [currentInput, setCurrentInput] = useState("");
   const [historyIndex, setHistoryIndex] = useState<number | null>(null);
 
@@ -62,11 +71,15 @@ export function Terminal(props: TerminalProps) {
 
     switch (commandStr) {
       case "clear":
-        setCommandHistory([]);
+        setTerminalHistory([]);
+        setCommandHistory((prev) => [...prev, command]);
         break;
       case "add all":
-        props.setPlateItems(props.workstationItems);
-        setCommandHistory((prev) => [...prev, terminalResponse]);
+        props.setPlate1Items(props.workstation1Items);
+        props.setPlate2Items(props.workstation2Items);
+        props.setPlate3Items(props.workstation3Items);
+        setTerminalHistory((prev) => [...prev, terminalResponse]);
+        setCommandHistory((prev) => [...prev, command]);
         break;
       case "commit":
         const commits = props.branchData.commits;
@@ -81,9 +94,12 @@ export function Terminal(props: TerminalProps) {
         commits.push(newCommit);
 
         props.setBranchData({ commits: commits, branches: branches });
+        setTerminalHistory((prev) => [...prev, terminalResponse]);
+        setCommandHistory((prev) => [...prev, command]);
         break;
       default:
-        setCommandHistory((prev) => [...prev, terminalResponse]);
+        setTerminalHistory((prev) => [...prev, terminalResponse]);
+        setCommandHistory((prev) => [...prev, command]);
     }
 
     setCurrentInput("");
@@ -124,7 +140,7 @@ export function Terminal(props: TerminalProps) {
         ref={historyRef}
         onClick={handleHistoryClick}
       >
-        {commandHistory.map((cmd, idx) => (
+        {terminalHistory.map((cmd, idx) => (
           <div key={idx}>$ {cmd}</div>
         ))}
       </div>

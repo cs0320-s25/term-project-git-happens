@@ -30,6 +30,7 @@ export function BranchHeaders({
             fontWeight="bold"
             fontFamily="monospace"
             textAnchor="middle"
+            fill="white"
           >
             {branchName}
           </text>
