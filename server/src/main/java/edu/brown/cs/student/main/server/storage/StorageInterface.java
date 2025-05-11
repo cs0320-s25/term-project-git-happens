@@ -216,12 +216,12 @@ public interface StorageInterface {
       throws IllegalArgumentException, ExecutionException, InterruptedException;
 
   /**
-   * Method for returning a map of all unstaged and pushed commits in a user's local repository.
+   * Method for returning a map of all staged and pushed commits in a user's local repository.
    *
    * @param session_id - unique session id
    * @param user_id - unique user id
    * @param branch_id - id of currently checked out branch
-   * @return a map that contains a list of unstaged commits and a list of pushed commits
+   * @return a map that contains a list of staged commits and a list of pushed commits
    * @throws IllegalArgumentException - if any parameters are null
    * @throws ExecutionException - for firebase methods
    * @throws InterruptedException - for firebase methods
@@ -242,6 +242,21 @@ public interface StorageInterface {
    */
   List<Map<String, Object>> getAllRemoteCommits(String session_id, String branch_id)
       throws IllegalArgumentException, ExecutionException, InterruptedException;
+
+  /**
+   * Method for returning a map of all staged commits in a user's local repository and all remote
+   * commits for the current branch.
+   *
+   * @param session_id - unique session id
+   * @param user_id - unique user id
+   * @param branch_id - id of currently checked out branch
+   * @return a list of staged commits and remote commits
+   * @throws IllegalArgumentException - if any parameters are null
+   * @throws ExecutionException - for firebase methods
+   * @throws InterruptedException - for firebase methods
+   */
+  List<Map<String, Object>> getAllCommits(String session_id, String user_id, String branch_id)
+      throws ExecutionException, InterruptedException;
 
   /**
    * Method that pulls full list of pushed commits from the remote branch and adds them to the local
