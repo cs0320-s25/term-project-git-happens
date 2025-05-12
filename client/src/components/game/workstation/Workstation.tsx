@@ -3,7 +3,7 @@ import "../../../styles/game.css";
 import { IngredientImage } from "../Game";
 import { Terminal } from "./terminal/Terminal";
 import type { CommitData, BranchData } from "../../App";
-import { plate } from "../../../assets/images";
+import { plate, countertop } from "../../../assets/images";
 
 interface WorkstationProps {
   selectedWorkstation: 1 | 2 | 3 | null;
@@ -30,6 +30,8 @@ interface WorkstationProps {
       branches: BranchData[];
     }>
   >;
+  currentBranch: string;
+  setCurrentBranch: Dispatch<SetStateAction<string>>;
 }
 
 export function Workstation(props: WorkstationProps) {
@@ -79,7 +81,7 @@ export function Workstation(props: WorkstationProps) {
               }}
             />
           ))}
-          <img src={plate} style={{ width: "100px", height: "100px:" }} />
+          <img src={plate} className="workstation-plate" />
         </div>
         <div
           className={`workstation-section workstation1 ${
@@ -102,7 +104,7 @@ export function Workstation(props: WorkstationProps) {
               }}
             />
           ))}
-          <img src={plate} style={{ width: "100px", height: "100px:" }} />
+          <img src={plate} className="workstation-plate" />
         </div>
         <div
           className={`workstation-section workstation1 ${
@@ -125,7 +127,7 @@ export function Workstation(props: WorkstationProps) {
               }}
             />
           ))}
-          <img src={plate} style={{ width: "100px", height: "100px:" }} />
+          <img src={plate} className="workstation-plate" />
         </div>
       </div>
 
@@ -144,6 +146,8 @@ export function Workstation(props: WorkstationProps) {
         setPlate3Items={props.setPlate3Items}
         branchData={props.branchData}
         setBranchData={props.setBranchData}
+        currentBranch={props.currentBranch}
+        setCurrentBranch={props.setCurrentBranch}
       />
 
       <p>{textDisplay}</p>

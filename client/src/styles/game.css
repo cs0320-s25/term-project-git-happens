@@ -21,10 +21,11 @@
   position: relative;
   width: 800px;
   height: 300px;
-  background-image: url(C:\Users\aliso\cs320\Assignments\term-project-git-happens\client\src\assets\images\tray.png); /* replace with actual path */
-  background-size: 850px 100px;
+  background-image: url(../assets/images/tray.png),
+    url(../assets/images/restaurant_interior.png);
+  background-size: 850px 100px, 800px 300px;
   background-repeat: no-repeat;
-  background-position: center 200px;
+  background-position: center 200px, -20px center;
   margin: 0 auto;
   display: flex;
   justify-content: center;
@@ -75,10 +76,11 @@
   position: relative;
   width: 800px;
   height: 300px;
-  background-image: url(C:\Users\aliso\cs320\Assignments\term-project-git-happens\client\src\assets\images\tray.png); /* replace with actual path */
-  background-size: 850px 100px;
+  background-image: url(../assets/images/countertop.png),
+    url(../assets/images/kitchen_background.png);
+  background-size: 850px 100px, 800px 300px;
   background-repeat: no-repeat;
-  background-position: center 200px;
+  background-position: center 230px, -0px center;
   margin: 0 auto;
   display: flex;
   justify-content: center;
@@ -109,6 +111,11 @@
   transition: 0.2s ease-in-out;
 }
 
+.workstation-plate {
+  width: 250px;
+  height: 50px;
+  object-fit: fill;
+}
 /* TERMINAL */
 
 .terminal-history {
@@ -147,4 +154,12 @@
 .order-section img {
   margin-top: -50px; /* Controls the amount of overlap */
   z-index: 0;
+}
+
+/* LEVEL */
+
+.level-header {
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }

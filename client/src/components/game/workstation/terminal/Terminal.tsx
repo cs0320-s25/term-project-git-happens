@@ -27,7 +27,11 @@ interface TerminalProps {
       branches: BranchData[];
     }>
   >;
+  currentBranch: string;
+  setCurrentBranch: Dispatch<SetStateAction<string>>;
 }
+
+// can do branch stuff by changing currentBranch / setCurrentBranch
 
 export interface Command {
   commandStr: string;

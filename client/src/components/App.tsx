@@ -29,7 +29,7 @@ function App() {
     branches: BranchData[];
   }>({ commits: [], branches: [] });
   const [visibleBranches, setVisibleBranches] = useState<string[]>([]);
-  const [currentBranch, setCurrentBranch] = useState<string | null>(null);
+  const [currentBranch, setCurrentBranch] = useState<string>("main");
 
   const sampleData = {
     commits: [
@@ -166,7 +166,12 @@ function App() {
   return (
     <div className="App">
       <div className="game-branch-container">
-        <Game branchData={branchData} setBranchData={setBranchData} />
+        <Game
+          branchData={branchData}
+          setBranchData={setBranchData}
+          currentBranch={currentBranch}
+          setCurrentBranch={setCurrentBranch}
+        />
         <Branch
           currentBranch={currentBranch}
           setCurrentBranch={setCurrentBranch}

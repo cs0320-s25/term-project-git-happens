@@ -4,6 +4,7 @@ import { burger_top, burger_bottom } from "../../../assets/images";
 import { IngredientImage } from "../Game";
 
 interface IngredientsProps {
+  ingredientsItems: IngredientImage[];
   workstation1Items: IngredientImage[];
   setWorkstation1Items: Dispatch<SetStateAction<IngredientImage[]>>;
   workstation2Items: IngredientImage[];
@@ -44,42 +45,18 @@ export function Ingredients(props: IngredientsProps) {
   return (
     <div className="ingredients-container">
       <div className="ingredients-scroll">
-        <img
-          src={burger_top}
-          onClick={() =>
-            handleAddIngredient({
-              imgStr: burger_top,
-              imgName: generateIngredientName("burger_top"),
-            })
-          }
-        ></img>
-        <img
-          src={burger_bottom}
-          onClick={() =>
-            handleAddIngredient({
-              imgStr: burger_bottom,
-              imgName: generateIngredientName("burger_bottom"),
-            })
-          }
-        ></img>
-        <img
-          src={burger_bottom}
-          onClick={() =>
-            handleAddIngredient({
-              imgStr: burger_bottom,
-              imgName: generateIngredientName("burger_bottom"),
-            })
-          }
-        ></img>
-        <img
-          src={burger_bottom}
-          onClick={() =>
-            handleAddIngredient({
-              imgStr: burger_bottom,
-              imgName: generateIngredientName("burger_bottom"),
-            })
-          }
-        ></img>
+        {props.ingredientsItems.map((ingredient, index) => (
+          <img
+            key={index}
+            src={ingredient.imgStr}
+            onClick={() =>
+              handleAddIngredient({
+                imgStr: ingredient.imgStr,
+                imgName: generateIngredientName(ingredient.imgStr),
+              })
+            }
+          />
+        ))}
       </div>
     </div>
   );

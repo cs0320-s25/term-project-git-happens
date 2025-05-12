@@ -5,8 +5,8 @@ import { GitGraph } from "./gitgraph/GitGraph";
 import type { CommitData, BranchData } from "../App";
 
 interface BranchProps {
-  currentBranch: string | null;
-  setCurrentBranch: Dispatch<SetStateAction<string | null>>;
+  currentBranch: string;
+  setCurrentBranch: Dispatch<SetStateAction<string>>;
   branchData: {
     commits: CommitData[];
     branches: BranchData[];
