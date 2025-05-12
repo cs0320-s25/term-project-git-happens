@@ -56,7 +56,7 @@ export function parseCommand(command: string): Command {
       };
 
     case "git":
-      return gitCommand(splitCommand);
+      return gitCommand(splitCommand, normalCommand);
 
     default:
       return {
@@ -66,20 +66,24 @@ export function parseCommand(command: string): Command {
   }
 }
 
-export function gitCommand(splitCommand: string[]): Command {
+export function gitCommand(
+  splitCommand: string[],
+  normalCommand: string
+): Command {
   const command = splitCommand?.[1] ?? null;
   const tag = splitCommand?.[2] ?? null;
-  var message = splitCommand?.[3] ?? null; // FIND WAY TO SPLIT SO THAT MSG CONTAINS ALL SECTIONS AFTER SPACE?
 
-  // var message = ""
-
-  // for (let i = 3; i < splitCommand?.length; i++) {
-  //   message = message + " " + splitCommand?.[i]
-  // }
+  var message;
+  if (splitCommand?.[3]) {
+    var msg_split = normalCommand.slice(
+      splitCommand?.[0].length + command.length + tag.length + 3
+    ); // Message = slcie of normalCommand excluding command + git command + tag (includes spaces/quotes)
+    message = checkQuotes(msg_split);
+  }
 
   // return {
   //   commandStr: "stash null",
-  //   terminalResponse: `Message: ${message}`,
+  //   terminalResponse: `Command: ${command}, Tag: ${tag}, Message: ${message}`,
   // };
 
   switch (command) {
@@ -90,7 +94,7 @@ export function gitCommand(splitCommand: string[]): Command {
           if (message) {
             // Return error if additional command provided
             return {
-              commandStr: "stash null",
+              commandStr: "add null",
               terminalResponse: "Error: Unexpected command.",
             };
           }
@@ -113,23 +117,26 @@ export function gitCommand(splitCommand: string[]): Command {
     case "commit":
       switch (tag) {
         case "-m":
-          var commit_msg = checkQuotes(message, false) // ALLOW FOR MESSAGE TO BE ONE WORD NO QUOTES
-          if (commit_msg) {
+          // var commit_msg = checkQuotes(message, false)
+          if (message) {
             return {
               // Successful commit
               commandStr: "test",
-              terminalResponse: `Commit: ${commit_msg}`,
-              message: `${commit_msg}`,
+              terminalResponse: `Commit: ${message}`,
+              message: `${message}`,
             };
           }
-          return { // No commit msg or msg not in quotes
+          return {
+            // No commit msg or msg not in quotes
             commandStr: "commit null",
-            terminalResponse: "Error: Make sure you provide a commit message in quotes.",
+            terminalResponse:
+              "Error: Make sure you provide a commit message in quotes.",
           };
         case null:
           return {
             commandStr: "commit null",
-            terminalResponse: "Error: Try commit '-m' followed by a commit message in quotes.",
+            terminalResponse:
+              "Error: Try commit '-m' followed by a commit message in quotes.",
           };
         default:
           return {
@@ -151,7 +158,7 @@ export function gitCommand(splitCommand: string[]): Command {
           if (message) {
             // Return error if additional command provided
             return {
-              commandStr: "stash null",
+              commandStr: "branch null",
               terminalResponse: "Error: Unexpected command.",
             };
           }
@@ -163,7 +170,7 @@ export function gitCommand(splitCommand: string[]): Command {
           if (message) {
             // Return error if additional command provided
             return {
-              commandStr: "stash null",
+              commandStr: "branch null",
               terminalResponse: "Error: Unexpected command.",
             };
           }
@@ -172,15 +179,17 @@ export function gitCommand(splitCommand: string[]): Command {
             terminalResponse: "Fetching remote branches.",
           };
         case "-d": // delete
-          var branchname = checkQuotes(message, true)
-          if (branchname) {
-            return { // Successful branch delete call
+          if (message) {
+            var branchname = checkQuotes(message);
+            return {
+              // Successful branch delete call
               commandStr: "branch delete",
-              terminalResponse: `Deleting Branch: ${branchname}`,
-              message: `${branchname}`,
+              terminalResponse: `Deleting Branch: ${message}`,
+              message: `${message}`,
             };
           }
-          return { // No branchname specified
+          return {
+            // No branchname specified
             commandStr: "branch null",
             terminalResponse: "Error: Branch name required.",
           };
@@ -190,11 +199,17 @@ export function gitCommand(splitCommand: string[]): Command {
             terminalResponse: "Fetching local branches.",
           };
         default: // Create new branch branchname, check if already exists
-          var branchname = checkQuotes(message, true);
+          if (!message) {
+            var branchname = checkQuotes(tag);
+            return {
+              commandStr: "branch create",
+              terminalResponse: `Creating Branch: ${branchname}`,
+              message: `${branchname}`,
+            };
+          }
           return {
-            commandStr: "branch create",
-            terminalResponse: `Creating Branch: ${branchname}`,
-            message: `${branchname}`,
+            commandStr: "branch null",
+            terminalResponse: "Error: Branch name required.",
           };
       }
 
@@ -208,7 +223,7 @@ export function gitCommand(splitCommand: string[]): Command {
       if (tag) {
         // Return error if additional command provided
         return {
-          commandStr: "stash null",
+          commandStr: "log null",
           terminalResponse: "Error: Unexpected command.",
         };
       }
@@ -225,11 +240,18 @@ export function gitCommand(splitCommand: string[]): Command {
             terminalResponse: "Error: Try specifying a branch to merge with.",
           };
         default: // if arg2 = branch name, merge to branch
-          var branchname = checkQuotes(tag, true);
+          var branchname = checkQuotes(tag); // Removes quotes from branchname
+          if (!message) {
+            // Checks that additional spaces are NOT included in branchname specification
+            return {
+              commandStr: "merge",
+              terminalResponse: `Attempting Merge: ${branchname}`,
+              message: `${branchname}`,
+            };
+          }
           return {
-            commandStr: "merge",
-            terminalResponse: `Attempting Merge: ${branchname}`,
-            message: `${branchname}`,
+            commandStr: "merge null",
+            terminalResponse: "Error: Try specifying a branch to merge with.",
           };
       }
 
@@ -237,7 +259,7 @@ export function gitCommand(splitCommand: string[]): Command {
       if (tag) {
         // Return error if additional command provided
         return {
-          commandStr: "stash null",
+          commandStr: "pull null",
           terminalResponse: "Error: Unexpected command.",
         };
       }
@@ -261,7 +283,8 @@ export function gitCommand(splitCommand: string[]): Command {
         case null: // UNSURE
           return {
             commandStr: "reset null",
-            terminalResponse: "Error: Try specifying the type of reset with either '--soft' or '--hard'.",
+            terminalResponse:
+              "Error: Try specifying the type of reset with either '--soft' or '--hard'.",
           };
         default: // UNSURE
           return {
@@ -279,18 +302,26 @@ export function gitCommand(splitCommand: string[]): Command {
             terminalResponse: "Error: Try specifying a file to remove.",
           };
         default: // remove filename file
-          var filename = checkQuotes(tag, true);
+          var filename = checkQuotes(tag); // Removes quotes from filename
+          if (!message) {
+            // Checks that additional spaces are NOT included in filename specification
+            return {
+              commandStr: "rm",
+              terminalResponse: `Attempting to Remove: ${filename}`,
+              message: `${filename}`,
+            };
+          }
           return {
-            commandStr: "rm",
-            terminalResponse: `Attempting to Remove: ${filename}`,
-            message: `${filename}`,
+            commandStr: "rm null",
+            terminalResponse: "Error: Try specifying a file to remove.",
           };
       }
 
     case "stash":
       switch (tag) {
         case "pop": // return to previous stash and remove from stash list
-          return { // CAN USER SPECIFY COMMIT TO POP?
+          return {
+            // CAN USER SPECIFY COMMIT TO POP?
             commandStr: "stash pop",
             terminalResponse: "Popping last stash",
           };
@@ -304,7 +335,22 @@ export function gitCommand(splitCommand: string[]): Command {
             commandStr: "stash",
             terminalResponse: "Stashing commit",
           };
-        default: // error
+        default: // Check if popping specific index
+          var pop_tag = tag.split("{")[1].split("}"); // Gets value inside brackets
+          if (
+            // Checks that index to pop is specified and is a valid number
+            tag.slice(0, 5) === "pop@{" &&
+            tag.slice(-1) === "}" &&
+            !isNaN(parseFloat(pop_tag[0])) &&
+            isFinite(Number(pop_tag[0]))
+          ) {
+            return {
+              // Pop index
+              commandStr: "stash pop",
+              terminalResponse: `Popping index: ${pop_tag[0]}`,
+              message: `${pop_tag[0]}`,
+            };
+          }
           return {
             commandStr: "stash null",
             terminalResponse: "Error: Unexpected command.",
@@ -332,15 +378,18 @@ export function gitCommand(splitCommand: string[]): Command {
   }
 }
 
-function checkQuotes(message: string, returnBack: boolean) {
-  // If message is in quotes "" or '' return message without quotes, otherwise either return msg back if returnBack, or else return null
-  if (message) {
-    if (message[0] === "'" && message[message.length - 1] === "'") {
-      return message.split("'")[1];
-    } else if (message[0] === '"' && message[message.length - 1] === '"') {
-      return message.split('"')[1];
-    } else if (returnBack) {
-      return message
+function checkQuotes(msg_split: string) {
+  if (msg_split) {
+    // Checks for quotes and removes if applicable, returns null if message has multiple words w/o quotes
+    if (msg_split[0] === "'" && msg_split[msg_split.length - 1] === "'") {
+      return msg_split.split("'")[1];
+    } else if (
+      msg_split[0] === '"' &&
+      msg_split[msg_split.length - 1] === '"'
+    ) {
+      return msg_split.split('"')[1];
+    } else if (msg_split.split(" ").length === 1) {
+      return msg_split;
     }
   }
   return null;
