@@ -99,11 +99,13 @@ export function gitCommand(splitCommand: string[]): Command {
     case "commit":
       switch (tag) {
         case "-m":
-          if (checkQuotes(message)) {
-            return { // Successful commit
+          var commit_msg = checkQuotes(message, false)
+          if (commit_msg) {
+            return {
+              // Successful commit
               commandStr: "test",
-              terminalResponse: `Commit: ${checkQuotes(message)}`,
-              message: `${checkQuotes(message)}`,
+              terminalResponse: `Commit: ${commit_msg}`,
+              message: `${commit_msg}`,
             };
           }
           return { // No commit msg or msg not in quotes
@@ -132,34 +134,44 @@ export function gitCommand(splitCommand: string[]): Command {
       switch (tag) {
         case "-a": // view all branches
           return {
-            commandStr: "",
-            terminalResponse: "",
+            commandStr: "branch all",
+            terminalResponse: "Fetching branches", // Return all branches
           };
         case "-r": // view remote branches
           return {
-            commandStr: "",
-            terminalResponse: "",
+            commandStr: "branch remote",
+            terminalResponse: "Fetching branches",
           };
         case "-d": // delete
-          return {
-            commandStr: "",
-            terminalResponse: "",
+          var branchname = checkQuotes(message, true)
+          if (branchname) {
+            return { // Successful branch delete call
+              commandStr: "branch delete",
+              terminalResponse: `Deleting Branch: ${branchname}`,
+              message: `${branchname}`,
+            };
+          }
+          return { // No branchname specified
+            commandStr: "branch null",
+            terminalResponse: "fatal: branch name required",
           };
-        case null: // all local branches
+        case null: // View all local branches
           return {
-            commandStr: "",
-            terminalResponse: "",
+            commandStr: "branch local",
+            terminalResponse: "Fetching branches",
           };
-        default: // branchname
+        default: // Create new branch branchname, check if already exists
+          var branchname = checkQuotes(message, true);
           return {
-            commandStr: "",
-            terminalResponse: "",
+            commandStr: "branch create",
+            terminalResponse: `Creating Branch: ${branchname}`,
+            message: `${branchname}`,
           };
       }
 
     case "diff":
       return {
-        commandStr: "", // Todo: Fill
+        commandStr: "diff",
         terminalResponse: "", // Todo: Fill
       };
 
@@ -171,22 +183,24 @@ export function gitCommand(splitCommand: string[]): Command {
 
     case "merge":
       switch (tag) {
-        case null: // error
+        case null: // error?
           return {
             commandStr: "",
             terminalResponse: "",
           };
-        default: // if arg3 = branch name, merge to branch
+        default: // if arg2 = branch name, merge to branch
+          var branchname = checkQuotes(tag, true);
           return {
-            commandStr: "",
-            terminalResponse: "",
+            commandStr: "merge",
+            terminalResponse: `Attempting Merge: ${branchname}`,
+            message: `${branchname}`,
           };
       }
 
     case "pull":
       return {
-        commandStr: "", // Todo: Fill
-        terminalResponse: "", // Todo: Fill
+        commandStr: "pull", // Todo: Fill
+        terminalResponse: "Pulling", // Todo: Fill
       };
 
     case "reset":
@@ -196,7 +210,7 @@ export function gitCommand(splitCommand: string[]): Command {
             commandStr: "",
             terminalResponse: "",
           };
-        default: // if arg3 = branch name, merge to branch
+        default: // if arg2 = branch name, merge to branch
           return {
             commandStr: "",
             terminalResponse: "",
@@ -272,13 +286,15 @@ export function gitCommand(splitCommand: string[]): Command {
   }
 }
 
-function checkQuotes(message: string) {
-  // If message is in quotes "" or '' return message without quotes, otherwise return null
+function checkQuotes(message: string, returnBack: boolean) {
+  // If message is in quotes "" or '' return message without quotes, otherwise either return msg back if returnBack, or else return null
   if (message) {
     if (message[0] === "'" && message[message.length - 1] === "'") {
       return message.split("'")[1];
     } else if (message[0] === '"' && message[message.length - 1] === '"') {
       return message.split('"')[1];
+    } else if (returnBack) {
+      return message
     }
   }
   return null;
