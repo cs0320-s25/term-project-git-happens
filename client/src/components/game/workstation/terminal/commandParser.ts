@@ -257,15 +257,15 @@ export function gitCommand(splitCommand: string[]): Command {
             commandStr: "stash list",
             terminalResponse: "Fetching stash list",
           };
-        case null: // stash w no message
+        case null: // stash
           return {
-            commandStr: "",
-            terminalResponse: "",
+            commandStr: "stash",
+            terminalResponse: "Stashing commit",
           };
-        default: // stash message
+        default: // error
           return {
-            commandStr: "",
-            terminalResponse: "",
+            commandStr: "stash null",
+            terminalResponse: "Error: Unexpected command.",
           };
       }
 
