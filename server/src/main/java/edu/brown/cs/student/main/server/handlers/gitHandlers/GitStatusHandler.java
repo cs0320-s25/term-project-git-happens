@@ -23,14 +23,14 @@ public class GitStatusHandler extends AbstractEndpointHandler {
   @Override
   public Object handle(final Request request, final Response response) throws Exception {
     responseMap = new HashMap<>();
-// session id
-    String sessionId = request.queryParams("session_id");
+    // session id
+    final String sessionId = request.queryParams("session_id");
     // user id
-    String userId = request.queryParams("user_id");
+    final String userId = request.queryParams("user_id");
     // name of currently checked out branch
-    String branchId = request.queryParams("branch_id");
+    final String branchId = request.queryParams("branch_id");
     // current file map json including unstaged changes
-    String fileMapJson = request.queryParams("file_map_json");
+    final String fileMapJson = request.queryParams("file_map_json");
 
     if (sessionId == null) {
       return returnErrorResponse("error_bad_request", "null parameter", "session_id");

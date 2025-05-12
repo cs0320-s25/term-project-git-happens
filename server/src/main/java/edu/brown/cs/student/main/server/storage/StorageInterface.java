@@ -24,15 +24,43 @@ public interface StorageInterface {
   /**
    * Method that adds set of changed files to stashes list in user's local store
    *
-   * @param session_id - unique session_id for current game
-   * @param user_id - unique user id
+   * @param session_id    - unique session_id for current game
+   * @param user_id       - unique user id
+   * @param branch_id     - currently checked out branch
    * @param file_map_json - json string of map of filenames to file contents
+   * @throws IllegalArgumentException - if any parameters are null
+   * @throws ExecutionException       - for firebase methods
+   * @throws InterruptedException     - for firebase methods
+   * @returns - stash message
+   */
+  String addStash(String session_id, String user_id, String branch_id, String file_map_json)
+      throws IllegalArgumentException, ExecutionException, InterruptedException;
+
+  /**
+   * Method that returns the list of the user's stashes
+   * @param session_id - unique session id
+   * @param user_id - unique user id
+   * @return - list of stash maps
    * @throws IllegalArgumentException - if any parameters are null
    * @throws ExecutionException - for firebase methods
    * @throws InterruptedException - for firebase methods
    */
-  void addStash(String session_id, String user_id, String file_map_json)
-      throws IllegalArgumentException, ExecutionException, InterruptedException;
+  List<Map<String, Object>> getStashes(String session_id, String user_id)
+  throws IllegalArgumentException, ExecutionException, InterruptedException;
+
+  /**
+   * Method that retrieves a stash at the specified index of the stash list, then removes the stash
+   * from the stash list.
+   *
+   * @param session_id - unique session id
+   * @param user_id - unique user id
+   * @param stash_index - index of stash to retrieve
+   * @throws IllegalArgumentException - if any parameters are null
+   * @throws ExecutionException - for firebase methods
+   * @throws InterruptedException - for firebase methods
+   */
+  Map<String, Object> popStash(String session_id, String user_id, int stash_index)
+    throws IllegalArgumentException, ExecutionException, InterruptedException;
 
   /**
    * Method for adding a branch to user's local and remote store, which uses the file state of
@@ -126,8 +154,7 @@ public interface StorageInterface {
    * @throws ExecutionException - for firebase methods
    * @throws InterruptedException - for firebase methods
    */
- List<Map<String, Object>> getStagedCommits(
-      String session_id, String user_id, String branch_id)
+  List<Map<String, Object>> getStagedCommits(String session_id, String user_id, String branch_id)
       throws IllegalArgumentException, ExecutionException, InterruptedException;
 
   /**
@@ -168,8 +195,7 @@ public interface StorageInterface {
    * @throws ExecutionException - for firebase methods
    * @throws InterruptedException - for firebase methods
    */
-  List<Map<String, Object>> getRemotePushedCommits(
-      String session_id, String branch_id)
+  List<Map<String, Object>> getRemotePushedCommits(String session_id, String branch_id)
       throws IllegalArgumentException, ExecutionException, InterruptedException;
 
   /**
@@ -208,6 +234,7 @@ public interface StorageInterface {
    * will now be the last commit in the pushed-commits list.
    *
    * @param session_id - unique session id
+   * @param user_id - unique user id
    * @param branch_id - branch id for currently checked out branch
    * @throws IllegalArgumentException - if any parameters are null
    * @throws ExecutionException - for firebase methods
@@ -217,12 +244,12 @@ public interface StorageInterface {
       throws IllegalArgumentException, ExecutionException, InterruptedException;
 
   /**
-   * Method for returning a map of all unstaged and pushed commits in a user's local repository.
+   * Method for returning a map of all staged and pushed commits in a user's local repository.
    *
    * @param session_id - unique session id
    * @param user_id - unique user id
    * @param branch_id - id of currently checked out branch
-   * @return a map that contains a list of unstaged commits and a list of pushed commits
+   * @return a map that contains a list of staged commits and a list of pushed commits
    * @throws IllegalArgumentException - if any parameters are null
    * @throws ExecutionException - for firebase methods
    * @throws InterruptedException - for firebase methods
@@ -245,14 +272,30 @@ public interface StorageInterface {
       throws IllegalArgumentException, ExecutionException, InterruptedException;
 
   /**
+   * Method for returning a map of all staged commits in a user's local repository and all remote
+   * commits for the current branch.
+   *
+   * @param session_id - unique session id
+   * @param user_id - unique user id
+   * @param branch_id - id of currently checked out branch
+   * @return a list of staged commits and remote commits
+   * @throws IllegalArgumentException - if any parameters are null
+   * @throws ExecutionException - for firebase methods
+   * @throws InterruptedException - for firebase methods
+   */
+  List<Map<String, Object>> getAllCommits(String session_id, String user_id, String branch_id)
+      throws ExecutionException, InterruptedException;
+
+  /**
    * Method that pulls full list of pushed commits from the remote branch and adds them to the local
    * commit history. Now, the local pushed commits reflect the remote pushed commits
-   * @param session_id
-   * @param user_id
-   * @param branch_id
-   * @throws IllegalArgumentException
-   * @throws ExecutionException
-   * @throws InterruptedException
+   *
+   * @param session_id - unique session id
+   * @param user_id - unique user id
+   * @param branch_id - id of currently checked out branch
+   * @throws IllegalArgumentException - if any parameters are null
+   * @throws ExecutionException - for firebase methods
+   * @throws InterruptedException - for firebase methods
    */
   void pullRemoteCommits(String session_id, String user_id, String branch_id)
       throws IllegalArgumentException, ExecutionException, InterruptedException;
@@ -260,6 +303,7 @@ public interface StorageInterface {
   /**
    * Method that resets local commit history to inputted commits list for the given local branch.
    * Staged changes and staged commits are deleted, used for git reset.
+   *
    * @param session_id - unique session id
    * @param user_id - unique user id
    * @param branch_id - id of currently checked out branch

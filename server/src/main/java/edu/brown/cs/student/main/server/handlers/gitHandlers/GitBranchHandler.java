@@ -29,6 +29,8 @@ public class GitBranchHandler extends AbstractEndpointHandler {
     // branch id of currently checked out branch
     final String currentBranch = request.queryParams("current_branch_id");
 
+    // optional parameter, only used in the case where branch is being added
+    final String fileMapJson;
     if (sessionId == null) {
       returnErrorResponse("error_bad_request", "null parameter", "session_id");
     } else {
@@ -51,54 +53,60 @@ public class GitBranchHandler extends AbstractEndpointHandler {
     }
     try {
       // Fetch and return List of local branch names
-      if (branchRequest.equals("")) {
-        List<String> localBranchNames = storage.getAllLocalBranches(sessionId, userId);
-        responseMap.put("local_branch_names", localBranchNames);
-        responseMap.put("action", "list local branches");
-      }
-      // Fetch and return List of remote branch names
-      else if (branchRequest.equals("-r")) {
-        List<String> remoteBranchNames = storage.getAllRemoteBranches(sessionId);
-        List<String> updatedRemoteBranchNames = new ArrayList<>();
-        for (String remoteBranchName : remoteBranchNames) {
-          updatedRemoteBranchNames.add("origin/" + remoteBranchName);
+      switch (branchRequest) {
+        case "" -> {
+          List<String> localBranchNames = storage.getAllLocalBranches(sessionId, userId);
+          responseMap.put("local_branch_names", localBranchNames);
+          responseMap.put("action", "list local branches");
         }
-        responseMap.put("remote_branch_names", updatedRemoteBranchNames);
-        responseMap.put("action", "list remote branches");
-      }
-      // Fetch and return all local and remote branch names
-      else if (branchRequest.equals("-a")) {
-        List<String> localBranchNames = storage.getAllLocalBranches(sessionId, userId);
-        List<String> remoteBranchNames = storage.getAllRemoteBranches(sessionId);
-        List<String> updatedRemoteBranchNames = new ArrayList<>();
-        for (String remoteBranchName : remoteBranchNames) {
-          updatedRemoteBranchNames.add("origin/" + remoteBranchName);
+
+        // Fetch and return List of remote branch names
+        case "-r" -> {
+          List<String> remoteBranchNames = storage.getAllRemoteBranches(sessionId);
+          List<String> updatedRemoteBranchNames = new ArrayList<>();
+          for (String remoteBranchName : remoteBranchNames) {
+            updatedRemoteBranchNames.add("origin/" + remoteBranchName);
+          }
+          responseMap.put("remote_branch_names", updatedRemoteBranchNames);
+          responseMap.put("action", "list remote branches");
         }
-        responseMap.put("local_branch_names", localBranchNames);
-        responseMap.put("remote_branch_names", updatedRemoteBranchNames);
-        responseMap.put("action", "list remote and local branches");
-      }
-      // Fetch and delete specified branch
-      else if (branchRequest.equals("-d")) {
-        String branchToDelete = request.queryParams("delete_branch_id");
-        if (branchToDelete == null) {
-          returnErrorResponse("error_bad_request", "null parameter", "delete_branch_id");
+
+        // Fetch and return all local and remote branch names
+        case "-a" -> {
+          List<String> localBranchNames = storage.getAllLocalBranches(sessionId, userId);
+          List<String> remoteBranchNames = storage.getAllRemoteBranches(sessionId);
+          List<String> updatedRemoteBranchNames = new ArrayList<>();
+          for (String remoteBranchName : remoteBranchNames) {
+            updatedRemoteBranchNames.add("origin/" + remoteBranchName);
+          }
+          responseMap.put("local_branch_names", localBranchNames);
+          responseMap.put("remote_branch_names", updatedRemoteBranchNames);
+          responseMap.put("action", "list remote and local branches");
         }
-        if (branchToDelete.equals(currentBranch)) {
-          returnErrorResponse("error_bad_request", "cannot delete current branch");
+
+        // Fetch and delete specified branch
+        case "-d" -> {
+          String branchToDelete = request.queryParams("delete_branch_id");
+          if (branchToDelete == null) {
+            returnErrorResponse("error_bad_request", "null parameter", "delete_branch_id");
+          }
+          if (branchToDelete.equals(currentBranch)) {
+            returnErrorResponse("error_bad_request", "cannot delete current branch");
+          }
+          storage.deleteBranch(sessionId, userId, branchToDelete);
+          responseMap.put("action", "delete local branch");
+          responseMap.put("delete_branch_id", branchToDelete);
         }
-        storage.deleteBranch(sessionId, userId, branchToDelete);
-        responseMap.put("action", "delete local branch");
-        responseMap.put("delete_branch_id", branchToDelete);
-      } else {
-        // create branch with given string name
-        String currentFilemap = request.queryParams("file_map_json");
-        if (currentFilemap == null) {
-          return returnErrorResponse("error_bad_request", "null parameter", "file_map_json");
+        default -> {
+          // create branch with given string name
+          fileMapJson = request.queryParams("file_map_json");
+          if (fileMapJson == null) {
+            return returnErrorResponse("error_bad_request", "null parameter", "file_map_json");
+          }
+          storage.addBranch(sessionId, userId, currentBranch, branchRequest, fileMapJson);
+          responseMap.put("action", "add branch");
+          responseMap.put("new_branch_id", branchRequest);
         }
-        storage.addBranch(sessionId, userId, currentBranch, branchRequest, currentFilemap);
-        responseMap.put("action", "add branch");
-        responseMap.put("new_branch_id", branchRequest);
       }
     } catch (Exception e) {
       return returnErrorResponse("error_database", "branch_request_failed: " + e.getMessage());

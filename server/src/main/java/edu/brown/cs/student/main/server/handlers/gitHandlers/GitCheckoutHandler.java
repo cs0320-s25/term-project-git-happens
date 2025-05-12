@@ -85,9 +85,9 @@ public class GitCheckoutHandler extends AbstractEndpointHandler {
         responseMap.put("difference_detected", true);
         responseMap.put("files_with_differences", filesWithDifferences);
         responseMap.put(
-            "instructions", "Please commit your changes or stash them before you switch branches.");
+            "message", "Please commit your changes or stash them before you switch branches.");
         returnErrorResponse(
-            "error_untracked_changes",
+            "error_database",
             "Your local changes to the following files would be overwritten by checkout:");
       } else {
         responseMap.put("difference_detected", false);
