@@ -115,19 +115,20 @@ export function gitCommand(splitCommand: string[]): Command {
         case null:
           return {
             commandStr: "commit null",
-            terminalResponse: "Error: Command not available",
+            terminalResponse: "Error: Try commit '-m' followed by a commit message in quotes.",
           };
         default:
           return {
             commandStr: "commit null",
-            terminalResponse: "Error: Command not available",
+            terminalResponse:
+              "Error: Try commit '-m' followed by a commit message in quotes.",
           };
       }
 
     case "push":
       return {
         commandStr: "push",
-        terminalResponse: "Pushing local repository",
+        terminalResponse: "Pushing local repository.",
       };
 
     case "branch":
@@ -135,12 +136,12 @@ export function gitCommand(splitCommand: string[]): Command {
         case "-a": // view all branches
           return {
             commandStr: "branch all",
-            terminalResponse: "Fetching branches", // Return all branches
+            terminalResponse: "Fetching all branches.", // Return all branches
           };
         case "-r": // view remote branches
           return {
             commandStr: "branch remote",
-            terminalResponse: "Fetching branches",
+            terminalResponse: "Fetching remote branches.",
           };
         case "-d": // delete
           var branchname = checkQuotes(message, true)
@@ -153,12 +154,12 @@ export function gitCommand(splitCommand: string[]): Command {
           }
           return { // No branchname specified
             commandStr: "branch null",
-            terminalResponse: "fatal: branch name required",
+            terminalResponse: "Error: Branch name required.",
           };
         case null: // View all local branches
           return {
             commandStr: "branch local",
-            terminalResponse: "Fetching branches",
+            terminalResponse: "Fetching local branches.",
           };
         default: // Create new branch branchname, check if already exists
           var branchname = checkQuotes(message, true);
@@ -178,7 +179,7 @@ export function gitCommand(splitCommand: string[]): Command {
     case "log":
       return {
         commandStr: "log",
-        terminalResponse: "Fetching Log",
+        terminalResponse: "Fetching Log.",
       };
 
     case "merge":
@@ -186,7 +187,7 @@ export function gitCommand(splitCommand: string[]): Command {
         case null: // UNSURE
           return {
             commandStr: "merge null",
-            terminalResponse: "Error: Command not available",
+            terminalResponse: "Error: Try specifying a branch to merge with.",
           };
         default: // if arg2 = branch name, merge to branch
           var branchname = checkQuotes(tag, true);
@@ -218,12 +219,13 @@ export function gitCommand(splitCommand: string[]): Command {
         case null: // UNSURE
           return {
             commandStr: "reset null",
-            terminalResponse: "Error: Command not available",
+            terminalResponse: "Error: Try specifying the type of reset with either '--soft' or '--hard'.",
           };
         default: // UNSURE
           return {
             commandStr: "reset null",
-            terminalResponse: "Error: Command not available",
+            terminalResponse:
+              "Error: Try specifying the type of reset with either '--soft' or '--hard'.",
           };
       }
 
@@ -232,12 +234,14 @@ export function gitCommand(splitCommand: string[]): Command {
         case null: // error
           return {
             commandStr: "rm null",
-            terminalResponse: "Error: Command not available",
+            terminalResponse: "Error: Try specifying a file to remove.",
           };
-        default: // remove branchname file
+        default: // remove filename file
+          var filename = checkQuotes(tag, true);
           return {
-            commandStr: "",
-            terminalResponse: "",
+            commandStr: "rm",
+            terminalResponse: `Attempting to Remove: ${filename}`,
+            message: `${filename}`,
           };
       }
 
@@ -248,10 +252,10 @@ export function gitCommand(splitCommand: string[]): Command {
             commandStr: "",
             terminalResponse: "",
           };
-        case "list": // return stashes
+        case "list": // return list of stashes
           return {
-            commandStr: "",
-            terminalResponse: "",
+            commandStr: "stash list",
+            terminalResponse: "Fetching stash list",
           };
         case null: // stash w no message
           return {
@@ -273,15 +277,15 @@ export function gitCommand(splitCommand: string[]): Command {
 
     case null:
       return {
-        commandStr: "null arg1",
-        terminalResponse: "null arg1",
+        commandStr: "Error: null arg1",
+        terminalResponse: "Error: null arg1",
       };
 
     default:
       return {
         commandStr: "unknown",
         // terminalResponse: `Unknown argument "${tag}"`,
-        terminalResponse: `Command: "${command}" Tag: "${tag}" Message: "${message}"`,
+        terminalResponse: `Command: "${command}" unknown.`,
       };
   }
 }
