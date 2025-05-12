@@ -80,6 +80,13 @@ export function gitCommand(splitCommand: string[]): Command {
       // const arg2 = splitCommand?.[2] ?? null;
       switch (tag) {
         case "-A":
+          if (message) {
+            // Return error if additional command provided
+            return {
+              commandStr: "stash null",
+              terminalResponse: "Error: Unexpected command.",
+            };
+          }
           return {
             commandStr: "add all",
             terminalResponse: "Adding all",
@@ -248,9 +255,9 @@ export function gitCommand(splitCommand: string[]): Command {
     case "stash":
       switch (tag) {
         case "pop": // return to previous stash and remove from stash list
-          return {
-            commandStr: "",
-            terminalResponse: "",
+          return { // CAN USER SPECIFY COMMIT TO POP?
+            commandStr: "stash pop",
+            terminalResponse: "Popping last stash",
           };
         case "list": // return list of stashes
           return {
