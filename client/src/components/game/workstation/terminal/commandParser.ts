@@ -75,7 +75,7 @@ export function gitCommand(splitCommand: string[]): Command {
     case "add":
       // const arg2 = splitCommand?.[2] ?? null;
       switch (arg2) {
-        case "-A":
+        case "-a":
           return {
             commandStr: "add all",
             terminalResponse: "Adding all",
@@ -118,11 +118,34 @@ export function gitCommand(splitCommand: string[]): Command {
       };
 
     case "branch":
-      return {
-        commandStr: "", // Todo: Fill
-        terminalResponse: "", // Todo: Fill
-      };
-
+      switch (arg2) {
+        case "-a": // view all branches
+          return {
+            commandStr: "",
+            terminalResponse: "",
+          };
+        case "-r": // view remote branches
+          return {
+            commandStr: "",
+            terminalResponse: "",
+          };
+        case "-d": // delete
+          return {
+            commandStr: "",
+            terminalResponse: "",
+          };
+        case null: // all local branches
+          return {
+            commandStr: "",
+            terminalResponse: "",
+          };
+        default: // branchname
+          return {
+            commandStr: "",
+            terminalResponse: "",
+          };
+      }
+    
     case "diff":
       return {
         commandStr: "", // Todo: Fill
@@ -136,10 +159,18 @@ export function gitCommand(splitCommand: string[]): Command {
       };
 
     case "merge":
-      return {
-        commandStr: "", // Todo: Fill
-        terminalResponse: "", // Todo: Fill
-      };
+      switch (arg2) {
+        case null: // error
+          return {
+            commandStr: "",
+            terminalResponse: "",
+          };
+        default: // if arg3 = branch name, merge to branch
+          return {
+            commandStr: "",
+            terminalResponse: "",
+          };
+      }
 
     case "pull":
       return {
@@ -148,22 +179,66 @@ export function gitCommand(splitCommand: string[]): Command {
       };
 
     case "reset":
-      return {
-        commandStr: "", // Todo: Fill
-        terminalResponse: "", // Todo: Fill
-      };
+      switch (arg2) {
+        case null: // error
+          return {
+            commandStr: "",
+            terminalResponse: "",
+          };
+        default: // if arg3 = branch name, merge to branch
+          return {
+            commandStr: "",
+            terminalResponse: "",
+          };
+      }
 
     case "rm":
-      return {
-        commandStr: "", // Todo: Fill
-        terminalResponse: "", // Todo: Fill
-      };
+      switch (arg2) {
+        case "--hard": // hard reset
+          return {
+            commandStr: "",
+            terminalResponse: "",
+          };
+        case "--soft": // soft reset
+          return {
+            commandStr: "",
+            terminalResponse: "",
+          };
+        case null: // error
+          return {
+            commandStr: "",
+            terminalResponse: "",
+          };
+        default: // error
+          return {
+            commandStr: "",
+            terminalResponse: "",
+          };
+      }
 
     case "stash":
-      return {
-        commandStr: "", // Todo: Fill
-        terminalResponse: "", // Todo: Fill
-      };
+      switch (arg2) {
+        case "pop": // return to previous stash and remove from stash list
+          return {
+            commandStr: "",
+            terminalResponse: "",
+          };
+        case "list": // return stashes
+          return {
+            commandStr: "",
+            terminalResponse: "",
+          };
+        case null: // stash w no message
+          return {
+            commandStr: "",
+            terminalResponse: "",
+          };
+        default: // stash message
+          return {
+            commandStr: "",
+            terminalResponse: "",
+          };
+      }
 
     case "status":
       return {
