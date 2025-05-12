@@ -69,7 +69,18 @@ export function parseCommand(command: string): Command {
 export function gitCommand(splitCommand: string[]): Command {
   const command = splitCommand?.[1] ?? null;
   const tag = splitCommand?.[2] ?? null;
-  const message = splitCommand?.[3] ?? null; // FIND WAY TO SPLIT SO THAT MSG CONTAINS ALL SECTIONS AFTER SPACE?
+  var message = splitCommand?.[3] ?? null; // FIND WAY TO SPLIT SO THAT MSG CONTAINS ALL SECTIONS AFTER SPACE?
+
+  // var message = ""
+
+  // for (let i = 3; i < splitCommand?.length; i++) {
+  //   message = message + " " + splitCommand?.[i]
+  // }
+
+  // return {
+  //   commandStr: "stash null",
+  //   terminalResponse: `Message: ${message}`,
+  // };
 
   switch (command) {
     case "add":
@@ -102,7 +113,7 @@ export function gitCommand(splitCommand: string[]): Command {
     case "commit":
       switch (tag) {
         case "-m":
-          var commit_msg = checkQuotes(message, false)
+          var commit_msg = checkQuotes(message, false) // ALLOW FOR MESSAGE TO BE ONE WORD NO QUOTES
           if (commit_msg) {
             return {
               // Successful commit
