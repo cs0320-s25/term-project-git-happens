@@ -67,15 +67,19 @@ export function parseCommand(command: string): Command {
 }
 
 export function gitCommand(splitCommand: string[]): Command {
-  const arg1 = splitCommand?.[1] ?? null;
-  const arg2 = splitCommand?.[2] ?? null;
-  const arg3 = splitCommand?.[3] ?? null;
+  const command = splitCommand?.[1] ?? null;
+  const tag = splitCommand?.[2] ?? null;
+  const message = splitCommand?.[3] ?? null; // IF MULTIPLE WORDS (SPACE) AND DOES NOT HAVE QUOTES RETURN ERROR, IF HAS QUOTES REMOVE QUOTES AND RETURN WITHIN QUOTES
+  // FOR GIT COMMIT: COMMIT MSG MUST BE IN QUOTES
+  // BRANCH MUST BE ONE WORD EVEN IF IN QUOTES
+  // FOR OTHERS (GIT RM?) DOES NOT NEED QUOTES FOR FILENAME
+  // LOOK UP/TEST DIFFERENT REQUIREMENTS
 
-  switch (arg1) {
+  switch (command) {
     case "add":
       // const arg2 = splitCommand?.[2] ?? null;
-      switch (arg2) {
-        case "-a":
+      switch (tag) {
+        case "-A":
           return {
             commandStr: "add all",
             terminalResponse: "Adding all",
@@ -93,9 +97,9 @@ export function gitCommand(splitCommand: string[]): Command {
       }
 
     case "commit":
-      switch (arg2) {
-        case "-m":
-          return { // Todo: HANDLE COMMIT MESSAGE???
+      switch (tag) {
+        case "-m": // IF MSG IS IN QUOTES, OTHERWISE ERROR
+          return {
             commandStr: "commit",
             terminalResponse: "commit",
           };
@@ -118,7 +122,7 @@ export function gitCommand(splitCommand: string[]): Command {
       };
 
     case "branch":
-      switch (arg2) {
+      switch (tag) {
         case "-a": // view all branches
           return {
             commandStr: "",
@@ -159,7 +163,7 @@ export function gitCommand(splitCommand: string[]): Command {
       };
 
     case "merge":
-      switch (arg2) {
+      switch (tag) {
         case null: // error
           return {
             commandStr: "",
@@ -179,7 +183,7 @@ export function gitCommand(splitCommand: string[]): Command {
       };
 
     case "reset":
-      switch (arg2) {
+      switch (tag) {
         case null: // error
           return {
             commandStr: "",
@@ -193,7 +197,7 @@ export function gitCommand(splitCommand: string[]): Command {
       }
 
     case "rm":
-      switch (arg2) {
+      switch (tag) {
         case "--hard": // hard reset
           return {
             commandStr: "",
@@ -217,7 +221,7 @@ export function gitCommand(splitCommand: string[]): Command {
       }
 
     case "stash":
-      switch (arg2) {
+      switch (tag) {
         case "pop": // return to previous stash and remove from stash list
           return {
             commandStr: "",
@@ -255,7 +259,8 @@ export function gitCommand(splitCommand: string[]): Command {
     default:
       return {
         commandStr: "unknown",
-        terminalResponse: `Unknown argument "${arg1}"`,
+        // terminalResponse: `Unknown argument "${tag}"`,
+        terminalResponse: `Command: "${command}" Tag: "${tag}" Message: "${message}"`,
       };
   }
 }
