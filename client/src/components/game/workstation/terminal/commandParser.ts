@@ -141,11 +141,25 @@ export function gitCommand(splitCommand: string[]): Command {
     case "branch":
       switch (tag) {
         case "-a": // view all branches
+          if (message) {
+            // Return error if additional command provided
+            return {
+              commandStr: "stash null",
+              terminalResponse: "Error: Unexpected command.",
+            };
+          }
           return {
             commandStr: "branch all",
             terminalResponse: "Fetching all branches.", // Return all branches
           };
         case "-r": // view remote branches
+          if (message) {
+            // Return error if additional command provided
+            return {
+              commandStr: "stash null",
+              terminalResponse: "Error: Unexpected command.",
+            };
+          }
           return {
             commandStr: "branch remote",
             terminalResponse: "Fetching remote branches.",
@@ -184,6 +198,13 @@ export function gitCommand(splitCommand: string[]): Command {
       };
 
     case "log":
+      if (tag) {
+        // Return error if additional command provided
+        return {
+          commandStr: "stash null",
+          terminalResponse: "Error: Unexpected command.",
+        };
+      }
       return {
         commandStr: "log",
         terminalResponse: "Fetching Log.",
@@ -206,6 +227,13 @@ export function gitCommand(splitCommand: string[]): Command {
       }
 
     case "pull":
+      if (tag) {
+        // Return error if additional command provided
+        return {
+          commandStr: "stash null",
+          terminalResponse: "Error: Unexpected command.",
+        };
+      }
       return {
         commandStr: "pull", // Todo: Fill
         terminalResponse: "Pulling", // Todo: Fill
