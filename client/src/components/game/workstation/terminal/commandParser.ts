@@ -87,12 +87,12 @@ export function gitCommand(splitCommand: string[]): Command {
         case null:
           return {
             commandStr: "add null",
-            terminalResponse: "Error: Command not available",
+            terminalResponse: "Error: Nothing specified, nothing added.",
           };
         default:
           return {
             commandStr: "add null",
-            terminalResponse: "Error: Command not available",
+            terminalResponse: "Error: Try using '-A' instead?",
           };
       }
 
@@ -110,7 +110,7 @@ export function gitCommand(splitCommand: string[]): Command {
           }
           return { // No commit msg or msg not in quotes
             commandStr: "commit null",
-            terminalResponse: "Error: Command not available",
+            terminalResponse: "Error: Make sure you provide a commit message in quotes.",
           };
         case null:
           return {
@@ -183,10 +183,10 @@ export function gitCommand(splitCommand: string[]): Command {
 
     case "merge":
       switch (tag) {
-        case null: // error?
+        case null: // UNSURE
           return {
-            commandStr: "",
-            terminalResponse: "",
+            commandStr: "merge null",
+            terminalResponse: "Error: Command not available",
           };
         default: // if arg2 = branch name, merge to branch
           var branchname = checkQuotes(tag, true);
@@ -205,36 +205,36 @@ export function gitCommand(splitCommand: string[]): Command {
 
     case "reset":
       switch (tag) {
-        case null: // error
+        case "--hard": // hard reset
           return {
-            commandStr: "",
-            terminalResponse: "",
+            commandStr: "reset hard",
+            terminalResponse: "Hard Reset",
           };
-        default: // if arg2 = branch name, merge to branch
+        case "--soft": // soft reset
           return {
-            commandStr: "",
-            terminalResponse: "",
+            commandStr: "reset soft",
+            terminalResponse: "Soft Reset",
+          };
+        case null: // UNSURE
+          return {
+            commandStr: "reset null",
+            terminalResponse: "Error: Command not available",
+          };
+        default: // UNSURE
+          return {
+            commandStr: "reset null",
+            terminalResponse: "Error: Command not available",
           };
       }
 
     case "rm":
       switch (tag) {
-        case "--hard": // hard reset
-          return {
-            commandStr: "",
-            terminalResponse: "",
-          };
-        case "--soft": // soft reset
-          return {
-            commandStr: "",
-            terminalResponse: "",
-          };
         case null: // error
           return {
-            commandStr: "",
-            terminalResponse: "",
+            commandStr: "rm null",
+            terminalResponse: "Error: Command not available",
           };
-        default: // error
+        default: // remove branchname file
           return {
             commandStr: "",
             terminalResponse: "",
