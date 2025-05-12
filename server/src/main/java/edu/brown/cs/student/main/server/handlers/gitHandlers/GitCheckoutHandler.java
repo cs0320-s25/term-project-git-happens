@@ -118,7 +118,7 @@ public class GitCheckoutHandler extends AbstractEndpointHandler {
                 + newBranch + "' by " + stagedCommits.size() + " commits.");
           } else {
             //remote has commits that local does not
-            Integer remoteAheadBy = storage.getRemotePushedCommits(sessionId, newBranch).size()
+            int remoteAheadBy = storage.getRemotePushedCommits(sessionId, newBranch).size()
                 - storage.getLocalPushedCommits(sessionId, userId, newBranch).size();
             responseMap.put("message", "Your branch is behind 'origin/'" + newBranch
                 + "' by " + remoteAheadBy + " commits, and can be fast-forwarded.");

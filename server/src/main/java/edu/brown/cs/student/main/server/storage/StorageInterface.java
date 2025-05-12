@@ -213,7 +213,7 @@ public interface StorageInterface {
    * @throws ExecutionException - for firebase methods
    * @throws InterruptedException - for firebase methods
    */
-  void pushCommit(String session_id, String branch_id)
+  void pushCommit(String session_id, String user_id, String branch_id)
       throws IllegalArgumentException, ExecutionException, InterruptedException;
 
   /**
@@ -269,7 +269,7 @@ public interface StorageInterface {
    * @throws InterruptedException - for firebase methods
    */
   void resetLocalCommits(
-      String session_id, String user_id, String branch_id, List<Map<String, Object>> commits)
+      String session_id, String user_id, String branch_id, Map<String, List<Map<String, Object>>> commits)
       throws IllegalArgumentException, ExecutionException, InterruptedException;
 
   /**

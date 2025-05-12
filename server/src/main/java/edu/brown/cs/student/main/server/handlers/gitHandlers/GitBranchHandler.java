@@ -101,7 +101,7 @@ public class GitBranchHandler extends AbstractEndpointHandler {
         responseMap.put("new_branch_id", branchRequest);
       }
     } catch (Exception e) {
-      return returnErrorResponse("error_database", "branch request failed: " + e.getMessage());
+      return returnErrorResponse("error_database", "branch_request_failed: " + e.getMessage());
     }
     return returnSuccessResponse();
   }

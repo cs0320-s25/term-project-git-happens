@@ -111,6 +111,7 @@ public class GitPullHandler extends AbstractEndpointHandler {
       //  if there were no conflicts, add and commit merged files
       else {
 
+        // serialize merged file map
         Moshi moshi = new Builder().build();
         Type type =
             Types.newParameterizedType(
@@ -119,6 +120,7 @@ public class GitPullHandler extends AbstractEndpointHandler {
                 Types.newParameterizedType(List.class, MockFileObject.class));
         JsonAdapter<Map<String, List<MockFileObject>>> adapter = moshi.adapter(type);
 
+        storage.pullRemoteCommits(sessionId, userId, currentBranch);
         storage.addChange(sessionId, userId, currentBranch, adapter.toJson(mergedFileMap));
         String localCommitId = (String) currentLatestLocalCommit.get("commit_id");
         String incomingCommitId = (String) currentLatestRemoteCommit.get("commit_id");
@@ -127,13 +129,12 @@ public class GitPullHandler extends AbstractEndpointHandler {
         responseMap.put("incoming_commit_id", incomingCommitId);
         String commitMessage = localCommitId + " " + incomingCommitId + " merged";
         String mergeCommitId = storage.commitChange(sessionId, userId, currentBranch, commitMessage);
-        storage.
         responseMap.put("merge_commit_id", mergeCommitId);
         responseMap.put("message", commitMessage + " automatically and changes committed.");
       }
 
     } catch (Exception e) {
-      return returnErrorResponse("", "");
+      return returnErrorResponse("error_database", "pull_failed: " + e.getMessage());
     }
 
     return returnSuccessResponse();

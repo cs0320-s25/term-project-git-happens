@@ -175,7 +175,7 @@ public class GitMergeHandler extends AbstractEndpointHandler {
       }
 
     } catch (Exception e) {
-      return returnErrorResponse("", "");
+      return returnErrorResponse("error_database", "merge_failed: " + e.getMessage());
     }
 
     return returnSuccessResponse();

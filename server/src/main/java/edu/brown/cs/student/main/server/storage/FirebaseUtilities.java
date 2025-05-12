@@ -1066,10 +1066,10 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws InterruptedException - for firebase methods
    */
   @Override
-  public void pushCommit(String session_id, String branch_id)
+  public void pushCommit(String session_id, String user_id, String branch_id)
       throws IllegalArgumentException, ExecutionException, InterruptedException {
-    if (session_id == null || branch_id == null) {
-      throw new IllegalArgumentException("pushCommit: session_id, branch_id cannot be null");
+    if (session_id == null || user_id == null || branch_id == null) {
+      throw new IllegalArgumentException("pushCommit: session_id, user_id, and branch_id cannot be null");
     }
     Firestore db = FirestoreClient.getFirestore();
     // get all staged commits
@@ -1078,6 +1078,8 @@ public class FirebaseUtilities implements StorageInterface {
             db.collection("sessions")
                 .document(session_id)
                 .collection("local_store")
+                .document("users")
+                .collection(user_id)
                 .document("branches")
                 .collection(branch_id)
                 .document("staged_commits")
@@ -1319,15 +1321,22 @@ public class FirebaseUtilities implements StorageInterface {
    */
   @Override
   public void resetLocalCommits(
-      String session_id, String user_id, String branch_id, List<Map<String, Object>> commits)
+      String session_id, String user_id, String branch_id, Map<String, List<Map<String, Object>>> commits)
   throws IllegalArgumentException, ExecutionException, InterruptedException {
     if (session_id == null || user_id == null || branch_id == null) {
       throw new IllegalArgumentException("resetLocalCommits: session_id, user_id, branch_id, and commits cannot be null");
     }
     Firestore db = FirestoreClient.getFirestore();
-    Map<String, Object> head = commits.get(commits.size()-1);
+    List<Map<String, Object>> stagedCommits = commits.get("staged_commits");
+    List<Map<String, Object>> pushedCommits = commits.get("pushed_commits");
 
-    // replace local commits with reset commits list
+    Map<String, Object> head = null;
+    if (stagedCommits.isEmpty()) {
+      head = pushedCommits.get(pushedCommits.size()-1);
+    } else {
+      head = stagedCommits.get(stagedCommits.size()-1);
+    }
+    // replace local pushed commits with reset commits list
     db.collection("sessions")
         .document(session_id)
         .collection("local_store")
@@ -1336,7 +1345,18 @@ public class FirebaseUtilities implements StorageInterface {
         .document("branches")
         .collection(branch_id)
         .document("pushed_commits")
-        .set(Collections.singletonMap("commits", commits));
+        .set(Collections.singletonMap("commits", pushedCommits));
+
+    // replace local staged commits with reset commits list
+    db.collection("sessions")
+        .document(session_id)
+        .collection("local_store")
+        .document("users")
+        .collection(user_id)
+        .document("branches")
+        .collection(branch_id)
+        .document("staged_commits")
+        .set(Collections.singletonMap("commits", stagedCommits));
 
     // set head to last commit in list (commit you reset to)
     db.collection("sessions")
@@ -1361,21 +1381,6 @@ public class FirebaseUtilities implements StorageInterface {
         .collection(branch_id)
         .document("add_changes")
         .set(changes);
-
-    // clear any staged commits
-    List<Map<String, Object>> stagedCommits = new ArrayList<>();
-    db.collection("sessions")
-        .document(session_id)
-        .collection("local_store")
-        .document("users")
-        .collection(user_id)
-        .document("branches")
-        .collection(branch_id)
-        .document("staged_commits")
-        .set(Collections.singletonMap("commits", stagedCommits));
-
-
-
   }
 
   /**

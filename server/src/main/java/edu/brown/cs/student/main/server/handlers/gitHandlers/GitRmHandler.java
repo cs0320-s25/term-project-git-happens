@@ -52,7 +52,7 @@ public class GitRmHandler extends AbstractEndpointHandler {
       storage.addChange(sessionId, userId, branchId, fileMapJson);
       responseMap.put("action", "rm");
     } catch (Exception e) {
-      return returnErrorResponse("", "");
+      return returnErrorResponse("error_database", "rm_failed" + e.getMessage());
     }
     return returnSuccessResponse();
   }
