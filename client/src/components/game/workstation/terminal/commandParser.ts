@@ -98,10 +98,17 @@ export function gitCommand(splitCommand: string[]): Command {
 
     case "commit":
       switch (tag) {
-        case "-m": // IF MSG IS IN QUOTES, OTHERWISE ERROR
-          return {
-            commandStr: "commit",
-            terminalResponse: "commit",
+        case "-m":
+          if (checkQuotes(message)) {
+            return { // Successful commit
+              commandStr: "test",
+              terminalResponse: `Commit: ${checkQuotes(message)}`,
+              message: `${checkQuotes(message)}`,
+            };
+          }
+          return { // No commit msg or msg not in quotes
+            commandStr: "commit null",
+            terminalResponse: "Error: Command not available",
           };
         case null:
           return {
@@ -149,7 +156,7 @@ export function gitCommand(splitCommand: string[]): Command {
             terminalResponse: "",
           };
       }
-    
+
     case "diff":
       return {
         commandStr: "", // Todo: Fill
@@ -263,4 +270,16 @@ export function gitCommand(splitCommand: string[]): Command {
         terminalResponse: `Command: "${command}" Tag: "${tag}" Message: "${message}"`,
       };
   }
+}
+
+function checkQuotes(message: string) {
+  // If message is in quotes "" or '' return message without quotes, otherwise return null
+  if (message) {
+    if (message[0] === "'" && message[message.length - 1] === "'") {
+      return message.split("'")[1];
+    } else if (message[0] === '"' && message[message.length - 1] === '"') {
+      return message.split('"')[1];
+    }
+  }
+  return null;
 }
