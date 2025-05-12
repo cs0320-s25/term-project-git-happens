@@ -69,11 +69,7 @@ export function parseCommand(command: string): Command {
 export function gitCommand(splitCommand: string[]): Command {
   const command = splitCommand?.[1] ?? null;
   const tag = splitCommand?.[2] ?? null;
-  const message = splitCommand?.[3] ?? null; // IF MULTIPLE WORDS (SPACE) AND DOES NOT HAVE QUOTES RETURN ERROR, IF HAS QUOTES REMOVE QUOTES AND RETURN WITHIN QUOTES
-  // FOR GIT COMMIT: COMMIT MSG MUST BE IN QUOTES
-  // BRANCH MUST BE ONE WORD EVEN IF IN QUOTES
-  // FOR OTHERS (GIT RM?) DOES NOT NEED QUOTES FOR FILENAME
-  // LOOK UP/TEST DIFFERENT REQUIREMENTS
+  const message = splitCommand?.[3] ?? null; // FIND WAY TO SPLIT SO THAT MSG CONTAINS ALL SECTIONS AFTER SPACE?
 
   switch (command) {
     case "add":
