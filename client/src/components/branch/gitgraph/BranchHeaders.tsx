@@ -1,4 +1,5 @@
 import "../../../styles/branch.css";
+import "../../../styles/main.css";
 
 interface BranchHeadersProps {
   visibleBranches: string[];
@@ -30,7 +31,6 @@ export function BranchHeaders({
             fontWeight="bold"
             fontFamily="monospace"
             textAnchor="middle"
-            fill="white"
           >
             {branchName}
           </text>

@@ -35,6 +35,8 @@ interface WorkstationProps {
   setCurrentBranch: Dispatch<SetStateAction<string>>;
   branchTypes: BranchType[];
   setBranchTypes: Dispatch<SetStateAction<BranchType[]>>;
+  sessionID: string;
+  userID: string;
 }
 
 export function Workstation(props: WorkstationProps) {
@@ -202,6 +204,8 @@ export function Workstation(props: WorkstationProps) {
         setCurrentBranch={props.setCurrentBranch}
         newBranch={newBranch}
         setNewBranch={setNewBranch}
+        sessionID={props.sessionID}
+        userID={props.userID}
       />
 
       <p>{textDisplay}</p>

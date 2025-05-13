@@ -31,6 +31,8 @@ interface TerminalProps {
   setCurrentBranch: Dispatch<SetStateAction<string>>;
   newBranch: string;
   setNewBranch: Dispatch<SetStateAction<string>>;
+  sessionID: string;
+  userID: string;
 }
 
 // can do branch stuff by changing currentBranch / setCurrentBranch

@@ -13,7 +13,6 @@ export interface CommitData {
 
 export interface BranchData {
   name: string;
-  head_commit: string;
 }
 
 /**
@@ -149,14 +148,14 @@ function App() {
         ],
       },
     ],
-    branches: [
-      { name: "main", head_commit: "d" },
-      { name: "feature", head_commit: "b" },
-      { name: "side", head_commit: "e" },
-    ],
+    branches: [{ name: "main" }, { name: "feature" }, { name: "side" }],
   };
 
   const sampleVisibleBranches = ["side", "main", "feature"];
+
+  const [sessionID, setSessionID] = useState("");
+  const [userID, setUserID] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     setBranchData(sampleData);
@@ -165,20 +164,49 @@ function App() {
 
   return (
     <div className="App">
-      <div className="game-branch-container">
-        <Game
-          branchData={branchData}
-          setBranchData={setBranchData}
-          currentBranch={currentBranch}
-          setCurrentBranch={setCurrentBranch}
-        />
-        <Branch
-          currentBranch={currentBranch}
-          setCurrentBranch={setCurrentBranch}
-          branchData={branchData}
-          visibleBranches={visibleBranches}
-        />
-      </div>
+      {!submitted ? (
+        <div className="session-form">
+          <h2>Enter Session Details</h2>
+          <input
+            type="text"
+            placeholder="Session ID"
+            value={sessionID}
+            onChange={(e) => setSessionID(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="User ID"
+            value={userID}
+            onChange={(e) => setUserID(e.target.value)}
+          />
+          <button
+            onClick={() => {
+              if (sessionID && userID) {
+                setSubmitted(true);
+              }
+            }}
+          >
+            Enter
+          </button>
+        </div>
+      ) : (
+        <div className="game-branch-container">
+          <Game
+            branchData={branchData}
+            setBranchData={setBranchData}
+            currentBranch={currentBranch}
+            setCurrentBranch={setCurrentBranch}
+            sessionID={sessionID}
+            userID={userID}
+          />
+          <Branch
+            currentBranch={currentBranch}
+            setCurrentBranch={setCurrentBranch}
+            branchData={branchData}
+            visibleBranches={visibleBranches}
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -19,13 +19,8 @@
   cursor: pointer;
 }
 
-.branch-headers {
-  color: white;
-}
-
 .sidebar {
   height: 100vh;
-  color: white;
   transition: width 0.3s ease;
   display: flex;
   flex-direction: column;
@@ -44,7 +39,6 @@
 .toggle-btn {
   background: none;
   border: none;
-  color: white;
   font-size: 1.25rem;
   padding: 10px;
   cursor: pointer;

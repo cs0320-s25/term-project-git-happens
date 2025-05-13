@@ -42,6 +42,8 @@ interface GameProps {
   >;
   currentBranch: string;
   setCurrentBranch: Dispatch<SetStateAction<string>>;
+  sessionID: string;
+  userID: string;
 }
 
 export interface BranchType {
@@ -220,6 +222,8 @@ export function Game(props: GameProps) {
             setCurrentBranch={props.setCurrentBranch}
             branchTypes={branchTypes}
             setBranchTypes={setBranchTypes}
+            sessionID={props.sessionID}
+            userID={props.userID}
           />
           <Ingredients
             ingredientsItems={getBranchIngredients(props.currentBranch)}

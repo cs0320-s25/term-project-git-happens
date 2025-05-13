@@ -15,4 +15,14 @@
     background-color: #f8f8f8;
     border: 1px;
   }
+
+  svg text {
+    fill: black;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  svg text {
+    fill: white;
+  }
 }
