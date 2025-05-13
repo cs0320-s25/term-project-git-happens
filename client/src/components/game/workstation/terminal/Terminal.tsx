@@ -38,6 +38,7 @@ interface TerminalProps {
 export interface Command {
   commandStr: string;
   terminalResponse: string;
+  message?: string;
 }
 
 export function Terminal(props: TerminalProps) {
