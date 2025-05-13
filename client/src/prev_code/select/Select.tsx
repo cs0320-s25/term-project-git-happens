@@ -2,8 +2,8 @@ import { useState } from "react";
 import "../../styles/main.css";
 import { SelectCsvInput } from "./SelectCsvInput";
 import { Table } from "../table/Table";
-import { BarGraph } from "../graphs/BarGraph";
-import { LineGraph } from "../graphs/LineGraph";
+import { BarGraph } from "../../components/graphs/BarGraph";
+import { LineGraph } from "../../components/graphs/LineGraph";
 import { SelectBroadbandInput } from "./SelectBroadbandInput";
 import { SelectInputProps } from "./SelectInputUtil";
 

@@ -1,0 +1,52 @@
+.branch-vis {
+  width: 600px;
+  height: 700px;
+  /* border: 1px solid lime; */
+}
+
+.svg-container {
+  max-height: 700px;
+  overflow-y: auto;
+  position: relative;
+}
+
+.svg-vis {
+  /* border: 1px solid cyan; */
+  background: "transparent";
+}
+
+.commit-node {
+  cursor: pointer;
+}
+
+.branch-headers {
+  color: white;
+}
+
+.sidebar {
+  height: 100vh;
+  color: white;
+  transition: width 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar.open {
+  width: 600px;
+}
+
+.sidebar.collapsed {
+  width: 50px;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.25rem;
+  padding: 10px;
+  cursor: pointer;
+  text-align: left;
+}

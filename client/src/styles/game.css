@@ -1,0 +1,200 @@
+/* GAME */
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.instructions-order-container {
+  /* border: 1px solid white; */
+  width: 300px;
+  text-align: left;
+}
+
+/* PLATE */
+
+.plate-container {
+  text-align: center;
+}
+
+.tray-background {
+  position: relative;
+  width: 800px;
+  height: 300px;
+  background-image: url(../assets/images/Serving_Tray.png),
+    url(../assets/images/Restaurant.png);
+  background-size: 800px 100px, 800px 300px;
+  background-repeat: no-repeat;
+  background-position: center 200px, center center;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.plate-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 30%;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.plate-section img {
+  margin-top: -50px; /* Controls the amount of overlap */
+  z-index: 0;
+  width: 240px;
+  height: 100px;
+}
+
+/* INGREDIENTS */
+
+.ingredients-container {
+  width: 800px;
+  height: 100px;
+}
+
+.ingredients-scroll {
+  display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  overflow-y: hidden;
+  /* border: 1px solid purple; */
+}
+
+.ingredients-scroll img {
+  width: 300px;
+  height: 100px;
+}
+
+/* WORKSTATION */
+
+.workstation-container {
+  width: 800px;
+  height: 460px;
+  /* border: 1px solid greenyellow; */
+  overflow: hidden;
+}
+
+.workstation-background {
+  position: relative;
+  width: 800px;
+  height: 300px;
+  background-image: url(../assets/images/Workstation.png),
+    url(../assets/images/Kitchen.png);
+  background-size: 850px 100px, 800px 300px;
+  background-repeat: no-repeat;
+  background-position: center 210px, center center;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.workstation-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 30%;
+  justify-content: flex-end;
+  position: relative;
+  margin-bottom: 20px;
+  height: 300px;
+}
+
+.workstation-section img {
+  margin-top: -80px; /* Controls the amount of overlap */
+  z-index: 0;
+  width: 240px;
+  height: 100px;
+}
+
+.workstation-section.selected {
+  border: 3px solid #4caf50;
+  border-radius: 10px;
+  background-color: rgba(76, 175, 80, 0.1); /* Optional: subtle background */
+  transition: 0.2s ease-in-out;
+}
+
+.workstation-plate {
+  width: 240px;
+  height: 50px;
+  object-fit: fill;
+}
+/* TERMINAL */
+
+.terminal-history {
+  width: 800px;
+  height: 75px;
+  text-align: left;
+  overflow: auto;
+  /* border: 1px solid blue; */
+  background-color: black;
+  cursor: text;
+}
+
+.terminal-input {
+  width: 800px;
+  height: 25px;
+  box-sizing: border-box;
+}
+
+/* ORDER */
+
+.order-container {
+  width: 300px;
+  height: 200px; /* Fixed height */
+  /* border: 1px solid red; */
+}
+
+.order-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
+  margin-top: 80px;
+}
+
+.order-section img {
+  margin-top: -80px; /* Controls the amount of overlap */
+  width: 300px;
+  height: 100px;
+  z-index: 0;
+}
+
+/* LEVEL */
+
+.level-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.logo {
+  width: 100px;
+  height: 100px;
+}
+
+.order-container {
+  position: relative;
+}
+
+.checkmark-img {
+  position: absolute;
+  top: -50px;
+  right: 20px;
+  width: 250px;
+  height: 250px;
+  z-index: 10;
+}
+
+/* BRANCH CREATION POPUP */
+
+.branch-creation-popup {
+  width: 800px;
+  height: 300px;
+}
