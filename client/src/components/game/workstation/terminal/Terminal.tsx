@@ -29,6 +29,8 @@ interface TerminalProps {
   >;
   currentBranch: string;
   setCurrentBranch: Dispatch<SetStateAction<string>>;
+  newBranch: string;
+  setNewBranch: Dispatch<SetStateAction<string>>;
 }
 
 // can do branch stuff by changing currentBranch / setCurrentBranch
@@ -136,6 +138,27 @@ export function Terminal(props: TerminalProps) {
       });
     }
   }
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const target = e.target as HTMLElement;
+
+      const isTyping =
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable;
+
+      if (isTyping) return;
+
+      if (e.shiftKey && e.key === "T") {
+        e.preventDefault(); // Prevent default action for Shift + T
+        inputRef.current?.focus(); // Focus the input field
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   return (
     <div className="terminal-container">

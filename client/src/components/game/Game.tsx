@@ -5,7 +5,24 @@ import { Level } from "./level/Level";
 import { Ingredients } from "./ingredients/Ingredients";
 import { Workstation } from "./workstation/Workstation";
 import type { CommitData, BranchData } from "../App";
-import { burger_top, burger_bottom } from "../../assets/images";
+import {
+  fancy_patty,
+  fries,
+  ketchup,
+  lettuce,
+  mayo,
+  moldy_patty,
+  mustard,
+  onion,
+  patty,
+  pretzel_bottom,
+  pretzel_top,
+  sesame_bottom,
+  sesame_top,
+  tomato,
+  plate,
+  cheese,
+} from "../../assets/images";
 
 export interface IngredientImage {
   imgStr: string;
@@ -25,6 +42,11 @@ interface GameProps {
   >;
   currentBranch: string;
   setCurrentBranch: Dispatch<SetStateAction<string>>;
+}
+
+export interface BranchType {
+  branchName: string;
+  branchType: "fries" | "burger";
 }
 
 export function Game(props: GameProps) {
@@ -49,48 +71,55 @@ export function Game(props: GameProps) {
     {
       instructions: "Instructions for level 1",
       orderItems: [
-        { imgStr: burger_top, imgName: "1" },
-        { imgStr: burger_bottom, imgName: "1" },
-        { imgStr: burger_bottom, imgName: "1" },
-        { imgStr: burger_bottom, imgName: "1" },
-        { imgStr: burger_bottom, imgName: "1" },
-        { imgStr: burger_bottom, imgName: "1" },
+        { imgStr: sesame_top, imgName: "1" },
+        { imgStr: sesame_bottom, imgName: "1" },
+        { imgStr: sesame_bottom, imgName: "1" },
+        { imgStr: sesame_bottom, imgName: "1" },
+        { imgStr: sesame_bottom, imgName: "1" },
+        { imgStr: sesame_bottom, imgName: "1" },
       ],
+      completed: true,
     },
     {
-      instructions: "Instructions for level 2",
+      instructions:
+        "Instructions for level 2 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
       orderItems: [
-        { imgStr: burger_bottom, imgName: "1" },
-        { imgStr: burger_bottom, imgName: "1" },
+        { imgStr: sesame_bottom, imgName: "1" },
+        { imgStr: sesame_bottom, imgName: "1" },
       ],
+      completed: true,
     },
     {
       instructions: "Instructions for level 3",
       orderItems: [
-        { imgStr: burger_bottom, imgName: "1" },
-        { imgStr: burger_bottom, imgName: "1" },
+        { imgStr: sesame_bottom, imgName: "1" },
+        { imgStr: sesame_bottom, imgName: "1" },
       ],
+      completed: false,
     },
     {
       instructions: "Instructions for level 4",
       orderItems: [
-        { imgStr: burger_bottom, imgName: "1" },
-        { imgStr: burger_bottom, imgName: "1" },
+        { imgStr: sesame_bottom, imgName: "1" },
+        { imgStr: sesame_bottom, imgName: "1" },
       ],
+      completed: false,
     },
     {
       instructions: "Instructions for level 5",
       orderItems: [
-        { imgStr: burger_bottom, imgName: "1" },
-        { imgStr: burger_bottom, imgName: "1" },
+        { imgStr: sesame_bottom, imgName: "1" },
+        { imgStr: sesame_bottom, imgName: "1" },
       ],
+      completed: false,
     },
     {
       instructions: "Instructions for level 6",
       orderItems: [
-        { imgStr: burger_bottom, imgName: "1" },
-        { imgStr: burger_bottom, imgName: "1" },
+        { imgStr: sesame_bottom, imgName: "1" },
+        { imgStr: sesame_bottom, imgName: "1" },
       ],
+      completed: false,
     },
   ];
 
@@ -113,22 +142,33 @@ export function Game(props: GameProps) {
     }
   };
 
-  function getBranchIngredients(branch: string): IngredientImage[] {
-    switch (branch) {
+  const [branchTypes, setBranchTypes] = useState<BranchType[]>([
+    { branchName: "main", branchType: "burger" },
+  ]);
+
+  function getBranchIngredients(type: string): IngredientImage[] {
+    switch (type) {
       case "fries":
         return [
-          { imgStr: burger_bottom, imgName: "1" },
-          { imgStr: burger_bottom, imgName: "1" },
+          { imgStr: fries, imgName: "1" },
+          { imgStr: ketchup, imgName: "1" },
+          { imgStr: mayo, imgName: "1" },
+          { imgStr: mustard, imgName: "1" },
         ];
-        break;
       default:
         return [
-          { imgStr: burger_top, imgName: "1" },
-          { imgStr: burger_bottom, imgName: "1" },
-          { imgStr: burger_bottom, imgName: "1" },
-          { imgStr: burger_bottom, imgName: "1" },
-          { imgStr: burger_bottom, imgName: "1" },
-          { imgStr: burger_bottom, imgName: "1" },
+          { imgStr: sesame_top, imgName: "1" },
+          { imgStr: sesame_bottom, imgName: "1" },
+          { imgStr: pretzel_top, imgName: "1" },
+          { imgStr: pretzel_bottom, imgName: "1" },
+          { imgStr: patty, imgName: "1" },
+          { imgStr: lettuce, imgName: "1" },
+          { imgStr: tomato, imgName: "1" },
+          { imgStr: onion, imgName: "1" },
+          { imgStr: cheese, imgName: "1" },
+          { imgStr: ketchup, imgName: "1" },
+          { imgStr: mayo, imgName: "1" },
+          { imgStr: mustard, imgName: "1" },
         ];
     }
   }
@@ -141,6 +181,7 @@ export function Game(props: GameProps) {
           <Level
             level={currentLevel}
             instructions={levelData[currentLevel - 1].instructions}
+            completed={levelData[currentLevel - 1].completed}
             orderItems={orderItems}
             setOrderItems={setOrderItems}
             onPrev={handlePrev}
@@ -177,6 +218,8 @@ export function Game(props: GameProps) {
             setBranchData={props.setBranchData}
             currentBranch={props.currentBranch}
             setCurrentBranch={props.setCurrentBranch}
+            branchTypes={branchTypes}
+            setBranchTypes={setBranchTypes}
           />
           <Ingredients
             ingredientsItems={getBranchIngredients(props.currentBranch)}

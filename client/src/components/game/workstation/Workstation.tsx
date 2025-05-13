@@ -1,9 +1,10 @@
-import { Dispatch, SetStateAction, useState, useEffect } from "react";
+import { Dispatch, SetStateAction, useState, useEffect, useRef } from "react";
 import "../../../styles/game.css";
-import { IngredientImage } from "../Game";
+import { IngredientImage, BranchType } from "../Game";
 import { Terminal } from "./terminal/Terminal";
 import type { CommitData, BranchData } from "../../App";
-import { plate, countertop } from "../../../assets/images";
+import { plate } from "../../../assets/images";
+import { BranchCreationPopup } from "../workstation/branchcreationpopup/BranchCreationPopup";
 
 interface WorkstationProps {
   selectedWorkstation: 1 | 2 | 3 | null;
@@ -32,6 +33,8 @@ interface WorkstationProps {
   >;
   currentBranch: string;
   setCurrentBranch: Dispatch<SetStateAction<string>>;
+  branchTypes: BranchType[];
+  setBranchTypes: Dispatch<SetStateAction<BranchType[]>>;
 }
 
 export function Workstation(props: WorkstationProps) {
@@ -56,80 +59,129 @@ export function Workstation(props: WorkstationProps) {
     }
   }
 
+  const workstationRefs = [
+    useRef<HTMLDivElement>(null),
+    useRef<HTMLDivElement>(null),
+    useRef<HTMLDivElement>(null),
+  ];
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const target = e.target as HTMLElement;
+
+      const isTyping =
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable;
+
+      if (isTyping) return;
+
+      if (e.shiftKey) {
+        switch (e.code) {
+          case "Digit1":
+            props.setSelectedWorkstation(1);
+            workstationRefs[0].current?.focus();
+            break;
+          case "Digit2":
+            props.setSelectedWorkstation(2);
+            workstationRefs[1].current?.focus();
+            break;
+          case "Digit3":
+            props.setSelectedWorkstation(3);
+            workstationRefs[2].current?.focus();
+            break;
+        }
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [props.setSelectedWorkstation]);
+
+  const [showPopup, setShowPopup] = useState(false);
+  const [newBranch, setNewBranch] = useState<string>("");
+
+  function handleBranchSelect(type: "fries" | "burger") {
+    console.log("User selected:", type);
+    props.setBranchTypes((prev) => [
+      ...prev,
+      { branchName: newBranch, branchType: type },
+    ]);
+    setShowPopup(false);
+  }
+
   return (
     <div className="workstation-container">
       <p>Workstation</p>
-      <div className="workstation-background">
-        <div
-          className={`workstation-section workstation1 ${
-            props.selectedWorkstation === 1 ? "selected" : ""
-          }`}
-          onClick={() => props.setSelectedWorkstation(1)}
-        >
-          {props.workstation1Items.map((ing, i) => (
-            <img
-              key={ing.imgName}
-              src={ing.imgStr}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRemoveItem(1, ing.imgName);
-              }}
-              style={{
-                zIndex: props.workstation1Items.length - i,
-                position: "relative",
-                cursor: "pointer",
-              }}
-            />
-          ))}
-          <img src={plate} className="workstation-plate" />
+      {showPopup ? (
+        <BranchCreationPopup
+          show={true}
+          onClose={() => setShowPopup(false)}
+          onSelect={(type) => handleBranchSelect(type)}
+        />
+      ) : (
+        <div className="workstation-background">
+          {[1, 2, 3].map((wsNum) => {
+            const items =
+              wsNum === 1
+                ? props.workstation1Items
+                : wsNum === 2
+                ? props.workstation2Items
+                : props.workstation3Items;
+
+            return (
+              <div
+                key={wsNum}
+                ref={workstationRefs[wsNum - 1]}
+                className={`workstation-section workstation${wsNum} ${
+                  props.selectedWorkstation === wsNum ? "selected" : ""
+                }`}
+                tabIndex={0}
+                role="button"
+                aria-label={`Select workstation ${wsNum}`}
+                onClick={() => props.setSelectedWorkstation(wsNum as 1 | 2 | 3)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    props.setSelectedWorkstation(wsNum as 1 | 2 | 3);
+                  }
+                }}
+              >
+                {items.map((ing, i) => (
+                  <img
+                    key={ing.imgName}
+                    src={ing.imgStr}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`Remove ingredient ${ing.imgName}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveItem(wsNum as 1 | 2 | 3, ing.imgName);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleRemoveItem(wsNum as 1 | 2 | 3, ing.imgName);
+                      }
+                    }}
+                    style={{
+                      zIndex: items.length - i,
+                      position: "relative",
+                      cursor: "pointer",
+                    }}
+                  />
+                ))}
+                <img
+                  src={plate}
+                  className="workstation-plate"
+                  alt={`Plate for workstation ${wsNum}`}
+                />
+              </div>
+            );
+          })}
         </div>
-        <div
-          className={`workstation-section workstation1 ${
-            props.selectedWorkstation === 2 ? "selected" : ""
-          }`}
-          onClick={() => props.setSelectedWorkstation(2)}
-        >
-          {props.workstation2Items.map((ing, i) => (
-            <img
-              key={ing.imgName}
-              src={ing.imgStr}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRemoveItem(2, ing.imgName);
-              }}
-              style={{
-                zIndex: props.workstation2Items.length - i,
-                position: "relative",
-                cursor: "pointer",
-              }}
-            />
-          ))}
-          <img src={plate} className="workstation-plate" />
-        </div>
-        <div
-          className={`workstation-section workstation1 ${
-            props.selectedWorkstation === 3 ? "selected" : ""
-          }`}
-          onClick={() => props.setSelectedWorkstation(3)}
-        >
-          {props.workstation3Items.map((ing, i) => (
-            <img
-              key={ing.imgName}
-              src={ing.imgStr}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRemoveItem(3, ing.imgName);
-              }}
-              style={{
-                zIndex: props.workstation3Items.length - i,
-                position: "relative",
-                cursor: "pointer",
-              }}
-            />
-          ))}
-          <img src={plate} className="workstation-plate" />
-        </div>
-      </div>
+      )}
 
       <Terminal
         workstation1Items={props.workstation1Items}
@@ -148,6 +200,8 @@ export function Workstation(props: WorkstationProps) {
         setBranchData={props.setBranchData}
         currentBranch={props.currentBranch}
         setCurrentBranch={props.setCurrentBranch}
+        newBranch={newBranch}
+        setNewBranch={setNewBranch}
       />
 
       <p>{textDisplay}</p>

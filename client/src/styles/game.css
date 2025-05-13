@@ -21,16 +21,15 @@
   position: relative;
   width: 800px;
   height: 300px;
-  background-image: url(../assets/images/tray.png),
-    url(../assets/images/restaurant_interior.png);
-  background-size: 850px 100px, 800px 300px;
+  background-image: url(../assets/images/Serving_Tray.png),
+    url(../assets/images/Restaurant.png);
+  background-size: 800px 100px, 800px 300px;
   background-repeat: no-repeat;
-  background-position: center 200px, -20px center;
+  background-position: center 200px, center center;
   margin: 0 auto;
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  padding: 0 20px;
 }
 
 .plate-section {
@@ -46,6 +45,8 @@
 .plate-section img {
   margin-top: -50px; /* Controls the amount of overlap */
   z-index: 0;
+  width: 240px;
+  height: 100px;
 }
 
 /* INGREDIENTS */
@@ -63,6 +64,11 @@
   /* border: 1px solid purple; */
 }
 
+.ingredients-scroll img {
+  width: 300px;
+  height: 100px;
+}
+
 /* WORKSTATION */
 
 .workstation-container {
@@ -76,16 +82,15 @@
   position: relative;
   width: 800px;
   height: 300px;
-  background-image: url(../assets/images/countertop.png),
-    url(../assets/images/kitchen_background.png);
+  background-image: url(../assets/images/Workstation.png),
+    url(../assets/images/Kitchen.png);
   background-size: 850px 100px, 800px 300px;
   background-repeat: no-repeat;
-  background-position: center 230px, -0px center;
-  margin: 0 auto;
+  background-position: center 210px, center center;
+  margin: 0;
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  padding: 0 20px;
 }
 
 .workstation-section {
@@ -100,8 +105,10 @@
 }
 
 .workstation-section img {
-  margin-top: -50px; /* Controls the amount of overlap */
+  margin-top: -80px; /* Controls the amount of overlap */
   z-index: 0;
+  width: 240px;
+  height: 100px;
 }
 
 .workstation-section.selected {
@@ -112,7 +119,7 @@
 }
 
 .workstation-plate {
-  width: 250px;
+  width: 240px;
   height: 50px;
   object-fit: fill;
 }
@@ -148,11 +155,13 @@
   align-items: center;
   justify-content: flex-end;
   position: relative;
-  margin-top: 50px;
+  margin-top: 80px;
 }
 
 .order-section img {
-  margin-top: -50px; /* Controls the amount of overlap */
+  margin-top: -80px; /* Controls the amount of overlap */
+  width: 300px;
+  height: 100px;
   z-index: 0;
 }
 
@@ -161,5 +170,31 @@
 .level-header {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
+}
+
+.logo {
+  width: 100px;
+  height: 100px;
+}
+
+.order-container {
+  position: relative;
+}
+
+.checkmark-img {
+  position: absolute;
+  top: -50px;
+  right: 20px;
+  width: 250px;
+  height: 250px;
+  z-index: 10;
+}
+
+/* BRANCH CREATION POPUP */
+
+.branch-creation-popup {
+  width: 800px;
+  height: 300px;
 }

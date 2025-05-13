@@ -24,6 +24,27 @@ export function Branch(props: BranchProps) {
 
   const [isOpen, setIsOpen] = useState(false);
 
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const target = e.target as HTMLElement;
+
+      const isTyping =
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable;
+
+      if (isTyping) return;
+
+      if (e.shiftKey && e.key === "B") {
+        e.preventDefault(); // Prevent the default behavior
+        setIsOpen((prev) => !prev); // Toggle the sidebar
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   return (
     <div className={`sidebar ${isOpen ? "open" : "collapsed"}`}>
       <button className="toggle-btn" onClick={() => setIsOpen(!isOpen)}>

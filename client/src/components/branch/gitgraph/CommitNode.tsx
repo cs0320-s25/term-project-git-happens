@@ -22,14 +22,28 @@ export function CommitNode({ commit, onToggleSelect }: CommitNodeProps) {
       ? commit.commit.message.slice(0, maxMessageLength) + "..."
       : commit.commit.message;
 
+  const handleSelect = (clickX: number, clickY: number) => {
+    onToggleSelect(commit, clickX, clickY);
+  };
+
   return (
     <g
       className="commit-node"
+      tabIndex={0}
+      role="button"
+      aria-label={`Commit: ${commit.commit.message}`}
       onClick={(e) => {
         const svgRect = e.target.ownerSVGElement?.getBoundingClientRect();
         const clickX = e.clientX - (svgRect?.left || 0);
         const clickY = e.clientY - (svgRect?.top || 0);
-        onToggleSelect(commit, clickX, clickY);
+        handleSelect(clickX, clickY);
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          // Estimate click position at the center of the node
+          handleSelect(commit.x, commit.y);
+        }
       }}
     >
       <circle

@@ -1,7 +1,6 @@
 import { Dispatch, SetStateAction, useState, useEffect } from "react";
 import "../../../styles/game.css";
 import { IngredientImage } from "../Game";
-import { burger_bottom, burger_top } from "../../../assets/images";
 
 interface OrderProps {
   orderItems: IngredientImage[];
