@@ -3,7 +3,9 @@ package edu.brown.cs.student.main.server.handlers;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
+import edu.brown.cs.student.main.server.mergeHelpers.MockFileObject;
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
 import spark.Route;
 
@@ -86,5 +88,62 @@ public abstract class AbstractEndpointHandler implements Route {
    */
   private String returnResponse() {
     return responseMapAdapter.toJson(responseMap);
+  }
+
+  /**
+   * Deserializes a json string into a map of filename : file contents, where file contents is a
+   * list of shape objects.
+   *
+   * @param fileMapJson - json string
+   * @return map of strings to list of objects
+   */
+  public static Map<String, List<MockFileObject>> deserializeFileMap(String fileMapJson) {
+    try {
+      // Initializes Moshi
+      Moshi moshi = new Moshi.Builder().build();
+
+      // Initializes an adapter to a parametrized List class then uses it to parse the JSON.
+      Type type =
+          Types.newParameterizedType(
+              Map.class,
+              String.class,
+              Types.newParameterizedType(List.class, MockFileObject.class));
+
+      JsonAdapter<Map<String, List<MockFileObject>>> adapter = moshi.adapter(type);
+
+      Map<String, List<MockFileObject>> fileMap = adapter.fromJson(fileMapJson);
+
+      return fileMap;
+    } catch (Exception e) {
+      // for debugging purposes
+      e.printStackTrace();
+      throw new RuntimeException("In deserializeFileMap: " + e.getMessage());
+    }
+  }
+
+  /**
+   * Deserializes json string into a set of filename strings
+   *
+   * @param fileListJson - json string
+   * @return a set of filenames
+   */
+  public static List<String> deserializeFileList(String fileListJson) {
+    try {
+      // Initializes Moshi
+      Moshi moshi = new Moshi.Builder().build();
+
+      // Initializes an adapter to a parametrized List class then uses it to parse the JSON.
+      Type type = Types.newParameterizedType(List.class, String.class);
+
+      JsonAdapter<List<String>> adapter = moshi.adapter(type);
+
+      List<String> filenames = adapter.fromJson(fileListJson);
+
+      return filenames;
+    } catch (Exception e) {
+      // for debugging purposes
+      e.printStackTrace();
+      throw new RuntimeException("In deserializeFileList: " + e.getMessage());
+    }
   }
 }
