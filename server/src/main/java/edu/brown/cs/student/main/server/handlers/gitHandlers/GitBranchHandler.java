@@ -60,7 +60,7 @@ public class GitBranchHandler extends AbstractEndpointHandler {
           responseMap.put("action", "list local branches");
         }
 
-        // Fetch and return List of remote branch names
+          // Fetch and return List of remote branch names
         case "-r" -> {
           List<String> remoteBranchNames = storage.getAllRemoteBranches(sessionId);
           List<String> updatedRemoteBranchNames = new ArrayList<>();
@@ -71,7 +71,7 @@ public class GitBranchHandler extends AbstractEndpointHandler {
           responseMap.put("action", "list remote branches");
         }
 
-        // Fetch and return all local and remote branch names
+          // Fetch and return all local and remote branch names
         case "-a" -> {
           List<String> localBranchNames = storage.getAllLocalBranches(sessionId, userId);
           List<String> remoteBranchNames = storage.getAllRemoteBranches(sessionId);
@@ -84,7 +84,7 @@ public class GitBranchHandler extends AbstractEndpointHandler {
           responseMap.put("action", "list remote and local branches");
         }
 
-        // Fetch and delete specified branch
+          // Fetch and delete specified branch
         case "-d" -> {
           String branchToDelete = request.queryParams("delete_branch_id");
           if (branchToDelete == null) {

@@ -21,13 +21,13 @@ public class GitResetHandler extends AbstractEndpointHandler {
   public Object handle(final Request request, final Response response) throws Exception {
     responseMap = new HashMap<>();
 
-    //unique session id
+    // unique session id
     final String session_id = request.queryParams("session_id");
-    //unique user id
+    // unique user id
     final String user_id = request.queryParams("user_id");
-    //id of currently checked out branch
+    // id of currently checked out branch
     final String branchId = request.queryParams("branch_id");
-    //commit to reset to
+    // commit to reset to
     final String commitId = request.queryParams("reset_commit_id");
 
     if (session_id == null) {
@@ -52,8 +52,9 @@ public class GitResetHandler extends AbstractEndpointHandler {
     }
 
     try {
-      //get all local commits
-      Map<String, List<Map<String, Object>>> allLocalCommits = storage.getAllLocalCommits(session_id, user_id, branchId);
+      // get all local commits
+      Map<String, List<Map<String, Object>>> allLocalCommits =
+          storage.getAllLocalCommits(session_id, user_id, branchId);
       List<Map<String, Object>> stagedCommits = allLocalCommits.get("staged_commits");
       List<Map<String, Object>> pushedCommits = allLocalCommits.get("pushed_commits");
 
@@ -82,7 +83,11 @@ public class GitResetHandler extends AbstractEndpointHandler {
       }
       // if commit is not in local commit history, return error for terminal display
       if (resetCommit == null) {
-        responseMap.put("message", "Commit '" + commitId + "' not found. Hint: use 'git log' to view a list of local commits.");
+        responseMap.put(
+            "message",
+            "Commit '"
+                + commitId
+                + "' not found. Hint: use 'git log' to view a list of local commits.");
         returnErrorResponse("error_database", "Error: failed to reset.");
       }
 

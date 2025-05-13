@@ -12,7 +12,6 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import spark.Request;
 import spark.Response;
 
@@ -57,15 +56,21 @@ public class GitPullHandler extends AbstractEndpointHandler {
     try {
 
       // get current branch's latest local commit
-      Map<String, Object> currentLatestLocalCommit = storage.getLatestLocalCommit(sessionId, userId, currentBranch);
-      Map<String, List<MockFileObject>> localCommittedFileMap = deserializeFileMap((String) currentLatestLocalCommit.get("file_map_json"));
+      Map<String, Object> currentLatestLocalCommit =
+          storage.getLatestLocalCommit(sessionId, userId, currentBranch);
+      Map<String, List<MockFileObject>> localCommittedFileMap =
+          deserializeFileMap((String) currentLatestLocalCommit.get("file_map_json"));
 
       // get current branch's latest remote commit
-      Map<String, Object> currentLatestRemoteCommit = storage.getLatestRemoteCommit(sessionId, currentBranch);
-      Map<String, List<MockFileObject>> remoteCommittedFileMap = deserializeFileMap((String) currentLatestRemoteCommit.get("file_map_json"));
+      Map<String, Object> currentLatestRemoteCommit =
+          storage.getLatestRemoteCommit(sessionId, currentBranch);
+      Map<String, List<MockFileObject>> remoteCommittedFileMap =
+          deserializeFileMap((String) currentLatestRemoteCommit.get("file_map_json"));
 
       // if local head is the same as remote head, return message for terminal display
-      if (currentLatestLocalCommit.get("commit_id").equals(currentLatestRemoteCommit.get("commit_id"))) {
+      if (currentLatestLocalCommit
+          .get("commit_id")
+          .equals(currentLatestRemoteCommit.get("commit_id"))) {
         responseMap.put("message", "Already up to date.");
         returnSuccessResponse();
       }
@@ -84,29 +89,32 @@ public class GitPullHandler extends AbstractEndpointHandler {
         localCommittedFileMap.put(fileName, remoteCommittedFileMap.get(fileName));
       }
 
-      //stores the resulting merged files
+      // stores the resulting merged files
       Map<String, List<MockFileObject>> mergedFileMap = new HashMap<>();
 
-      // now that both maps have the same files, attempt to auto-merge each file and store resulting List<Ingredients>
+      // now that both maps have the same files, attempt to auto-merge each file and store resulting
+      // List<Ingredients>
       for (String fileName : localCommittedFileMap.keySet()) {
         List<MockFileObject> committedFile = localCommittedFileMap.get(fileName);
         List<MockFileObject> incomingFile = remoteCommittedFileMap.get(fileName);
-        List<MockFileObject> mergedFile = diffHelper.autoMergeIfPossible(fileName, committedFile, incomingFile);
+        List<MockFileObject> mergedFile =
+            diffHelper.autoMergeIfPossible(fileName, committedFile, incomingFile);
         if (mergedFile != null) {
           mergedFileMap.put(fileName, mergedFile);
         }
       }
       responseMap.put("merged_files", mergedFileMap);
 
-      // if there were conflicting files, return successfully merged files and info for conflicting files
+      // if there were conflicting files, return successfully merged files and info for conflicting
+      // files
       // for terminal display
       //  file_conflicts map looks like:
       //                    {filename : {"local": List<Ingredients>, "incoming": List<Ingredients>}}
 
       if (!diffHelper.getFileConflicts().isEmpty()) {
         responseMap.put("file_conflicts", diffHelper.getFileConflicts());
-        returnErrorResponse("error_database",
-            "Automatic merge failed; fix conflicts and then commit the results.");
+        returnErrorResponse(
+            "error_database", "Automatic merge failed; fix conflicts and then commit the results.");
       }
       //  if there were no conflicts, add and commit merged files
       else {
@@ -124,11 +132,12 @@ public class GitPullHandler extends AbstractEndpointHandler {
         storage.addChange(sessionId, userId, currentBranch, adapter.toJson(mergedFileMap));
         String localCommitId = (String) currentLatestLocalCommit.get("commit_id");
         String incomingCommitId = (String) currentLatestRemoteCommit.get("commit_id");
-        //for updating branch map
+        // for updating branch map
         responseMap.put("local_commit_id", localCommitId);
         responseMap.put("incoming_commit_id", incomingCommitId);
         String commitMessage = localCommitId + " " + incomingCommitId + " merged";
-        String mergeCommitId = storage.commitChange(sessionId, userId, currentBranch, commitMessage);
+        String mergeCommitId =
+            storage.commitChange(sessionId, userId, currentBranch, commitMessage);
         responseMap.put("merge_commit_id", mergeCommitId);
         responseMap.put("message", commitMessage + " automatically and changes committed.");
       }

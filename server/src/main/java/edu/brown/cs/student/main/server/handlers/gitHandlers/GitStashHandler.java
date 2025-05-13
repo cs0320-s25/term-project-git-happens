@@ -70,8 +70,8 @@ public class GitStashHandler extends AbstractEndpointHandler {
       switch (stashRequest) {
         case "" -> {
           String stashMessage = storage.addStash(sessionId, userId, branchId, fileMapJson);
-          Map<String, Object> latestLocalCommit = storage.getLatestLocalCommit(sessionId, userId,
-              branchId);
+          Map<String, Object> latestLocalCommit =
+              storage.getLatestLocalCommit(sessionId, userId, branchId);
           responseMap.put("reset_file_map_json", latestLocalCommit.get("file_map_json"));
           responseMap.put("message", "Saved working directory " + stashMessage);
           responseMap.put("action", "add stash");
@@ -94,18 +94,21 @@ public class GitStashHandler extends AbstractEndpointHandler {
             responseMap.put("stash_index", stashIndex);
           }
 
-          Map<String, Object> stash = storage.popStash(sessionId, userId,
-              Integer.parseInt(stashIndex));
+          Map<String, Object> stash =
+              storage.popStash(sessionId, userId, Integer.parseInt(stashIndex));
 
-          //if stash not found, return message for terminal display
+          // if stash not found, return message for terminal display
           if (stash == null) {
-            returnErrorResponse("error_database", "Error: stash@{" + stashIndex
-                + "} not found. (Hint: use 'stash list' to view available stashes)");
+            returnErrorResponse(
+                "error_database",
+                "Error: stash@{"
+                    + stashIndex
+                    + "} not found. (Hint: use 'stash list' to view available stashes)");
           }
 
           // if stash found, attempt to merge current filemap and stashed filemap
-          Map<String, List<MockFileObject>> stashedFileMap = deserializeFileMap(
-              (String) stash.get("file_map_json"));
+          Map<String, List<MockFileObject>> stashedFileMap =
+              deserializeFileMap((String) stash.get("file_map_json"));
           Map<String, List<MockFileObject>> currentFileMap = deserializeFileMap(fileMapJson);
 
           // add any new local files to incoming filemap
@@ -121,35 +124,46 @@ public class GitStashHandler extends AbstractEndpointHandler {
             currentFileMap.put(fileName, stashedFileMap.get(fileName));
           }
 
-          //stores the resulting merged files
+          // stores the resulting merged files
           Map<String, List<MockFileObject>> mergedFileMap = new HashMap<>();
 
-          // now that both maps have the same files, attempt to auto-merge each file and store resulting List<Ingredients>
+          // now that both maps have the same files, attempt to auto-merge each file and store
+          // resulting List<Ingredients>
           for (String fileName : currentFileMap.keySet()) {
             List<MockFileObject> committedFile = currentFileMap.get(fileName);
             List<MockFileObject> incomingFile = stashedFileMap.get(fileName);
-            List<MockFileObject> mergedFile = gitDiffHelper.autoMergeIfPossible(fileName,
-                committedFile, incomingFile);
+            List<MockFileObject> mergedFile =
+                gitDiffHelper.autoMergeIfPossible(fileName, committedFile, incomingFile);
             if (mergedFile != null) {
               mergedFileMap.put(fileName, mergedFile);
             }
           }
           responseMap.put("merged_files", mergedFileMap);
 
-          // if there were conflicting files, return successfully merged files and info for conflicting files
+          // if there were conflicting files, return successfully merged files and info for
+          // conflicting files
           // for terminal display
           //  file_conflicts map looks like:
-          //                    {filename : {"local": List<Ingredients>, "incoming": List<Ingredients>}}
+          //                    {filename : {"local": List<Ingredients>, "incoming":
+          // List<Ingredients>}}
 
           if (!gitDiffHelper.getFileConflicts().isEmpty()) {
             responseMap.put("file_conflicts", gitDiffHelper.getFileConflicts());
-            returnErrorResponse("error_database",
-                "Error: Could not apply " + "stash@{" + stashIndex +
-                    "}. Conflict detected; fix conflicts and then commit the results.");
+            returnErrorResponse(
+                "error_database",
+                "Error: Could not apply "
+                    + "stash@{"
+                    + stashIndex
+                    + "}. Conflict detected; fix conflicts and then commit the results.");
           } else {
             responseMap.put("action", "stash pop");
-            responseMap.put("message", "Applied stash@{" + stashIndex + "} ("
-                + stash.get("stash_message") + ") and removed from stashes list.");
+            responseMap.put(
+                "message",
+                "Applied stash@{"
+                    + stashIndex
+                    + "} ("
+                    + stash.get("stash_message")
+                    + ") and removed from stashes list.");
           }
         }
         default -> returnErrorResponse("error_database", "Command not supported.");

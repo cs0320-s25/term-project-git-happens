@@ -200,10 +200,13 @@ public class FirebaseUtilities implements StorageInterface {
     List<Map<String, Object>> stashes = pather.getStashList(session_id, user_id);
     // generate a unique message for stash
     Map<String, Object> latestCommit = this.getLatestLocalCommit(session_id, user_id, branch_id);
-    String stashMessage = "WIP on " + branch_id + ": "
-        + latestCommit.get(FIELD_COMMIT_ID)
-        + " " + latestCommit.get(FIELD_COMMIT_MESSAGE);
-
+    String stashMessage =
+        "WIP on "
+            + branch_id
+            + ": "
+            + latestCommit.get(FIELD_COMMIT_ID)
+            + " "
+            + latestCommit.get(FIELD_COMMIT_MESSAGE);
 
     // create new stash map
     Map<String, Object> stash = new HashMap<>();
@@ -219,6 +222,7 @@ public class FirebaseUtilities implements StorageInterface {
 
   /**
    * Method that returns the list of the user's stashes
+   *
    * @param session_id - unique session id
    * @param user_id - unique user id
    * @return - list of stash maps
@@ -228,7 +232,7 @@ public class FirebaseUtilities implements StorageInterface {
    */
   @Override
   public List<Map<String, Object>> getStashes(String session_id, String user_id)
-  throws IllegalArgumentException, ExecutionException, InterruptedException {
+      throws IllegalArgumentException, ExecutionException, InterruptedException {
     if (session_id == null || user_id == null) {
       throw new IllegalArgumentException("getStashes: session_id and user_id cannot be null");
     }
@@ -848,8 +852,11 @@ public class FirebaseUtilities implements StorageInterface {
    */
   @Override
   public void resetLocalCommits(
-      String session_id, String user_id, String branch_id, Map<String, List<Map<String, Object>>> commits)
-  throws IllegalArgumentException {
+      String session_id,
+      String user_id,
+      String branch_id,
+      Map<String, List<Map<String, Object>>> commits)
+      throws IllegalArgumentException {
     if (session_id == null || user_id == null || branch_id == null) {
       throw new IllegalArgumentException(
           "resetLocalCommits: session_id, user_id, branch_id, and commits cannot be null");
@@ -862,9 +869,9 @@ public class FirebaseUtilities implements StorageInterface {
 
     Map<String, Object> head;
     if (stagedCommits.isEmpty()) {
-      head = pushedCommits.get(pushedCommits.size()-1);
+      head = pushedCommits.get(pushedCommits.size() - 1);
     } else {
-      head = stagedCommits.get(stagedCommits.size()-1);
+      head = stagedCommits.get(stagedCommits.size() - 1);
     }
     // replace local pushed commits with reset commits list
     setField(localBranchRef.pushedCommits(), FIELD_COMMITS, pushedCommits);
