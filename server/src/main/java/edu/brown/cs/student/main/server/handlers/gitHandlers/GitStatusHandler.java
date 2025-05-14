@@ -60,28 +60,51 @@ public class GitStatusHandler extends AbstractEndpointHandler {
       // check if local and remote are ahead/behind to make branch info message for terminal display
 
       // get local and remote head for current branch
-      Map<String, Object> latestLocalCommit = storage.getLatestLocalCommit(sessionId, userId, branchId);
+      Map<String, Object> latestLocalCommit =
+          storage.getLatestLocalCommit(sessionId, userId, branchId);
       Map<String, Object> latestRemoteCommit = storage.getLatestRemoteCommit(sessionId, branchId);
 
       // if the heads are different, determine how
       if (!latestLocalCommit.get("commit_id").equals(latestRemoteCommit.get("commit_id"))) {
-        List<Map<String, Object>> stagedCommits = storage.getStagedCommits(sessionId, userId, branchId);
+        List<Map<String, Object>> stagedCommits =
+            storage.getStagedCommits(sessionId, userId, branchId);
 
         // local has commits that remote does not
         if (!stagedCommits.isEmpty()) {
-          responseMap.put("branch_message", "On branch " + branchId + ". Your branch is ahead of 'origin/"
-              + branchId + "' by " + stagedCommits.size() + " commits.");
+          responseMap.put(
+              "branch_message",
+              "On branch "
+                  + branchId
+                  + ". Your branch is ahead of 'origin/"
+                  + branchId
+                  + "' by "
+                  + stagedCommits.size()
+                  + " commits.");
         } else {
           // remote has commits that local does not
-          int remoteAheadBy = storage.getRemotePushedCommits(sessionId, branchId).size()
-              - storage.getLocalPushedCommits(sessionId, userId, branchId).size();
-          responseMap.put("branch_message", "On branch " + branchId + ". Your branch is behind 'origin/'"
-              + branchId + "' by " + remoteAheadBy + " commits, and can be fast-forwarded.");
+          int remoteAheadBy =
+              storage.getRemotePushedCommits(sessionId, branchId).size()
+                  - storage.getLocalPushedCommits(sessionId, userId, branchId).size();
+          responseMap.put(
+              "branch_message",
+              "On branch "
+                  + branchId
+                  + ". Your branch is behind 'origin/'"
+                  + branchId
+                  + "' by "
+                  + remoteAheadBy
+                  + " commits, and can be fast-forwarded.");
         }
         // local and remote have the same head
       } else {
-        responseMap.put("branch_message", "On branch " + branchId + ". Your branch is up to date with"
-            + " 'origin/" + branchId + "'.");
+        responseMap.put(
+            "branch_message",
+            "On branch "
+                + branchId
+                + ". Your branch is up to date with"
+                + " 'origin/"
+                + branchId
+                + "'.");
       }
 
       // check for staged changes, add to changes to be committed if there are
@@ -90,7 +113,8 @@ public class GitStatusHandler extends AbstractEndpointHandler {
 
       // send list of files with staged changes
       if (stagedChangesJson != null) {
-        Map<String, List<MockFileObject>> stagedChangesFileMap = deserializeFileMap(stagedChangesJson);
+        Map<String, List<MockFileObject>> stagedChangesFileMap =
+            deserializeFileMap(stagedChangesJson);
         List<String> changedFiles = new ArrayList<>();
         for (String filename : stagedChangesFileMap.keySet()) {
           changedFiles.add(filename);
@@ -101,7 +125,8 @@ public class GitStatusHandler extends AbstractEndpointHandler {
         // find difference between staged changes and current file map
 
         GitDiffHelper gitDiffHelper = new GitDiffHelper();
-        Set<String> filesWithDifferences = gitDiffHelper.differenceDetected(stagedChangesFileMap, currentFileMap);
+        Set<String> filesWithDifferences =
+            gitDiffHelper.differenceDetected(stagedChangesFileMap, currentFileMap);
 
         // send set of files with unstaged changes
         if (!filesWithDifferences.isEmpty()) {
@@ -116,11 +141,11 @@ public class GitStatusHandler extends AbstractEndpointHandler {
 
         // find difference between last local commit and current filemap to find unstaged changes
 
-        Map<String, List<MockFileObject>> localCommittedFileMap = deserializeFileMap(
-            (String) latestLocalCommit.get("file_map_json"));
+        Map<String, List<MockFileObject>> localCommittedFileMap =
+            deserializeFileMap((String) latestLocalCommit.get("file_map_json"));
         GitDiffHelper gitDiffHelper = new GitDiffHelper();
-        Set<String> filesWithDifferences = gitDiffHelper.differenceDetected(
-            localCommittedFileMap, currentFileMap);
+        Set<String> filesWithDifferences =
+            gitDiffHelper.differenceDetected(localCommittedFileMap, currentFileMap);
 
         // send set of files with unstaged changes
         if (!filesWithDifferences.isEmpty()) {

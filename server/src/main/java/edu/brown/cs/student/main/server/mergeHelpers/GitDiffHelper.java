@@ -89,7 +89,7 @@ public class GitDiffHelper {
     // current state
     for (Map.Entry<String, List<MockFileObject>> storedFile : storedState.entrySet()) {
       String fileName = storedFile.getKey();
-      //if the file is not present in both the current and incoming states, no need to compare
+      // if the file is not present in both the current and incoming states, no need to compare
       if (filesWithDifferences.contains(fileName)) {
         continue;
       }

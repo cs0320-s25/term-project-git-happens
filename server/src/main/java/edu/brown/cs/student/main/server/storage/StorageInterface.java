@@ -24,13 +24,13 @@ public interface StorageInterface {
   /**
    * Method that adds set of changed files to stashes list in user's local store
    *
-   * @param session_id    - unique session_id for current game
-   * @param user_id       - unique user id
-   * @param branch_id     - currently checked out branch
+   * @param session_id - unique session_id for current game
+   * @param user_id - unique user id
+   * @param branch_id - currently checked out branch
    * @param file_map_json - json string of map of filenames to file contents
    * @throws IllegalArgumentException - if any parameters are null
-   * @throws ExecutionException       - for firebase methods
-   * @throws InterruptedException     - for firebase methods
+   * @throws ExecutionException - for firebase methods
+   * @throws InterruptedException - for firebase methods
    * @returns - stash message
    */
   String addStash(String session_id, String user_id, String branch_id, String file_map_json)
@@ -38,6 +38,7 @@ public interface StorageInterface {
 
   /**
    * Method that returns the list of the user's stashes
+   *
    * @param session_id - unique session id
    * @param user_id - unique user id
    * @return - list of stash maps
@@ -46,7 +47,7 @@ public interface StorageInterface {
    * @throws InterruptedException - for firebase methods
    */
   List<Map<String, Object>> getStashes(String session_id, String user_id)
-  throws IllegalArgumentException, ExecutionException, InterruptedException;
+      throws IllegalArgumentException, ExecutionException, InterruptedException;
 
   /**
    * Method that retrieves a stash at the specified index of the stash list, then removes the stash
@@ -60,7 +61,7 @@ public interface StorageInterface {
    * @throws InterruptedException - for firebase methods
    */
   Map<String, Object> popStash(String session_id, String user_id, int stash_index)
-    throws IllegalArgumentException, ExecutionException, InterruptedException;
+      throws IllegalArgumentException, ExecutionException, InterruptedException;
 
   /**
    * Method for adding a branch to user's local and remote store, which uses the file state of
@@ -313,7 +314,10 @@ public interface StorageInterface {
    * @throws InterruptedException - for firebase methods
    */
   void resetLocalCommits(
-      String session_id, String user_id, String branch_id, Map<String, List<Map<String, Object>>> commits)
+      String session_id,
+      String user_id,
+      String branch_id,
+      Map<String, List<Map<String, Object>>> commits)
       throws IllegalArgumentException, ExecutionException, InterruptedException;
 
   /**

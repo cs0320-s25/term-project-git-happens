@@ -44,7 +44,8 @@ public class GitPushHandler extends AbstractEndpointHandler {
     try {
 
       // check that there are local staged commits
-      List<Map<String, Object>> stagedCommits = storage.getStagedCommits(sessionId, userId, currentBranch);
+      List<Map<String, Object>> stagedCommits =
+          storage.getStagedCommits(sessionId, userId, currentBranch);
 
       // if there is nothing to commit, return message for terminal display
       if (stagedCommits.isEmpty()) {
@@ -53,20 +54,22 @@ public class GitPushHandler extends AbstractEndpointHandler {
       }
 
       // check that local and remote head are the same
-      Map<String, Object> localLatestCommit = storage.getLatestLocalCommit(
-          sessionId, userId, currentBranch);
-      Map<String, Object> remoteLatestCommit = storage.getLatestRemoteCommit(sessionId, currentBranch);
+      Map<String, Object> localLatestCommit =
+          storage.getLatestLocalCommit(sessionId, userId, currentBranch);
+      Map<String, Object> remoteLatestCommit =
+          storage.getLatestRemoteCommit(sessionId, currentBranch);
       String localLatestCommitId = (String) localLatestCommit.get("commit_id");
       String remoteLatestCommitId = (String) remoteLatestCommit.get("commit_id");
 
       // if user needs to pull remote changes, return message for terminal display
       if (!localLatestCommitId.equals(remoteLatestCommitId)) {
-        responseMap.put("message", "hint: Updates were rejected because the remote contains work that you do"
-            + " not have locally. This is usually caused by another repository pushing "
-            + "to the same remote branch. You may want to first integrate the remote changes "
-            + "(e.g., 'git pull') before pushing again.");
-        return returnErrorResponse("error_database",
-            "Error: failed to push to origin/" + currentBranch);
+        responseMap.put(
+            "message",
+            "hint: Updates were rejected because the remote contains work that you do"
+                + " not have locally. This is usually caused by another repository pushing "
+                + "to the same remote branch. You may want to first integrate the remote changes "
+                + "(e.g., 'git pull') before pushing again.");
+        return returnErrorResponse("error_database", "Error: failed to push to origin/" + currentBranch);
       }
 
       // otherwise, push staged commit(s) to remote
@@ -74,8 +77,17 @@ public class GitPushHandler extends AbstractEndpointHandler {
       responseMap.put("old_head_id", remoteLatestCommitId);
       responseMap.put("new_head_id", localLatestCommitId);
       responseMap.put("action", "push");
-      responseMap.put("message", remoteLatestCommitId + ".." + localLatestCommitId + " "
-          + currentBranch + " -> " + "origin/" + currentBranch + " Successfully pushed.");
+      responseMap.put(
+          "message",
+          remoteLatestCommitId
+              + ".."
+              + localLatestCommitId
+              + " "
+              + currentBranch
+              + " -> "
+              + "origin/"
+              + currentBranch
+              + " Successfully pushed.");
 
     } catch (Exception e) {
       return returnErrorResponse("error_database", "push_failed: " + e.getMessage());

@@ -24,13 +24,13 @@ public class GitCommitHandler extends AbstractEndpointHandler {
     responseMap = new HashMap<>();
     GitDiffHelper diffHelper = new GitDiffHelper();
 
-    //unique session id
+    // unique session id
     final String session_id = request.queryParams("session_id");
-    //unique user id
+    // unique user id
     final String user_id = request.queryParams("user_id");
-    //id of currently checked out branch
+    // id of currently checked out branch
     final String branchId = request.queryParams("branch_id");
-    //message to accompany commit
+    // message to accompany commit
     final String commitMessage = request.queryParams("commit_message");
 
     if (session_id == null) {
@@ -55,27 +55,29 @@ public class GitCommitHandler extends AbstractEndpointHandler {
     }
     try {
 
-      //get staged changes
+      // get staged changes
       String newFileMapJson = storage.getLatestLocalChanges(session_id, user_id, branchId);
-      //if there are no staged changes, return error for terminal display
+      // if there are no staged changes, return error for terminal display
       if (newFileMapJson == null) {
         return returnErrorResponse("error_database", "No changes added to commit (use 'git add -A')");
       }
 
-      //get last latest local commit and deserialize file map
-      Map<String, Object> latestLocalCommit = storage.getLatestLocalCommit(session_id, user_id, branchId);
-      Map<String, List<MockFileObject>> latestFileMap = deserializeFileMap((String) latestLocalCommit.get("file_map_json"));
+      // get last latest local commit and deserialize file map
+      Map<String, Object> latestLocalCommit =
+          storage.getLatestLocalCommit(session_id, user_id, branchId);
+      Map<String, List<MockFileObject>> latestFileMap =
+          deserializeFileMap((String) latestLocalCommit.get("file_map_json"));
 
-      //check that there is a difference between the last commit and staged changes
+      // check that there is a difference between the last commit and staged changes
 
       Map<String, List<MockFileObject>> newFileMap = deserializeFileMap((newFileMapJson));
       Set<String> filesWithDifferences = diffHelper.differenceDetected(latestFileMap, newFileMap);
 
-      //if the filemap has not changed since last commit, return message for terminal display
+      // if the filemap has not changed since last commit, return message for terminal display
       if (filesWithDifferences.isEmpty()) {
         return returnErrorResponse("error_database", "Nothing to commit, working tree clean");
       }
-      //make new commit, populate response map for terminal display
+      // make new commit, populate response map for terminal display
       String commitId = storage.commitChange(session_id, user_id, branchId, commitMessage);
       responseMap.put("commit_id", commitId);
       responseMap.put("commit_message", commitMessage);
