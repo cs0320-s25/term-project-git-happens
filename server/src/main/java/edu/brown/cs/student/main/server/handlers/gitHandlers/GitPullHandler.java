@@ -105,6 +105,12 @@ public class GitPullHandler extends AbstractEndpointHandler {
       }
       responseMap.put("merged_files", mergedFileMap);
 
+      String localCommitId = (String) currentLatestLocalCommit.get("commit_id");
+      String incomingCommitId = (String) currentLatestRemoteCommit.get("commit_id");
+      // for updating branch map
+      responseMap.put("local_commit_id", localCommitId);
+      responseMap.put("incoming_commit_id", incomingCommitId);
+
       // if there were conflicting files, return successfully merged files and info for conflicting
       // files
       // for terminal display
@@ -130,11 +136,6 @@ public class GitPullHandler extends AbstractEndpointHandler {
 
         storage.pullRemoteCommits(sessionId, userId, currentBranch);
         storage.addChange(sessionId, userId, currentBranch, adapter.toJson(mergedFileMap));
-        String localCommitId = (String) currentLatestLocalCommit.get("commit_id");
-        String incomingCommitId = (String) currentLatestRemoteCommit.get("commit_id");
-        // for updating branch map
-        responseMap.put("local_commit_id", localCommitId);
-        responseMap.put("incoming_commit_id", incomingCommitId);
         String commitMessage = localCommitId + " " + incomingCommitId + " merged";
         Map<String, Object> newCommit =
             storage.commitChange(

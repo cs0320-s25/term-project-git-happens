@@ -62,23 +62,24 @@ export function Game(props: GameProps) {
   const [workstation3Items, setWorkstation3Items] = useState<IngredientImage[]>(
     []
   );
-  let file1Contents: IngredientImage[] = [];
-  let file2Contents: IngredientImage[] = [];
-  let file3Contents: IngredientImage[] = [];
-  for (const file of props.startingState) {
-    if (file.fileName === "file1") {
-      file1Contents = file.fileContents;
+
+  const [plate1Items, setPlate1Items] = useState<IngredientImage[]>([]);
+  const [plate2Items, setPlate2Items] = useState<IngredientImage[]>([]);
+  const [plate3Items, setPlate3Items] = useState<IngredientImage[]>([]);
+
+  useEffect(() => {
+    if (!props.startingState) return;
+
+    for (const file of props.startingState) {
+      if (file.fileName === "file1") {
+        setPlate1Items(file.fileContents);
+      } else if (file.fileName === "file2") {
+        setPlate2Items(file.fileContents);
+      } else if (file.fileName === "file3") {
+        setPlate3Items(file.fileContents);
+      }
     }
-    if (file.fileName === "file2") {
-      file2Contents = file.fileContents;
-    }
-    if (file.fileName === "file3") {
-      file3Contents = file.fileContents
-    }
-  }
-  const [plate1Items, setPlate1Items] = useState<IngredientImage[]>(file1Contents);
-  const [plate2Items, setPlate2Items] = useState<IngredientImage[]>(file2Contents);
-  const [plate3Items, setPlate3Items] = useState<IngredientImage[]>(file3Contents);
+  }, [props.startingState]);
 
   const [selectedWorkstation, setSelectedWorkstation] = useState<
     1 | 2 | 3 | null

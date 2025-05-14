@@ -9,18 +9,18 @@ export interface GitStatusParams {
 export interface GitStatusResponse extends BaseResponse {
   branch_message?: string;
   staged_changes_message?: string;
-  changed_files?: string[];
+  staged_changes?: string[];
   unstaged_changes_message?: string;
-  unstaged_changes?: Set<string>;
+  unstaged_changes?: string[];
 }
 
 const allowedKeys: (keyof GitStatusResponse)[] = [
   "error_response",
   "branch_message",
   "staged_changes_message",
-  "changed_files",
   "unstaged_changes_message",
   "unstaged_changes",
+  "staged_changes",
 ]
 
 export async function gitStatus(params: GitStatusParams

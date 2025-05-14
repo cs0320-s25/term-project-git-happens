@@ -9,7 +9,7 @@ export interface GitResetParams {
 
 export interface GitResetResponse extends BaseResponse {
   message?: string;
-  file_map_json?: Map<string, any[]>;
+  file_map_json?: string;
   action?: string;
 }
 

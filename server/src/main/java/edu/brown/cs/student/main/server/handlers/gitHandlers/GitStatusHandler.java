@@ -4,7 +4,6 @@ import edu.brown.cs.student.main.server.handlers.AbstractEndpointHandler;
 import edu.brown.cs.student.main.server.mergeHelpers.GitDiffHelper;
 import edu.brown.cs.student.main.server.mergeHelpers.MockFileObject;
 import edu.brown.cs.student.main.server.storage.StorageInterface;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -115,16 +114,18 @@ public class GitStatusHandler extends AbstractEndpointHandler {
       if (stagedChangesJson != null) {
         Map<String, List<MockFileObject>> stagedChangesFileMap =
             deserializeFileMap(stagedChangesJson);
-        List<String> changedFiles = new ArrayList<>();
-        for (String filename : stagedChangesFileMap.keySet()) {
-          changedFiles.add(filename);
-        }
+        GitDiffHelper gitDiffHelper = new GitDiffHelper();
+        Map<String, List<MockFileObject>> deserializedLatestLocalCommit =
+            deserializeFileMap((String) latestLocalCommit.get("file_map_json"));
+
+        // get difference between staged changes and most recent commit
+        Set<String> changedFiles =
+            gitDiffHelper.differenceDetected(deserializedLatestLocalCommit, stagedChangesFileMap);
         responseMap.put("staged_changes_message", "Changes to be committed: ");
         responseMap.put("staged_changes", changedFiles);
 
-        // find difference between staged changes and current file map
+        // find difference between staged changes and current file map (unstaged changes)
 
-        GitDiffHelper gitDiffHelper = new GitDiffHelper();
         Set<String> filesWithDifferences =
             gitDiffHelper.differenceDetected(stagedChangesFileMap, currentFileMap);
 

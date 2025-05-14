@@ -270,50 +270,24 @@ export function gitCommand(
 
     case "reset":
       switch (tag) {
-        case "--hard": // hard reset
-          return {
-            commandStr: "reset hard",
-            terminalResponse: "Hard Reset",
-          };
-        case "--soft": // soft reset
-          return {
-            commandStr: "reset soft",
-            terminalResponse: "Soft Reset",
-          };
-        case null: // UNSURE
+        case null:
           return {
             commandStr: "reset null",
-            terminalResponse:
-              "Error: Try specifying the type of reset with either '--soft' or '--hard'.",
+            terminalResponse: "Error: Try specifying a commitID to reset to.",
           };
-        default: // UNSURE
-          return {
-            commandStr: "reset null",
-            terminalResponse:
-              "Error: Try specifying the type of reset with either '--soft' or '--hard'.",
-          };
-      }
-
-    case "rm":
-      switch (tag) {
-        case null: // error
-          return {
-            commandStr: "rm null",
-            terminalResponse: "Error: Try specifying a file to remove.",
-          };
-        default: // remove filename file
-          var filename = checkQuotes(tag); // Removes quotes from filename
+        default: // if arg2 = commitId, commit to return to
+          var commitId = checkQuotes(tag); // Removes quotes from commitId
           if (!message) {
-            // Checks that additional spaces are NOT included in filename specification
+            // Checks that additional spaces are NOT included in commitId specification
             return {
-              commandStr: "rm",
-              terminalResponse: `Attempting to Remove: ${filename}`,
-              message: `${filename}`,
+              commandStr: "reset",
+              terminalResponse: `Attempting reset to commit ID: ${commitId}`,
+              message: `${commitId}`,
             };
           }
           return {
-            commandStr: "rm null",
-            terminalResponse: "Error: Try specifying a file to remove.",
+            commandStr: "reset null",
+            terminalResponse: "Error: Try specifying a commitID to reset to.",
           };
       }
 
@@ -370,7 +344,7 @@ export function gitCommand(
             commandStr: "checkout null",
             terminalResponse: "Error: Branch name required.",
           };
-          
+
         default: // Check for branch name
           if (!message) {
             var branchname = checkQuotes(tag);
