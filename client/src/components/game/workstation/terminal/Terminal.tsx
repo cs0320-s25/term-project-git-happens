@@ -3,6 +3,7 @@ import "../../../../styles/game.css";
 import { parseCommand } from "./commandParser";
 import { IngredientImage } from "../../Game";
 import type { CommitData, BranchData } from "../../../App";
+import type { BranchType } from "../../Game";
 
 interface TerminalProps {
   workstation1Items: IngredientImage[];
@@ -31,6 +32,8 @@ interface TerminalProps {
   setCurrentBranch: Dispatch<SetStateAction<string>>;
   newBranch: string;
   setNewBranch: Dispatch<SetStateAction<string>>;
+  branchTypes: BranchType[];
+  setBranchTypes: Dispatch<SetStateAction<BranchType[]>>;
   sessionID: string;
   userID: string;
 }

@@ -204,6 +204,8 @@ export function Workstation(props: WorkstationProps) {
         setCurrentBranch={props.setCurrentBranch}
         newBranch={newBranch}
         setNewBranch={setNewBranch}
+        branchTypes={props.branchTypes}
+        setBranchTypes={props.setBranchTypes}
         sessionID={props.sessionID}
         userID={props.userID}
       />
