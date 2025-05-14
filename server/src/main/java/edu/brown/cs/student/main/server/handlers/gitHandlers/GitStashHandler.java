@@ -166,7 +166,9 @@ public class GitStashHandler extends AbstractEndpointHandler {
                     + ") and removed from stashes list.");
           }
         }
-        default -> returnErrorResponse("error_database", "Command not supported.");
+        default -> {
+          return returnErrorResponse("error_database", "Command not supported.");
+        }
       }
     } catch (Exception e) {
       return returnErrorResponse("", "");

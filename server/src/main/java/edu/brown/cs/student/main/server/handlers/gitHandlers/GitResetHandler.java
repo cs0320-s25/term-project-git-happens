@@ -31,22 +31,22 @@ public class GitResetHandler extends AbstractEndpointHandler {
     final String commitId = request.queryParams("reset_commit_id");
 
     if (session_id == null) {
-      return returnErrorResponse("error_bad_request", "null_parameter", "session_id");
+      return returnErrorResponse("error_bad_request", "null parameter", "session_id");
     } else {
       responseMap.put("session_id", session_id);
     }
     if (user_id == null) {
-      return returnErrorResponse("error_bad_request", "null_parameter", "user_id");
+      return returnErrorResponse("error_bad_request", "null parameter", "user_id");
     } else {
       responseMap.put("user_id", user_id);
     }
     if (branchId == null) {
-      return returnErrorResponse("error_bad_request", "null_parameter", "branch_id");
+      return returnErrorResponse("error_bad_request", "null parameter", "branch_id");
     } else {
       responseMap.put("branch_id", branchId);
     }
     if (commitId == null) {
-      return returnErrorResponse("error_bad_request", "null_parameter", "reset_commit_id");
+      return returnErrorResponse("error_bad_request", "null parameter", "reset_commit_id");
     } else {
       responseMap.put("reset_commit_id", commitId);
     }
@@ -64,7 +64,7 @@ public class GitResetHandler extends AbstractEndpointHandler {
       // if desired commit is in staged commits, trim staged commits list
       for (Map<String, Object> commit : stagedCommits) {
         newStagedCommits.add(commit);
-        if (commit.get("commit_id") == commitId) {
+        if (commit.get("commit_id").equals(commitId)) {
           resetCommit = commit;
           break;
         }
@@ -75,7 +75,7 @@ public class GitResetHandler extends AbstractEndpointHandler {
         // if desired commit is in pushed commits, trim pushed commits list
         for (Map<String, Object> commit : pushedCommits) {
           newPushedCommits.add(commit);
-          if (commit.get("commit_id") == commitId) {
+          if (commit.get("commit_id").equals(commitId)) {
             resetCommit = commit;
             break;
           }

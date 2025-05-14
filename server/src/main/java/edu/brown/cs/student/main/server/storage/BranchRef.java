@@ -86,6 +86,7 @@ public record BranchRef(CollectionReference branch) {
    * @return a map representing the head commit data
    */
   public Map<String, Object> getHeadData() throws ExecutionException, InterruptedException {
-    return head().get().get().getData();
+    var snapshot = head().get().get();
+    return snapshot.getData();
   }
 }

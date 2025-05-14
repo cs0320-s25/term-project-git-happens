@@ -18,6 +18,7 @@ public class GitPushHandler extends AbstractEndpointHandler {
 
   @Override
   public Object handle(final Request request, final Response response) throws Exception {
+
     responseMap = new HashMap<>();
     // unique session id
     final String sessionId = request.queryParams("session_id");
@@ -41,9 +42,8 @@ public class GitPushHandler extends AbstractEndpointHandler {
     } else {
       responseMap.put("branch_id", currentBranch);
     }
-
     try {
-
+      System.out.println("push past null checks ");
       // check that there are local staged commits
       List<Map<String, Object>> stagedCommits =
           storage.getStagedCommits(sessionId, userId, currentBranch);
@@ -51,6 +51,7 @@ public class GitPushHandler extends AbstractEndpointHandler {
       // if there is nothing to commit, return message for terminal display
       if (stagedCommits.isEmpty()) {
         responseMap.put("message", "Already up to date.");
+        System.out.println("nothing to push");
         return returnSuccessResponse();
       }
 
@@ -76,6 +77,7 @@ public class GitPushHandler extends AbstractEndpointHandler {
             "error_database", "Error: failed to push to origin/" + currentBranch);
       }
 
+      System.out.println("finally pushing commits");
       // otherwise, push staged commit(s) to remote
       storage.pushCommit(sessionId, userId, currentBranch);
       responseMap.put("old_head_id", remoteLatestCommitId);
@@ -94,6 +96,8 @@ public class GitPushHandler extends AbstractEndpointHandler {
               + " Successfully pushed.");
 
     } catch (Exception e) {
+
+      System.out.println("push exception exists");
       return returnErrorResponse("error_database", "push_failed: " + e.getMessage());
     }
 

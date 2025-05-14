@@ -51,15 +51,11 @@ public class CreateSessionHandler extends AbstractEndpointHandler {
       } else {
         responseMap.put("file_map_json", originalFileMap);
       }
-      // check if session already exists
-      List<String> existingSessionIds = storage.getAllSessions();
-      if (existingSessionIds.contains(sessionId)) {
-        return returnErrorResponse("error_bad_request", "session_name_already_in_use");
-      } else {
-        // setup main branch for the game and push original game state as first commit
+
+        // setup main branch for the game if not already created and add local user
         storage.addSession(sessionId, userId, originalFileMap);
         responseMap.put("action", "session_created");
-      }
+
     } catch (Exception e) {
       return returnErrorResponse("error_database", "session_creation_failed: " + e.getMessage());
     }
