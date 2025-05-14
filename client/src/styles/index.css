@@ -17,11 +17,11 @@
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: #ff6464;
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: #ff6464;
 }
 
 h1 {
@@ -40,8 +40,8 @@ button {
 }
 
 button:hover {
-  border-color: #646cff;
-  background-color: #646bea;
+  border-color: #ff6464;
+  background-color: #ff6464;
 }
 
 button:focus,
@@ -50,7 +50,7 @@ button:focus-visible {
 }
 
 .mode-toggle-button:hover {
-  border-color: #646cff;
+  border-color: #ff6464;
 }
 
 /* media queries for light mode adaption */
