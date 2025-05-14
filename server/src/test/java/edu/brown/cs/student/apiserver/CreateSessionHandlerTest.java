@@ -9,13 +9,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class CreateSessionHandlerTest  extends BaseEndpointTest {
+public class CreateSessionHandlerTest extends BaseEndpointTest {
 
   private final String testSessionId = "create-test";
   private final Map<String, List<MockFileObject>> originalFileMap = new HashMap<>();
+
   @Test
   void testMissingParameters() {
     try {
@@ -45,13 +45,21 @@ public class CreateSessionHandlerTest  extends BaseEndpointTest {
 
       String fileMapJson = serializeFileMap(originalFileMap);
 
-      HttpURLConnection connection = tryRequest("createsession?session_id=" + testSessionId
-      + "&user_id=test-user1&file_map_json=" + fileMapJson);
+      HttpURLConnection connection =
+          tryRequest(
+              "createsession?session_id="
+                  + testSessionId
+                  + "&user_id=test-user1&file_map_json="
+                  + fileMapJson);
       Map<String, Object> response = deserializeResponse(connection);
       assertEquals("success", response.get("response"));
 
-      connection = tryRequest("createsession?session_id=" + testSessionId
-      + "&user_id=test-user2&file_map_json=" + fileMapJson);
+      connection =
+          tryRequest(
+              "createsession?session_id="
+                  + testSessionId
+                  + "&user_id=test-user2&file_map_json="
+                  + fileMapJson);
       response = deserializeResponse(connection);
       assertEquals("success", response.get("response"));
 

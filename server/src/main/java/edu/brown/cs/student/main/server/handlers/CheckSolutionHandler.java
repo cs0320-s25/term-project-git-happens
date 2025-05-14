@@ -18,7 +18,6 @@ public class CheckSolutionHandler extends AbstractEndpointHandler {
     this.storage = storage;
   }
 
-
   @Override
   public Object handle(Request request, Response response) throws Exception {
     responseMap = new HashMap<>();
@@ -58,15 +57,17 @@ public class CheckSolutionHandler extends AbstractEndpointHandler {
 
       // get latest pushed commit from the branch solution should be on
       Map<String, Object> latestRemoteCommit = storage.getLatestRemoteCommit(sessionId, branchId);
-      Map<String, List<MockFileObject>> userFileMap = deserializeFileMap(
-          (String) latestRemoteCommit.get("file_map_json"));
+      Map<String, List<MockFileObject>> userFileMap =
+          deserializeFileMap((String) latestRemoteCommit.get("file_map_json"));
 
       // check for differences between user's commit and solution, return boolean
-      Set<String> filesWithDifferences = gitDiffHelper.differenceDetected(solutionFileMap, userFileMap);
+      Set<String> filesWithDifferences =
+          gitDiffHelper.differenceDetected(solutionFileMap, userFileMap);
       System.out.println(gitDiffHelper.getNewIncomingFiles());
       System.out.println(gitDiffHelper.getNewLocalFiles());
       System.out.println(filesWithDifferences);
-      responseMap.put("solution_correct", filesWithDifferences.isEmpty());
+      // at least one of the files matches the solution
+      responseMap.put("solution_correct", filesWithDifferences.size() < 3);
     } catch (Exception e) {
       return returnErrorResponse("error_database", "check_solution_failed: " + e.getMessage());
     }

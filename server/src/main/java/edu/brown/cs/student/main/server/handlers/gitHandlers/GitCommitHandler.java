@@ -75,7 +75,7 @@ public class GitCommitHandler extends AbstractEndpointHandler {
       String newFileMapJson = storage.getLatestLocalChanges(session_id, user_id, branchId);
       // if there are no staged changes, return error for terminal display
       if (newFileMapJson == null) {
-       System.out.println("no file found");
+        System.out.println("no file found");
         return returnErrorResponse(
             "error_database", "No changes added to commit (use 'git add -A')");
       }

@@ -19,9 +19,7 @@ import edu.brown.cs.student.main.server.handlers.gitHandlers.GitRmHandler;
 import edu.brown.cs.student.main.server.handlers.gitHandlers.GitStashHandler;
 import edu.brown.cs.student.main.server.handlers.gitHandlers.GitStatusHandler;
 import edu.brown.cs.student.main.server.mergeHelpers.MockFileObject;
-import edu.brown.cs.student.main.server.storage.FirebaseUtilities;
 import edu.brown.cs.student.main.server.storage.MockStorage;
-import edu.brown.cs.student.main.server.storage.StorageInterface;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
@@ -47,9 +45,8 @@ public abstract class BaseEndpointTest {
   /** Starts the Spark test server before any tests are run. */
   @BeforeAll
   public static void setupBeforeEverything() {
-      firebaseUtils = new MockStorage();
-      SparkTestServer.startServer();
-
+    firebaseUtils = new MockStorage();
+    SparkTestServer.startServer();
   }
 
   /**
@@ -141,9 +138,7 @@ public abstract class BaseEndpointTest {
     Moshi moshi = new Moshi.Builder().build();
     Type type =
         Types.newParameterizedType(
-            Map.class,
-            String.class,
-            Types.newParameterizedType(List.class, MockFileObject.class));
+            Map.class, String.class, Types.newParameterizedType(List.class, MockFileObject.class));
     JsonAdapter<Map<String, List<MockFileObject>>> adapter = moshi.adapter(type);
     return adapter.toJson(fileMap);
   }
@@ -174,6 +169,7 @@ public abstract class BaseEndpointTest {
 
   /**
    * Returns a deserialized response map from the given connection.
+   *
    * @param connection - HttpURLConnection returned by a request
    * @return - a responsse map of strings to objects
    * @throws IOException - if there is a problem reading input stream

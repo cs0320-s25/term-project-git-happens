@@ -1,5 +1,3 @@
 package edu.brown.cs.student.apiserver;
 
-public class MockStorage {
-
-}
+public class MockStorage {}

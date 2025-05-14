@@ -8,7 +8,6 @@ import edu.brown.cs.student.main.server.mergeHelpers.GitDiffHelper;
 import edu.brown.cs.student.main.server.mergeHelpers.MockFileObject;
 import edu.brown.cs.student.main.server.storage.StorageInterface;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

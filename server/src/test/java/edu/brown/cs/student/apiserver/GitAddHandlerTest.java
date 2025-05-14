@@ -1,12 +1,11 @@
 package edu.brown.cs.student.apiserver;
 
-import edu.brown.cs.student.main.server.mergeHelpers.MockFileObject;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
+import edu.brown.cs.student.main.server.mergeHelpers.MockFileObject;
 import java.net.HttpURLConnection;
 import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 public class GitAddHandlerTest extends BaseEndpointTest {
 
@@ -17,7 +16,8 @@ public class GitAddHandlerTest extends BaseEndpointTest {
   @Test
   public void testMissingSessionId() {
     try {
-      HttpURLConnection connection = tryRequest("gitadd?user_id=" + userId + "&branch_id=" + branchId + "&file_map_json={}");
+      HttpURLConnection connection =
+          tryRequest("gitadd?user_id=" + userId + "&branch_id=" + branchId + "&file_map_json={}");
       Map<String, Object> response = deserializeResponse(connection);
       assertEquals("error_bad_request", response.get("response"));
       assertEquals("null parameter", response.get("error_cause"));
@@ -29,7 +29,9 @@ public class GitAddHandlerTest extends BaseEndpointTest {
   @Test
   public void testMissingUserId() {
     try {
-      HttpURLConnection connection = tryRequest("gitadd?session_id=" + sessionId + "&branch_id=" + branchId + "&file_map_json={}");
+      HttpURLConnection connection =
+          tryRequest(
+              "gitadd?session_id=" + sessionId + "&branch_id=" + branchId + "&file_map_json={}");
       Map<String, Object> response = deserializeResponse(connection);
       assertEquals("error_bad_request", response.get("response"));
       assertEquals("null parameter", response.get("error_cause"));
@@ -41,7 +43,8 @@ public class GitAddHandlerTest extends BaseEndpointTest {
   @Test
   public void testMissingBranchId() {
     try {
-      HttpURLConnection connection = tryRequest("gitadd?session_id=" + sessionId + "&user_id=" + userId + "&file_map_json={}");
+      HttpURLConnection connection =
+          tryRequest("gitadd?session_id=" + sessionId + "&user_id=" + userId + "&file_map_json={}");
       Map<String, Object> response = deserializeResponse(connection);
       assertEquals("error_bad_request", response.get("response"));
       assertEquals("null parameter", response.get("error_cause"));
@@ -53,7 +56,9 @@ public class GitAddHandlerTest extends BaseEndpointTest {
   @Test
   public void testMissingFileMapJson() {
     try {
-      HttpURLConnection connection = tryRequest("gitadd?session_id=" + sessionId + "&user_id=" + userId + "&branch_id=" + branchId);
+      HttpURLConnection connection =
+          tryRequest(
+              "gitadd?session_id=" + sessionId + "&user_id=" + userId + "&branch_id=" + branchId);
       Map<String, Object> response = deserializeResponse(connection);
       assertEquals("error_bad_request", response.get("response"));
       assertEquals("null parameter", response.get("error_cause"));
@@ -71,11 +76,27 @@ public class GitAddHandlerTest extends BaseEndpointTest {
       String fileMapJson = serializeFileMap(fileMap);
 
       // create session first
-      HttpURLConnection connection = tryRequest("createsession?session_id=" + sessionId + "&user_id=" + userId + "&file_map_json=" + fileMapJson);
+      HttpURLConnection connection =
+          tryRequest(
+              "createsession?session_id="
+                  + sessionId
+                  + "&user_id="
+                  + userId
+                  + "&file_map_json="
+                  + fileMapJson);
       Map<String, Object> createResponse = deserializeResponse(connection);
       assertEquals("success", createResponse.get("response"));
 
-      connection = tryRequest("gitadd?session_id=" + sessionId + "&user_id=" + userId + "&branch_id=" + branchId + "&file_map_json=" + fileMapJson);
+      connection =
+          tryRequest(
+              "gitadd?session_id="
+                  + sessionId
+                  + "&user_id="
+                  + userId
+                  + "&branch_id="
+                  + branchId
+                  + "&file_map_json="
+                  + fileMapJson);
       Map<String, Object> response = deserializeResponse(connection);
 
       assertEquals("success", response.get("response"));
@@ -85,4 +106,3 @@ public class GitAddHandlerTest extends BaseEndpointTest {
     }
   }
 }
-

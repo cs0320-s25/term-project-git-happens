@@ -11,9 +11,10 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-public class DeleteSessionHandlerTest  extends BaseEndpointTest {
+public class DeleteSessionHandlerTest extends BaseEndpointTest {
   private final String testSessionId = "delete-test";
   private final Map<String, List<MockFileObject>> originalFileMap = new HashMap<>();
+
   @Test
   void testMissingParameters() {
     try {
@@ -39,6 +40,7 @@ public class DeleteSessionHandlerTest  extends BaseEndpointTest {
       e.printStackTrace();
     }
   }
+
   @Test
   void testDeleteExistingSession() {
     try {
@@ -55,8 +57,12 @@ public class DeleteSessionHandlerTest  extends BaseEndpointTest {
 
       String fileMapJson = serializeFileMap(originalFileMap);
 
-      HttpURLConnection connection = tryRequest("createsession?session_id=" + testSessionId
-          + "&user_id=test-user1&file_map_json=" + fileMapJson);
+      HttpURLConnection connection =
+          tryRequest(
+              "createsession?session_id="
+                  + testSessionId
+                  + "&user_id=test-user1&file_map_json="
+                  + fileMapJson);
       Map<String, Object> response = deserializeResponse(connection);
       assertEquals("success", response.get("response"));
 

@@ -19,7 +19,7 @@ import {
   BackendCommit,
   convertBackendCommit,
 } from "../../../../datasource/fetcherUtil";
-import { parse } from "path";
+import { checkSolution } from "../../../../datasource/checkSolution";
 
 interface TerminalProps {
   workstation1Items: IngredientImage[];
@@ -63,22 +63,18 @@ interface TerminalProps {
   setShowMergePopup: Dispatch<SetStateAction<boolean>>;
   mergePopupDone: boolean;
   setMergePopupDone: Dispatch<SetStateAction<boolean>>;
-  levelData: [
-    {
-      instructions: string;
-      orderItems: { imgStr: string; imgName: string }[];
-      completed: boolean;
-    }
-  ];
+  levelData: {
+    instructions: string;
+    orderItems: { imgStr: string; imgName: string }[];
+    completed: boolean;
+  }[];
   setLevelData: Dispatch<
     SetStateAction<
-      [
-        {
-          instructions: string;
-          orderItems: { imgStr: string; imgName: string }[];
-          completed: boolean;
-        }
-      ]
+      {
+        instructions: string;
+        orderItems: { imgStr: string; imgName: string }[];
+        completed: boolean;
+      }[]
     >
   >;
   currentLevel: number;
@@ -104,6 +100,12 @@ export function Terminal(props: TerminalProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const historyRef = useRef<HTMLDivElement | null>(null); // Ref for scrolling
   const [conflictingFiles, setConflictingFiles] = useState<string[]>([]);
+  const [currentLevelSolutionData, setCurrentLevelSolutionData] =
+    useState<string>(
+      makeFileMapJsonForLevelSolution(
+        props.levelData[props.currentLevel].orderItems
+      )
+    );
 
   // Scroll to bottom whenever the command history updates
   useEffect(() => {
@@ -130,6 +132,14 @@ export function Terminal(props: TerminalProps) {
     props.setMergePopupDone(() => false);
   }, [props.mergePopupDone]);
 
+  useEffect(() => {
+    setCurrentLevelSolutionData(
+      makeFileMapJsonForLevelSolution(
+        props.levelData[props.currentLevel].orderItems
+      )
+    );
+  }, [props.currentLevel]);
+
   // Focus the terminal input when the history is clicked
   function handleHistoryClick() {
     if (window.getSelection()?.toString()) {
@@ -140,6 +150,16 @@ export function Terminal(props: TerminalProps) {
     if (inputRef.current) {
       inputRef.current.focus(); // Focus the input
     }
+  }
+
+  function makeFileMapJsonForLevelSolution(
+    ingredientList: IngredientImage[]
+  ): string {
+    const returnMap: { [key: string]: IngredientImage[] } = {};
+    returnMap["file1"] = ingredientList;
+    returnMap["file2"] = ingredientList;
+    returnMap["file3"] = ingredientList;
+    return JSON.stringify(returnMap);
   }
 
   function makeFileMapJson(useStaged: boolean): string {
@@ -298,6 +318,22 @@ export function Terminal(props: TerminalProps) {
             if (response[1].message !== undefined) {
               const pushMessage: string = response[1].message;
               addToTerminal(pushMessage);
+            }
+          }
+        });
+        checkSolution({
+          session_id: props.sessionID,
+          user_id: props.userID,
+          solution_branch_id: "main", // TODO: pass in the correct branch
+          solution_file_map_json: currentLevelSolutionData,
+        }).then((response) => {
+          if (response[0]) {
+            if (response[1].solution_correct! == "true") {
+              addToTerminal("Level completed!");
+              const updatedLevelData = [...props.levelData];
+              updatedLevelData[props.currentLevel].completed = true;
+              props.setLevelData(updatedLevelData);
+              // TODO: do whatever needs to happen with level completion
             }
           }
         });
@@ -653,8 +689,6 @@ export function Terminal(props: TerminalProps) {
           }
         });
         setCommandHistory((prev) => [...prev, command]);
-
-        // TODO: call gitStashList
         break;
       case "stash":
         addToTerminal(command);

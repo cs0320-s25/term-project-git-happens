@@ -2,7 +2,6 @@ package edu.brown.cs.student.main.server.handlers;
 
 import edu.brown.cs.student.main.server.storage.StorageInterface;
 import java.util.HashMap;
-import java.util.List;
 import spark.Request;
 import spark.Response;
 
@@ -52,9 +51,9 @@ public class CreateSessionHandler extends AbstractEndpointHandler {
         responseMap.put("file_map_json", originalFileMap);
       }
 
-        // setup main branch for the game if not already created and add local user
-        storage.addSession(sessionId, userId, originalFileMap);
-        responseMap.put("action", "session_created");
+      // setup main branch for the game if not already created and add local user
+      storage.addSession(sessionId, userId, originalFileMap);
+      responseMap.put("action", "session_created");
 
     } catch (Exception e) {
       return returnErrorResponse("error_database", "session_creation_failed: " + e.getMessage());

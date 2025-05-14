@@ -8,7 +8,11 @@ import spark.Response;
 public class DeleteSessionHandler extends AbstractEndpointHandler {
 
   final StorageInterface storage;
-  public DeleteSessionHandler(StorageInterface storage) {this.storage = storage;}
+
+  public DeleteSessionHandler(StorageInterface storage) {
+    this.storage = storage;
+  }
+
   @Override
   public Object handle(Request request, Response response) throws Exception {
     responseMap = new HashMap<>();
