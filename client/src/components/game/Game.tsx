@@ -4,6 +4,7 @@ import { Plate } from "./plate/Plate";
 import { Level } from "./level/Level";
 import { Ingredients } from "./ingredients/Ingredients";
 import { Workstation } from "./workstation/Workstation";
+import { MergeConflictPopup } from "./mergeconflictpopup/MergeConflictPopup";
 import type { CommitData, BranchData, fileCommit } from "../App";
 import {
   fancy_patty,
@@ -27,6 +28,17 @@ import {
 export interface IngredientImage {
   imgStr: string;
   imgName: string;
+}
+
+export interface ConflictEntry {
+  incoming: IngredientImage[];
+  local: IngredientImage[];
+}
+
+export type FileName = "file1" | "file2" | "file3";
+
+export interface FileContents {
+  [key: string]: IngredientImage[];
 }
 
 interface GameProps {
@@ -131,12 +143,12 @@ export function Game(props: GameProps) {
       ],
       completed: false,
     },
-    {
-      instructions:
-        "Uh oh, looks like the health inspector is coming around, so you should get rid of any plates containing moldy burger! Use git rm “<FILE NAME HERE>” to remove a plate from both your local (kitchen) and remote (dining room) repositories.",
-      orderItems: [{ imgStr: sesame_bottom, imgName: "1" }],
-      completed: false,
-    },
+    // {
+    //   instructions:
+    //     "Uh oh, looks like the health inspector is coming around, so you should get rid of any plates containing moldy burger! Use git rm “<FILE NAME HERE>” to remove a plate from both your local (kitchen) and remote (dining room) repositories.",
+    //   orderItems: [{ imgStr: sesame_bottom, imgName: "1" }],
+    //   completed: false,
+    // },
     {
       instructions:
         "Try pulling and modifying the following order, but instead of pushing, save it with git stash.",
@@ -342,8 +354,54 @@ export function Game(props: GameProps) {
     e.preventDefault(); // Required to allow dropping
   };
 
+  const [showMergePopup, setShowMergePopup] = useState(true);
+  const [desiredMergeContents, setDesiredMergeContents] =
+    useState<FileContents>({ file1: [], file2: [], file3: [] });
+
+  const fileConflicts = {
+    file2: {
+      incoming: [
+        { imgStr: sesame_top, imgName: "blobs" },
+        { imgStr: sesame_bottom, imgName: "ingredient4" },
+      ],
+      local: [
+        { imgStr: pretzel_top, imgName: "ingredient820" },
+        { imgStr: pretzel_bottom, imgName: "ingredient4" },
+      ],
+    },
+    file1: {
+      incoming: [
+        { imgStr: mayo, imgName: "blobs" },
+        { imgStr: fries, imgName: "ingredient2" },
+      ],
+      local: [
+        { imgStr: ketchup, imgName: "ingredient1" },
+        { imgStr: fries, imgName: "ingredient2" },
+      ],
+    },
+    file3: {
+      incoming: [
+        { imgStr: mayo, imgName: "blobs" },
+        { imgStr: fries, imgName: "ingredient2" },
+      ],
+      local: [
+        { imgStr: ketchup, imgName: "ingredient1" },
+        { imgStr: fries, imgName: "ingredient2" },
+      ],
+    },
+  };
+
   return (
     <div className="game-container">
+      {showMergePopup && (
+        <MergeConflictPopup
+          fileConflicts={fileConflicts}
+          setShowMergePopup={setShowMergePopup}
+          desiredMergeContents={desiredMergeContents}
+          setDesiredMergeContents={setDesiredMergeContents}
+        />
+      )}
+
       <div className="flex-row">
         <div className="level-container">
           <div className="level-buttons"></div>
