@@ -358,11 +358,9 @@ export function Game(props: GameProps) {
   const [desiredMergeContents, setDesiredMergeContents] =
     useState<FileContents>({ file1: [], file2: [], file3: [] });
 
-  const [fileConflicts, setFileConflicts] = useState<FileContents>({
-    file1: [],
-    file2: [],
-    file3: [],
-  });
+  const [fileConflicts, setFileConflicts] = useState<{
+    [key: string]: ConflictEntry;
+  }>({});
 
   const exfileConflicts = {
     file2: {
@@ -401,7 +399,7 @@ export function Game(props: GameProps) {
     <div className="game-container">
       {showMergePopup && (
         <MergeConflictPopup
-          fileConflicts={exfileConflicts}
+          fileConflicts={fileConflicts}
           setShowMergePopup={setShowMergePopup}
           desiredMergeContents={desiredMergeContents}
           setDesiredMergeContents={setDesiredMergeContents}
