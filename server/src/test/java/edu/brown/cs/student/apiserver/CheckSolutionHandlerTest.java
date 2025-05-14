@@ -42,8 +42,6 @@ public class CheckSolutionHandlerTest extends BaseEndpointTest {
       Map<String, Object> response = deserializeResponse(connection);
       assertEquals("error_bad_request", response.get("response"));
 
-      connection = tryRequest("deletesession?session_id=2" + testSessionId);
-
     } catch (Exception e) {
       e.printStackTrace();
     }

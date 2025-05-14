@@ -8,7 +8,7 @@ public record MockFileObject(String imgStr, String imgName) {
     if (this == obj) return true;
     if (obj == null) return false;
     MockFileObject other = (MockFileObject) obj;
-    return imgStr.equals(other.imgStr) && imgName.equals(other.imgName);
+    return imgStr.equals(other.imgStr);
   }
 
   @Override
