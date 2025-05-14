@@ -2,13 +2,37 @@ import { Dispatch, SetStateAction, useState, useEffect, useRef } from "react";
 import "../styles/App.css";
 import { Game } from "./game/Game";
 import { Branch } from "./branch/Branch";
+import { IngredientImage } from "./game/Game";
+import {
+  fancy_patty,
+  fries,
+  ketchup,
+  lettuce,
+  mayo,
+  moldy_patty,
+  mustard,
+  onion,
+  patty,
+  pretzel_bottom,
+  pretzel_top,
+  sesame_bottom,
+  sesame_top,
+  tomato,
+  plate,
+  cheese,
+} from "../assets/images";
+
+export interface fileCommit {
+  fileName: string;
+  fileContents: IngredientImage[];
+}
 
 export interface CommitData {
   commit_hash: string;
   message: string;
   branch: string;
   parent_commits: string[];
-  contents: string[];
+  contents: fileCommit[];
 }
 
 export interface BranchData {
@@ -37,21 +61,71 @@ function App() {
         message: "Initial commit",
         branch: "main",
         parent_commits: [],
-        contents: ["aaaaaa"],
+        contents: [
+          {
+            fileName: "file1",
+            fileContents: [
+              { imgStr: sesame_top, imgName: "burger" },
+              { imgStr: mayo, imgName: "burger" },
+              { imgStr: cheese, imgName: "burger" },
+              { imgStr: patty, imgName: "burger" },
+              { imgStr: sesame_bottom, imgName: "burger" },
+            ],
+          },
+          {
+            fileName: "file2",
+            fileContents: [
+              { imgStr: sesame_top, imgName: "burger" },
+              { imgStr: onion, imgName: "burger" },
+              { imgStr: lettuce, imgName: "burger" },
+              { imgStr: tomato, imgName: "burger" },
+              { imgStr: sesame_bottom, imgName: "burger" },
+            ],
+          },
+          {
+            fileName: "file3",
+            fileContents: [
+              { imgStr: ketchup, imgName: "burger" },
+              { imgStr: fries, imgName: "burger" },
+            ],
+          },
+        ],
       },
       {
         commit_hash: "b",
         message: "Add feature",
         branch: "feature",
         parent_commits: ["a"],
-        contents: ["aaaaaa"],
+        contents: [
+          {
+            fileName: "file1",
+            fileContents: [
+              { imgStr: sesame_top, imgName: "burger" },
+              { imgStr: mayo, imgName: "burger" },
+              { imgStr: cheese, imgName: "burger" },
+              { imgStr: patty, imgName: "burger" },
+              { imgStr: sesame_bottom, imgName: "burger" },
+            ],
+          },
+        ],
       },
       {
         commit_hash: "c",
         message: "Fix bug",
         branch: "main",
         parent_commits: ["a"],
-        contents: ["aaaaaa"],
+        contents: [
+          {
+            fileName: "file1",
+            fileContents: [
+              { imgStr: sesame_top, imgName: "burger" },
+              { imgStr: mayo, imgName: "burger" },
+              { imgStr: cheese, imgName: "burger" },
+              { imgStr: patty, imgName: "burger" },
+              { imgStr: sesame_bottom, imgName: "burger" },
+            ],
+          },
+        ],
       },
       {
         commit_hash: "d",
@@ -59,7 +133,16 @@ function App() {
         branch: "main",
         parent_commits: ["f", "h"],
         contents: [
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          {
+            fileName: "file1",
+            fileContents: [
+              { imgStr: sesame_top, imgName: "burger" },
+              { imgStr: mayo, imgName: "burger" },
+              { imgStr: cheese, imgName: "burger" },
+              { imgStr: patty, imgName: "burger" },
+              { imgStr: sesame_bottom, imgName: "burger" },
+            ],
+          },
         ],
       },
       {
@@ -67,7 +150,18 @@ function App() {
         message: "new branch :p",
         branch: "side",
         parent_commits: ["a"],
-        contents: ["aaaaaa"],
+        contents: [
+          {
+            fileName: "file1",
+            fileContents: [
+              { imgStr: sesame_top, imgName: "burger" },
+              { imgStr: mayo, imgName: "burger" },
+              { imgStr: cheese, imgName: "burger" },
+              { imgStr: patty, imgName: "burger" },
+              { imgStr: sesame_bottom, imgName: "burger" },
+            ],
+          },
+        ],
       },
       {
         commit_hash: "f",
@@ -76,9 +170,16 @@ function App() {
         branch: "feature",
         parent_commits: ["e", "b"],
         contents: [
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          {
+            fileName: "file1",
+            fileContents: [
+              { imgStr: sesame_top, imgName: "burger" },
+              { imgStr: mayo, imgName: "burger" },
+              { imgStr: cheese, imgName: "burger" },
+              { imgStr: patty, imgName: "burger" },
+              { imgStr: sesame_bottom, imgName: "burger" },
+            ],
+          },
         ],
       },
       {
@@ -87,9 +188,16 @@ function App() {
         branch: "external",
         parent_commits: ["a"],
         contents: [
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          {
+            fileName: "file1",
+            fileContents: [
+              { imgStr: sesame_top, imgName: "burger" },
+              { imgStr: mayo, imgName: "burger" },
+              { imgStr: cheese, imgName: "burger" },
+              { imgStr: patty, imgName: "burger" },
+              { imgStr: sesame_bottom, imgName: "burger" },
+            ],
+          },
         ],
       },
       {
@@ -98,9 +206,16 @@ function App() {
         branch: "main",
         parent_commits: ["g", "c"],
         contents: [
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          {
+            fileName: "file1",
+            fileContents: [
+              { imgStr: sesame_top, imgName: "burger" },
+              { imgStr: mayo, imgName: "burger" },
+              { imgStr: cheese, imgName: "burger" },
+              { imgStr: patty, imgName: "burger" },
+              { imgStr: sesame_bottom, imgName: "burger" },
+            ],
+          },
         ],
       },
       {
@@ -109,9 +224,16 @@ function App() {
         branch: "main",
         parent_commits: ["d"],
         contents: [
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          {
+            fileName: "file1",
+            fileContents: [
+              { imgStr: sesame_top, imgName: "burger" },
+              { imgStr: mayo, imgName: "burger" },
+              { imgStr: cheese, imgName: "burger" },
+              { imgStr: patty, imgName: "burger" },
+              { imgStr: sesame_bottom, imgName: "burger" },
+            ],
+          },
         ],
       },
       {
@@ -120,9 +242,16 @@ function App() {
         branch: "main",
         parent_commits: ["i"],
         contents: [
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          {
+            fileName: "file1",
+            fileContents: [
+              { imgStr: sesame_top, imgName: "burger" },
+              { imgStr: mayo, imgName: "burger" },
+              { imgStr: cheese, imgName: "burger" },
+              { imgStr: patty, imgName: "burger" },
+              { imgStr: sesame_bottom, imgName: "burger" },
+            ],
+          },
         ],
       },
       {
@@ -131,9 +260,16 @@ function App() {
         branch: "main",
         parent_commits: ["j"],
         contents: [
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          {
+            fileName: "file1",
+            fileContents: [
+              { imgStr: sesame_top, imgName: "burger" },
+              { imgStr: mayo, imgName: "burger" },
+              { imgStr: cheese, imgName: "burger" },
+              { imgStr: patty, imgName: "burger" },
+              { imgStr: sesame_bottom, imgName: "burger" },
+            ],
+          },
         ],
       },
       {
@@ -142,9 +278,16 @@ function App() {
         branch: "main",
         parent_commits: ["k"],
         contents: [
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-          "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          {
+            fileName: "file1",
+            fileContents: [
+              { imgStr: sesame_top, imgName: "burger" },
+              { imgStr: mayo, imgName: "burger" },
+              { imgStr: cheese, imgName: "burger" },
+              { imgStr: patty, imgName: "burger" },
+              { imgStr: sesame_bottom, imgName: "burger" },
+            ],
+          },
         ],
       },
     ],

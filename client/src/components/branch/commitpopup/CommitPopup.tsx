@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction, useState, useEffect, useRef } from "react";
 import type { CommitData, BranchData } from "../../App";
+import "../../../styles/branch.css";
 
 interface CommitPopupProps {
   commit: CommitData;
@@ -34,9 +35,35 @@ export function CommitPopup(props: CommitPopupProps) {
       <div style={{ fontSize: "12px", marginBottom: "8px" }}>
         {commit.message}
       </div>
-      <pre style={{ fontSize: "11px", whiteSpace: "pre-wrap" }}>
-        {commit.contents.join("\n")}
-      </pre>
+      <div className="commit-contents">
+        {commit.contents.map((file, fileIdx) => (
+          <div
+            key={fileIdx}
+            style={{
+              display: "flex",
+            }}
+          >
+            <div className="file-contents">
+              <div style={{ fontSize: "12px", marginBottom: "8px" }}>
+                {file.fileName}
+              </div>
+              {file.fileContents.map((img, idx) => (
+                <img
+                  key={idx}
+                  src={img.imgStr}
+                  alt={img.imgName || `Ingredient ${idx + 1}`}
+                  style={{
+                    width: maxWidth - 10,
+                    top: `${idx * -45}px`, // shift each layer down slightly
+                    zIndex: 1000 - idx,
+                    position: "relative",
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
       <button onClick={() => onClose(commit.commit_hash)}>Close</button>
     </div>
   );

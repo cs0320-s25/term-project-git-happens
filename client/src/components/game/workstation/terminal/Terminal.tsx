@@ -77,6 +77,7 @@ export function Terminal(props: TerminalProps) {
     const parsed = parseCommand(command); // Parse the command here
     const commandStr = parsed.commandStr;
     const terminalResponse = parsed.terminalResponse;
+    const message = parsed.message ? parsed.message : null;
 
     switch (commandStr) {
       case "clear":
@@ -84,18 +85,22 @@ export function Terminal(props: TerminalProps) {
         setCommandHistory((prev) => [...prev, command]);
         break;
       case "add all":
+        // TODO: call gitAdd handler and update props accordingly
         props.setPlate1Items(props.workstation1Items);
         props.setPlate2Items(props.workstation2Items);
         props.setPlate3Items(props.workstation3Items);
         setTerminalHistory((prev) => [...prev, terminalResponse]);
         setCommandHistory((prev) => [...prev, command]);
         break;
-      case "commit":
+      case "commit success":
+        // TODO: call gitCommit and either update props accordingly from commit response or
         const commits = props.branchData.commits;
         const branches = props.branchData.branches;
+
+        // or don't make a new commit, just call git log verbose and update commits
         const newCommit = {
           commit_hash: "m",
-          message: "added commit",
+          message: message,
           branch: "main",
           parent_commits: ["l"],
           contents: ["aaaaa"],
@@ -106,7 +111,58 @@ export function Terminal(props: TerminalProps) {
         setTerminalHistory((prev) => [...prev, terminalResponse]);
         setCommandHistory((prev) => [...prev, command]);
         break;
-      default:
+      case "push":
+        // TODO: call gitPush
+        break;
+      case "branch all":
+        // TODO: call gitBranch
+        break;
+      case "branch remote":
+        // TODO: call gitBranch remote
+        break;
+      case "branch delete":
+        // TODO: call gitBranch delete
+        break;
+      case "branch local":
+        // TODO: call gitBranch local
+        break;
+      case "branch create":
+        // TODO: call gitBranch create, make sure to store the name of the newly created branch in the prop newBranch
+        break;
+      case "log":
+        // TODO: call gitLog
+        break;
+      case "merge":
+        // TODO: call gitMerge
+        break;
+      case "pull":
+        // TODO: call gitPull
+        break;
+      case "reset hard":
+        // TODO: call gitReset hard
+        break;
+      case "reset soft":
+        // TODO: call gitReset soft
+        break;
+      case "rm":
+        // TODO: call gitRm
+        break;
+      case "stash pop":
+        // TODO: call gitStashPop
+        break;
+      case "stash list":
+        // TODO: call gitStashList
+        break;
+      case "stash":
+        // TODO: call gitStash
+        break;
+      case "stash pop index":
+        // TODO: call gitStashPop with specific index
+        break;
+      case "status":
+        // TODO: call gitStatus
+        break;
+      default: // error commandstrs
         setTerminalHistory((prev) => [...prev, terminalResponse]);
         setCommandHistory((prev) => [...prev, command]);
     }

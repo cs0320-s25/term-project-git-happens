@@ -121,7 +121,7 @@ export function gitCommand(
           if (message) {
             return {
               // Successful commit
-              commandStr: "test",
+              commandStr: "commit success",
               terminalResponse: `Commit: ${message}`,
               message: `${message}`,
             };
@@ -346,7 +346,7 @@ export function gitCommand(
           ) {
             return {
               // Pop index
-              commandStr: "stash pop",
+              commandStr: "stash pop index",
               terminalResponse: `Popping index: ${pop_tag[0]}`,
               message: `${pop_tag[0]}`,
             };
