@@ -19,10 +19,29 @@
   svg text {
     fill: black;
   }
+
+  .terminal-history {
+    /* border: 1px solid blue; */
+    background-color: #e9e9e9;
+  }
+
+  .popup-container {
+    background-color: #f8f8f8;
+    border: 1px solid gray;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
   svg text {
     fill: white;
+  }
+
+  svg circle {
+    fill: white;
+  }
+
+  .popup-container {
+    background-color: gray;
+    border: 1px solid black;
   }
 }

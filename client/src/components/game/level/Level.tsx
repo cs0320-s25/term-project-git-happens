@@ -20,21 +20,33 @@ export function Level(props: LevelProps) {
   return (
     <div className="instructions-order-container">
       <center>
-        <img src={logo} className="logo" />
+        <img src={logo} className="logo" alt="Game logo" />
         <div className="level-header">
-          <button onClick={props.onPrev} disabled={props.isFirst}>
+          <button
+            onClick={props.onPrev}
+            disabled={props.isFirst}
+            aria-label="Go to previous level"
+          >
             &lt;
           </button>
-          <h1 style={{ margin: 0 }}>
+          <h1 id="level-heading" style={{ margin: 0 }} aria-live="polite">
             Level {props.level} {props.completed ? "✅" : ""}
           </h1>
-          <button onClick={props.onNext} disabled={props.isLast}>
+          <button
+            onClick={props.onNext}
+            disabled={props.isLast}
+            aria-label="Go to next level"
+          >
             &gt;
           </button>
         </div>
       </center>
-      <p>{props.instructions}</p>
-      <div className="order-container" style={{ position: "relative" }}>
+      <p className="level-instructions">{props.instructions}</p>
+      <section
+        className="order-container"
+        style={{ position: "relative" }}
+        aria-labelledby="level-heading"
+      >
         {props.completed && (
           <img src={checkmark} alt="Completed" className="checkmark-img" />
         )}
@@ -42,7 +54,7 @@ export function Level(props: LevelProps) {
           orderItems={props.orderItems}
           setOrderItems={props.setOrderItems}
         />
-      </div>
+      </section>
     </div>
   );
 }

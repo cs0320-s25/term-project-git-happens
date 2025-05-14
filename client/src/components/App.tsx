@@ -292,8 +292,31 @@ function App() {
           },
         ],
       },
+      {
+        commit_hash: "m",
+        message: "other branch",
+        branch: "other",
+        parent_commits: ["l"],
+        contents: [
+          {
+            fileName: "file1",
+            fileContents: [
+              { imgStr: sesame_top, imgName: "burger" },
+              { imgStr: mayo, imgName: "burger" },
+              { imgStr: cheese, imgName: "burger" },
+              { imgStr: patty, imgName: "burger" },
+              { imgStr: sesame_bottom, imgName: "burger" },
+            ],
+          },
+        ],
+      },
     ],
-    branches: [{ name: "main" }, { name: "feature" }, { name: "side" }],
+    branches: [
+      { name: "main" },
+      { name: "feature" },
+      { name: "side" },
+      { name: "other" },
+    ],
   };
 
   const sampleVisibleBranches = ["side", "main", "feature"];
@@ -380,6 +403,7 @@ function App() {
             setCurrentBranch={setCurrentBranch}
             branchData={branchData}
             visibleBranches={visibleBranches}
+            setVisibleBranches={setVisibleBranches}
           />
         </div>
       )}

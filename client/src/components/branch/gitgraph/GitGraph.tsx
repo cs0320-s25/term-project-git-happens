@@ -13,6 +13,7 @@ interface GitGraphProps {
     branches: BranchData[];
   };
   visibleBranches: string[];
+  setVisibleBranches: Dispatch<SetStateAction<string[]>>;
 }
 
 export function GitGraph(props: GitGraphProps) {
@@ -81,25 +82,6 @@ export function GitGraph(props: GitGraphProps) {
 
   const svgRef = useRef<SVGSVGElement | null>(null);
 
-  // function svgToScreenCoords(
-  //   svgElement: SVGSVGElement,
-  //   commitX: number,
-  //   commitY: number
-  // ) {
-  //   const container = svgElement.parentElement!;
-  //   const containerRect = container.getBoundingClientRect();
-  //   const svgRect = svgElement.getBoundingClientRect();
-
-  //   const offsetX = svgRect.left - containerRect.left;
-  //   const offsetY = svgRect.top - containerRect.top;
-
-  //   // Convert commit coordinates to container-relative
-  //   return {
-  //     x: commitX + offsetX,
-  //     y: commitY + offsetY,
-  //   };
-  // }
-
   function svgToScreenCoords(
     svgElement: SVGSVGElement,
     commitX: number,
@@ -121,6 +103,53 @@ export function GitGraph(props: GitGraphProps) {
     };
   }
 
+  const [focusedCommitHash, setFocusedCommitHash] = useState<string | null>(
+    null
+  );
+
+  function handleArrowNavigate(
+    current: (typeof commitPositions)[0],
+    direction: "up" | "down" | "left" | "right"
+  ) {
+    const branchCommits = commitPositions.filter(
+      (c) => c.commit.branch === current.commit.branch
+    );
+
+    const sortByY = (
+      a: (typeof commitPositions)[0],
+      b: (typeof commitPositions)[0]
+    ) => a.y - b.y;
+    const sortByX = (
+      a: (typeof commitPositions)[0],
+      b: (typeof commitPositions)[0]
+    ) => a.x - b.x;
+
+    let next;
+
+    if (direction === "up") {
+      next = branchCommits
+        .filter((c) => c.y < current.y)
+        .sort(sortByY)
+        .pop();
+    } else if (direction === "down") {
+      next = branchCommits.filter((c) => c.y > current.y).sort(sortByY)[0];
+    } else if (direction === "left") {
+      next = commitPositions
+        .filter((c) => c.x < current.x && c.y === current.y)
+        .sort(sortByX)
+        .pop();
+    } else if (direction === "right") {
+      next = commitPositions
+        .filter((c) => c.x > current.x && c.y === current.y)
+        .sort(sortByX)[0];
+    }
+
+    if (next) {
+      setFocusedCommitHash(next.commit.commit_hash);
+      // Optional: scroll into view or apply visual highlight
+    }
+  }
+
   return (
     <div className="svg-container">
       <svg
@@ -134,7 +163,9 @@ export function GitGraph(props: GitGraphProps) {
         }}
       >
         <BranchHeaders
+          branches={data.branches}
           visibleBranches={visibleBranches}
+          setVisibleBranches={props.setVisibleBranches}
           branchTrack={branchTrack}
           branchSpacing={branchSpacing}
           baseX={baseX}
@@ -165,6 +196,10 @@ export function GitGraph(props: GitGraphProps) {
                 return [...prev, c];
               });
             }}
+            isFocused={focusedCommitHash === commit.commit.commit_hash}
+            onArrowNavigate={(direction) =>
+              handleArrowNavigate(commit, direction)
+            }
           />
         ))}
       </svg>

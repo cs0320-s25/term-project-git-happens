@@ -1,3 +1,4 @@
+import { Dispatch, SetStateAction, useState, useEffect, useRef } from "react";
 import "../../../styles/branch.css";
 import "../../../styles/main.css";
 import type { CommitData, BranchData } from "../../App";
@@ -16,35 +17,54 @@ interface CommitNodeProps {
   ) => void;
 }
 
-export function CommitNode({ commit, onToggleSelect }: CommitNodeProps) {
-  const maxMessageLength = 20;
-  const displayMessage =
-    commit.commit.message.length > maxMessageLength
-      ? commit.commit.message.slice(0, maxMessageLength) + "..."
-      : commit.commit.message;
+export function CommitNode({
+  commit,
+  onToggleSelect,
+  isFocused,
+  onArrowNavigate,
+}: CommitNodeProps & {
+  isFocused: boolean;
+  onArrowNavigate: (dir: "up" | "down" | "left" | "right") => void;
+}) {
+  const ref = useRef<SVGGElement>(null);
+
+  useEffect(() => {
+    if (isFocused && ref.current) {
+      ref.current.focus();
+    }
+  }, [isFocused]);
 
   const handleSelect = (clickX: number, clickY: number) => {
     onToggleSelect(commit, clickX, clickY);
   };
 
+  const ariaLabel = `Commit ${commit.commit.commit_hash.slice(
+    0,
+    7
+  )}, message: ${commit.commit.message}`;
+
   return (
     <g
+      ref={ref}
       className="commit-node"
       tabIndex={0}
       role="button"
-      aria-label={`Commit: ${commit.commit.message}`}
+      aria-label={ariaLabel}
+      onKeyDown={(e) => {
+        if (e.key === "ArrowUp") onArrowNavigate("up");
+        else if (e.key === "ArrowDown") onArrowNavigate("down");
+        else if (e.key === "ArrowLeft") onArrowNavigate("left");
+        else if (e.key === "ArrowRight") onArrowNavigate("right");
+        else if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onToggleSelect(commit, commit.x, commit.y);
+        }
+      }}
       onClick={(e) => {
         const svgRect = e.target.ownerSVGElement?.getBoundingClientRect();
         const clickX = e.clientX - (svgRect?.left || 0);
         const clickY = e.clientY - (svgRect?.top || 0);
         handleSelect(clickX, clickY);
-      }}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          // Estimate click position at the center of the node
-          handleSelect(commit.x, commit.y);
-        }
       }}
     >
       <circle
@@ -60,7 +80,7 @@ export function CommitNode({ commit, onToggleSelect }: CommitNodeProps) {
         fontSize={12}
         fontFamily="monospace"
       >
-        {displayMessage}
+        {commit.commit.message.slice(0, 20)}...
       </text>
     </g>
   );

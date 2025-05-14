@@ -220,6 +220,127 @@ export function Game(props: GameProps) {
     }
   }
 
+  const [draggedImage, setDraggedImage] = useState<IngredientImage | null>(
+    null
+  );
+  const [draggedFromWorkstation, setDraggedFromWorkstation] = useState<
+    number | null
+  >(null);
+
+  const handleDragStartFromWorkstation = (
+    e: React.DragEvent,
+    img: IngredientImage,
+    workstation: number
+  ) => {
+    // Store the dragged image and the workstation it came from
+    setDraggedImage(img);
+    setDraggedFromWorkstation(workstation);
+    e.dataTransfer.effectAllowed = "move"; // Set effect for move action
+  };
+
+  const handleDragStartFromIngredients = (
+    e: React.DragEvent,
+    img: IngredientImage
+  ) => {
+    // Store the dragged image and the workstation it came from
+    setDraggedImage(img);
+    e.dataTransfer.effectAllowed = "move"; // Set effect for move action
+  };
+
+  const handleDropOnIngredients = (e: React.DragEvent) => {
+    console.log("DROPPED ON ING");
+    e.preventDefault();
+    if (draggedImage && draggedFromWorkstation !== null) {
+      // Remove the dragged item from the correct workstation
+      console.log("DROPPED IF");
+      switch (draggedFromWorkstation) {
+        case 1:
+          setWorkstation1Items((prevItems) =>
+            prevItems.filter((item) => item.imgName !== draggedImage.imgName)
+          );
+          break;
+        case 2:
+          setWorkstation2Items((prevItems) =>
+            prevItems.filter((item) => item.imgName !== draggedImage.imgName)
+          );
+          break;
+        case 3:
+          setWorkstation3Items((prevItems) =>
+            prevItems.filter((item) => item.imgName !== draggedImage.imgName)
+          );
+          break;
+        default:
+          break;
+      }
+    }
+    setDraggedImage(null); // Reset the dragged image state
+    setDraggedFromWorkstation(null); // Reset the dragged from workstation state
+  };
+
+  const handleDropOnWorkstation = (
+    e: React.DragEvent,
+    workstationNum: number
+  ) => {
+    e.preventDefault();
+
+    if (draggedImage && draggedFromWorkstation !== null) {
+      let updatedItems: IngredientImage[] = [];
+
+      switch (workstationNum) {
+        case 1:
+          // Move item to top for workstation 1
+          updatedItems = [
+            draggedImage,
+            ...workstation1Items.filter(
+              (item) => item.imgName !== draggedImage.imgName
+            ),
+          ];
+          setWorkstation1Items(updatedItems);
+          break;
+        case 2:
+          // Move item to top for workstation 2
+          updatedItems = [
+            draggedImage,
+            ...workstation2Items.filter(
+              (item) => item.imgName !== draggedImage.imgName
+            ),
+          ];
+          setWorkstation2Items(updatedItems);
+          break;
+        case 3:
+          // Move item to top for workstation 3
+          updatedItems = [
+            draggedImage,
+            ...workstation3Items.filter(
+              (item) => item.imgName !== draggedImage.imgName
+            ),
+          ];
+          setWorkstation3Items(updatedItems);
+          break;
+        default:
+          break;
+      }
+    } else if (draggedImage) {
+      switch (workstationNum) {
+        case 1:
+          setWorkstation1Items((prev) => [draggedImage, ...prev]);
+          break;
+        case 2:
+          setWorkstation2Items((prev) => [draggedImage, ...prev]);
+          break;
+        case 3:
+          setWorkstation3Items((prev) => [draggedImage, ...prev]);
+          break;
+      }
+    }
+    setDraggedImage(null); // Reset the dragged image state
+    setDraggedFromWorkstation(null); // Reset the dragged from workstation state
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault(); // Required to allow dropping
+  };
+
   return (
     <div className="game-container">
       <div className="flex-row">
@@ -269,6 +390,9 @@ export function Game(props: GameProps) {
             setBranchTypes={setBranchTypes}
             sessionID={props.sessionID}
             userID={props.userID}
+            handleDragStartFromWorkstation={handleDragStartFromWorkstation}
+            handleDropOnWorkstation={handleDropOnWorkstation}
+            handleDragOver={handleDragOver}
           />
           <Ingredients
             ingredientsItems={getBranchIngredients(props.currentBranch)}
@@ -279,6 +403,9 @@ export function Game(props: GameProps) {
             workstation3Items={workstation3Items}
             setWorkstation3Items={setWorkstation3Items}
             selectedWorkstation={selectedWorkstation}
+            handleDragStartFromIngredients={handleDragStartFromIngredients}
+            handleDropOnIngredients={handleDropOnIngredients}
+            handleDragOver={handleDragOver}
           />
         </div>
       </div>
