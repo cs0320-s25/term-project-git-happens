@@ -36,35 +36,35 @@ public class GitCheckoutHandler extends AbstractEndpointHandler {
     final String fileMapJson = request.queryParams("file_map_json");
 
     if (sessionId == null) {
-      returnErrorResponse("error_bad_request",
+      return returnErrorResponse("error_bad_request",
           "null parameter",
           "session_id");
     } else {
       responseMap.put("session_id", sessionId);
     }
     if (userId == null) {
-      returnErrorResponse("error_bad_request",
+      return returnErrorResponse("error_bad_request",
           "null parameter",
           "user_id");
     } else {
       responseMap.put("user_id", userId);
     }
     if (currentBranch == null) {
-      returnErrorResponse("error_bad_request",
+      return returnErrorResponse("error_bad_request",
           "null parameter",
           "current_branch_id");
     } else {
       responseMap.put("current_branch_id", currentBranch);
     }
     if (newBranch == null) {
-      returnErrorResponse("error_bad_request",
+      return returnErrorResponse("error_bad_request",
           "null parameter",
           "new_branch_id");
     } else {
       responseMap.put("new_branch_id", newBranch);
     }
     if (fileMapJson == null) {
-      returnErrorResponse("error_bad_request",
+      return returnErrorResponse("error_bad_request",
           "null parameter",
           "file_map_json");
     } else {
@@ -86,7 +86,7 @@ public class GitCheckoutHandler extends AbstractEndpointHandler {
         responseMap.put("files_with_differences", filesWithDifferences);
         responseMap.put(
             "message", "Please commit your changes or stash them before you switch branches.");
-        returnErrorResponse(
+        return returnErrorResponse(
             "error_database",
             "Your local changes to the following files would be overwritten by checkout:");
       } else {
@@ -94,7 +94,7 @@ public class GitCheckoutHandler extends AbstractEndpointHandler {
         // check that desired branch exists
         List<String> allRemoteBranches = storage.getAllRemoteBranches(sessionId);
         if (!allRemoteBranches.contains(newBranch)) {
-          returnErrorResponse(
+          return returnErrorResponse(
               "error_database",
               "pathspec '" + newBranch + "' did not match any branches known to git",
               newBranch);

@@ -99,7 +99,7 @@ public class GitStashHandler extends AbstractEndpointHandler {
 
           //if stash not found, return message for terminal display
           if (stash == null) {
-            returnErrorResponse("error_database", "Error: stash@{" + stashIndex
+            return returnErrorResponse("error_database", "Error: stash@{" + stashIndex
                 + "} not found. (Hint: use 'stash list' to view available stashes)");
           }
 
@@ -143,7 +143,7 @@ public class GitStashHandler extends AbstractEndpointHandler {
 
           if (!gitDiffHelper.getFileConflicts().isEmpty()) {
             responseMap.put("file_conflicts", gitDiffHelper.getFileConflicts());
-            returnErrorResponse("error_database",
+            return returnErrorResponse("error_database",
                 "Error: Could not apply " + "stash@{" + stashIndex +
                     "}. Conflict detected; fix conflicts and then commit the results.");
           } else {
@@ -152,7 +152,9 @@ public class GitStashHandler extends AbstractEndpointHandler {
                 + stash.get("stash_message") + ") and removed from stashes list.");
           }
         }
-        default -> returnErrorResponse("error_database", "Command not supported.");
+        default -> {
+          return returnErrorResponse("error_database", "Command not supported.");
+        }
       }
     } catch (Exception e) {
       return returnErrorResponse("", "");

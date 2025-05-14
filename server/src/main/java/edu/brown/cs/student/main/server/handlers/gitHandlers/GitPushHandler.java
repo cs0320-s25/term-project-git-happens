@@ -26,17 +26,17 @@ public class GitPushHandler extends AbstractEndpointHandler {
     final String currentBranch = request.queryParams("branch_id");
 
     if (sessionId == null) {
-      returnErrorResponse("error_bad_request", "null parameter", "session_id");
+      return returnErrorResponse("error_bad_request", "null parameter", "session_id");
     } else {
       responseMap.put("session_id", sessionId);
     }
     if (userId == null) {
-      returnErrorResponse("error_bad_request", "null parameter", "user_id");
+      return returnErrorResponse("error_bad_request", "null parameter", "user_id");
     } else {
       responseMap.put("user_id", userId);
     }
     if (currentBranch == null) {
-      returnErrorResponse("error_bad_request", "null parameter", "current_branch_id");
+      return returnErrorResponse("error_bad_request", "null parameter", "current_branch_id");
     } else {
       responseMap.put("branch_id", currentBranch);
     }
@@ -49,7 +49,7 @@ public class GitPushHandler extends AbstractEndpointHandler {
       // if there is nothing to commit, return message for terminal display
       if (stagedCommits.isEmpty()) {
         responseMap.put("message", "Already up to date.");
-        returnSuccessResponse();
+        return returnSuccessResponse();
       }
 
       // check that local and remote head are the same
@@ -65,7 +65,7 @@ public class GitPushHandler extends AbstractEndpointHandler {
             + " not have locally. This is usually caused by another repository pushing "
             + "to the same remote branch. You may want to first integrate the remote changes "
             + "(e.g., 'git pull') before pushing again.");
-        returnErrorResponse("error_database",
+        return returnErrorResponse("error_database",
             "Error: failed to push to origin/" + currentBranch);
       }
 

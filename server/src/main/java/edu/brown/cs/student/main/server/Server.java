@@ -2,7 +2,9 @@ package edu.brown.cs.student.main.server;
 
 import static spark.Spark.after;
 
+import edu.brown.cs.student.main.server.handlers.CheckSolutionHandler;
 import edu.brown.cs.student.main.server.handlers.CreateSessionHandler;
+import edu.brown.cs.student.main.server.handlers.DeleteSessionHandler;
 import edu.brown.cs.student.main.server.handlers.gitHandlers.GitAddHandler;
 import edu.brown.cs.student.main.server.handlers.gitHandlers.GitBranchHandler;
 import edu.brown.cs.student.main.server.handlers.gitHandlers.GitCheckoutHandler;
@@ -58,6 +60,8 @@ public class Server {
 
       // Setting up the handlers for the endpoints
       Spark.get("createsession", new CreateSessionHandler(firebaseUtils));
+      Spark.get("deletesession", new DeleteSessionHandler(firebaseUtils));
+      Spark.get("checksolution", new CheckSolutionHandler(firebaseUtils));
       Spark.get("gitadd", new GitAddHandler(firebaseUtils));
       Spark.get("gitbranch", new GitBranchHandler(firebaseUtils));
       Spark.get("gitcheckout", new GitCheckoutHandler(firebaseUtils));
@@ -69,7 +73,6 @@ public class Server {
       Spark.get("gitreset", new GitResetHandler(firebaseUtils));
       Spark.get("gitrm", new GitRmHandler(firebaseUtils));
       Spark.get("gitstash", new GitStashHandler(firebaseUtils));
-      // Spark.get("gitstashpop", new GitStashPopHandler(firebaseUtils));
       Spark.get("gitstatus", new GitStatusHandler(firebaseUtils));
 
       Spark.notFound(

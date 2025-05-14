@@ -83,7 +83,7 @@ public class GitResetHandler extends AbstractEndpointHandler {
       // if commit is not in local commit history, return error for terminal display
       if (resetCommit == null) {
         responseMap.put("message", "Commit '" + commitId + "' not found. Hint: use 'git log' to view a list of local commits.");
-        returnErrorResponse("error_database", "Error: failed to reset.");
+        return returnErrorResponse("error_database", "Error: failed to reset.");
       }
 
       // if commit found, reset local commit history

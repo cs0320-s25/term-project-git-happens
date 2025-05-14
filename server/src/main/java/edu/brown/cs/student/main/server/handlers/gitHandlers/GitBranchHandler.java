@@ -32,22 +32,22 @@ public class GitBranchHandler extends AbstractEndpointHandler {
     // optional parameter, only used in the case where branch is being added
     final String fileMapJson;
     if (sessionId == null) {
-      returnErrorResponse("error_bad_request", "null parameter", "session_id");
+      return returnErrorResponse("error_bad_request", "null parameter", "session_id");
     } else {
       responseMap.put("session_id", sessionId);
     }
     if (userId == null) {
-      returnErrorResponse("error_bad_request", "null parameter", "user_id");
+      return returnErrorResponse("error_bad_request", "null parameter", "user_id");
     } else {
       responseMap.put("user_id", userId);
     }
     if (branchRequest == null) {
-      returnErrorResponse("error_bad_request", "null parameter", "branch_request");
+      return returnErrorResponse("error_bad_request", "null parameter", "branch_request");
     } else {
       responseMap.put("branch_request", branchRequest);
     }
     if (currentBranch == null) {
-      returnErrorResponse("error_bad_request", "null parameter", "current_branch_id");
+      return returnErrorResponse("error_bad_request", "null parameter", "current_branch_id");
     } else {
       responseMap.put("current_branch_id", currentBranch);
     }
@@ -88,10 +88,10 @@ public class GitBranchHandler extends AbstractEndpointHandler {
         case "-d" -> {
           String branchToDelete = request.queryParams("delete_branch_id");
           if (branchToDelete == null) {
-            returnErrorResponse("error_bad_request", "null parameter", "delete_branch_id");
+            return returnErrorResponse("error_bad_request", "null parameter", "delete_branch_id");
           }
           if (branchToDelete.equals(currentBranch)) {
-            returnErrorResponse("error_bad_request", "cannot delete current branch");
+            return returnErrorResponse("error_bad_request", "cannot delete current branch");
           }
           storage.deleteBranch(sessionId, userId, branchToDelete);
           responseMap.put("action", "delete local branch");

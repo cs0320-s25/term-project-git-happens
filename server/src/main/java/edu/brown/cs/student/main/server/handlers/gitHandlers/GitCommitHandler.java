@@ -59,7 +59,7 @@ public class GitCommitHandler extends AbstractEndpointHandler {
       String newFileMapJson = storage.getLatestLocalChanges(session_id, user_id, branchId);
       //if there are no staged changes, return error for terminal display
       if (newFileMapJson == null) {
-        returnErrorResponse("error_database", "No changes added to commit (use 'git add -A')");
+        return returnErrorResponse("error_database", "No changes added to commit (use 'git add -A')");
       }
 
       //get last latest local commit and deserialize file map
@@ -73,7 +73,7 @@ public class GitCommitHandler extends AbstractEndpointHandler {
 
       //if the filemap has not changed since last commit, return message for terminal display
       if (filesWithDifferences.isEmpty()) {
-        returnErrorResponse("error_database", "Nothing to commit, working tree clean");
+        return returnErrorResponse("error_database", "Nothing to commit, working tree clean");
       }
       //make new commit, populate response map for terminal display
       String commitId = storage.commitChange(session_id, user_id, branchId, commitMessage);

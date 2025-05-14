@@ -148,7 +148,7 @@ public class FirebaseUtilities implements StorageInterface {
       clearField(localMainBranchReference.parentBranch(), FIELD_PARENT_BRANCH_ID);
 
       // set head
-      setField(localMainBranchReference.head(), FIELD_HEAD, mainHead);
+      localMainBranchReference.head().set(mainHead);
 
       // set pushed commits to match main
       List<Map<String, Object>> mainCommits = remoteMainBranchReference.getPushedCommitsMap();
@@ -329,7 +329,7 @@ public class FirebaseUtilities implements StorageInterface {
         // set local branch's head
         Map<String, Object> head = this.getLatestRemoteCommit(session_id, new_branch_id);
 
-        setField(newLocalBranchRef.head(), FIELD_HEAD, head);
+        newLocalBranchRef.head().set(head);
 
         // set local branch's parent branch
         String parentId =
@@ -356,7 +356,7 @@ public class FirebaseUtilities implements StorageInterface {
 
     // set new branch's head
     Map<String, Object> head = this.getLatestLocalCommit(session_id, user_id, current_branch_id);
-    setField(newLocalBranchRef.head(), FIELD_HEAD, head);
+    newLocalBranchRef.head().set(head);
 
     // set new branch's parent branch
     setField(newLocalBranchRef.parentBranch(), FIELD_PARENT_BRANCH_ID, current_branch_id);
@@ -374,7 +374,7 @@ public class FirebaseUtilities implements StorageInterface {
 
     // add branch to remote repository for convenience
     setField(newRemoteBranchRef.parentBranch(), FIELD_PARENT_BRANCH_ID, current_branch_id);
-    setField(newRemoteBranchRef.head(), FIELD_HEAD, head);
+    newRemoteBranchRef.head().set(head);
     setField(newRemoteBranchRef.localFileMap(), FIELD_LOCAL_FILE_MAP, file_map_json);
     setField(newRemoteBranchRef.pushedCommits(), FIELD_COMMITS, pushedCommits);
   }
@@ -592,9 +592,9 @@ public class FirebaseUtilities implements StorageInterface {
       throw new IllegalArgumentException(
           "getLatestStagedCommit: session_id, user_id, and branch_id cannot be null");
     }
-    return pather
-        .getLocalBranch(session_id, user_id, branch_id)
-        .getSnapshotFieldString(DOC_ADD_CHANGES, FIELD_FILE_MAP_JSON);
+    String json = pather.getLocalBranch(session_id, user_id, branch_id).getSnapshotFieldString(DOC_ADD_CHANGES, FIELD_FILE_MAP_JSON);
+    System.out.println(json);
+    return json;
   }
 
   /**

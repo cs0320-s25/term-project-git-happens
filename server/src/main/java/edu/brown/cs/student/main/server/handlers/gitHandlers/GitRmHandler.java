@@ -28,22 +28,22 @@ public class GitRmHandler extends AbstractEndpointHandler {
     final String fileMapJson = request.queryParams("file_map_json");
 
     if (sessionId == null) {
-      returnErrorResponse("error_bad_request", "null parameter", "session_id");
+      return returnErrorResponse("error_bad_request", "null parameter", "session_id");
     } else {
       responseMap.put("session_id", sessionId);
     }
     if (userId == null) {
-      returnErrorResponse("error_bad_request", "null parameter", "user_id");
+      return returnErrorResponse("error_bad_request", "null parameter", "user_id");
     } else {
       responseMap.put("user_id", userId);
     }
     if (branchId == null) {
-      returnErrorResponse("error_bad_request", "null parameter", "branch_id");
+      return returnErrorResponse("error_bad_request", "null parameter", "branch_id");
     } else {
       responseMap.put("branch_id", branchId);
     }
     if (fileMapJson == null) {
-      returnErrorResponse("error_bad_request", "null parameter", "file_map_json");
+      return returnErrorResponse("error_bad_request", "null parameter", "file_map_json");
     } else {
       responseMap.put("file_map_json", fileMapJson);
     }
