@@ -5,7 +5,7 @@ export interface GitBranchRequestParams {
   user_id: string;
   branch_request: string;
   current_branch_id: string;
-  delete_branch_id?: string; // used when branch_request === "-d"
+  delete_branch_id?: string | null; // used when branch_request === "-d"
   file_map_json?: string; // used when creating a new branch
 }
 

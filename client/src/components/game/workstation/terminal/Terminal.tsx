@@ -4,6 +4,18 @@ import { parseCommand } from "./commandParser";
 import { IngredientImage } from "../../Game";
 import type { CommitData, BranchData } from "../../../App";
 import type { BranchType } from "../../Game";
+import { gitAdd } from "../../../../datasource/gitAdd";
+import { gitBranch } from "../../../../datasource/gitBranch";
+import { gitCheckout } from "../../../../datasource/gitCheckout";
+import { gitCommit, GitCommitParams } from "../../../../datasource/gitCommit";
+import { gitLog } from "../../../../datasource/gitLog";
+import { gitMerge } from "../../../../datasource/gitMerge";
+import { gitPull } from "../../../../datasource/gitPull";
+import { gitPush } from "../../../../datasource/gitPush";
+import { gitReset } from "../../../../datasource/gitReset";
+import { gitRm } from "../../../../datasource/gitRm";
+import { gitStash } from "../../../../datasource/gitStash";
+import { gitStatus } from "../../../../datasource/gitStatus";
 
 interface TerminalProps {
   workstation1Items: IngredientImage[];
@@ -51,6 +63,9 @@ export function Terminal(props: TerminalProps) {
   const [terminalHistory, setTerminalHistory] = useState<string[]>([]);
   const [currentInput, setCurrentInput] = useState("");
   const [historyIndex, setHistoryIndex] = useState<number | null>(null);
+  const [midMerge, setMidMerge] = useState<boolean>(false);
+  const [mergeLocalId, setMergeLocalId] = useState<string>("");
+  const [mergeIncomingId, setMergeIncomingId] = useState<string>("");
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const historyRef = useRef<HTMLDivElement | null>(null); // Ref for scrolling
@@ -74,6 +89,20 @@ export function Terminal(props: TerminalProps) {
     }
   }
 
+  function makeFileMapJson(useCommitted: boolean): string {
+    const returnMap: { [key: string]: IngredientImage[] } = {};
+    if (useCommitted) {
+      returnMap["file1"] = props.plate1Items;
+      returnMap["file2"] = props.plate2Items;
+      returnMap["file3"] = props.plate3Items;
+    } else {
+      returnMap["file1"] = props.workstation1Items;
+      returnMap["file2"] = props.workstation2Items;
+      returnMap["file3"] = props.workstation3Items;
+    }
+    return JSON.stringify(returnMap);
+  }
+
   function handleCommandSubmit(command: string) {
     if (command.trim() === "") return;
 
@@ -88,14 +117,45 @@ export function Terminal(props: TerminalProps) {
         setCommandHistory((prev) => [...prev, command]);
         break;
       case "add all":
-        // TODO: call gitAdd handler and update props accordingly
+        setTerminalHistory((prev) => [...prev, terminalResponse]);
+        setCommandHistory((prev) => [...prev, command]);
+        gitAdd({
+          session_id: props.sessionID,
+          user_id: props.userID,
+          branch_id: props.currentBranch,
+          file_map_json: makeFileMapJson(false),
+        }).then((response) => {
+          // no message on success, only error message
+          if (!response[0]) {
+            setTerminalHistory((prev) => [
+              ...prev,
+              response[1].error_response!,
+            ]);
+          }
+        });
         props.setPlate1Items(props.workstation1Items);
         props.setPlate2Items(props.workstation2Items);
         props.setPlate3Items(props.workstation3Items);
-        setTerminalHistory((prev) => [...prev, terminalResponse]);
-        setCommandHistory((prev) => [...prev, command]);
+
         break;
       case "commit success":
+        setTerminalHistory((prev) => [...prev, terminalResponse]);
+        setCommandHistory((prev) => [...prev, command]);
+        const gitCommitParams: GitCommitParams = {session_id: props.sessionID, user_id: props.userID, branch_id: props.currentBranch, commit_message: message!}
+        if (midMerge) {
+          gitCommitParams.incoming_commit_id =  mergeIncomingId;
+          gitCommitParams.local_commit_id = mergeLocalId;
+        }
+        gitCommit(gitCommitParams).then(
+          (response) => {
+            if (response[0]) {
+
+              // success
+            } else {
+              // error
+            }
+          }
+        )
         // TODO: call gitCommit and either update props accordingly from commit response or
         const commits = props.branchData.commits;
         const branches = props.branchData.branches;
@@ -108,61 +168,211 @@ export function Terminal(props: TerminalProps) {
           parent_commits: ["l"],
           contents: ["aaaaa"],
         };
-        commits.push(newCommit);
+        // commits.push(newCommit);
 
         props.setBranchData({ commits: commits, branches: branches });
-        setTerminalHistory((prev) => [...prev, terminalResponse]);
-        setCommandHistory((prev) => [...prev, command]);
         break;
       case "push":
-        // TODO: call gitPush
+        setTerminalHistory((prev) => [...prev, terminalResponse]);
+        setCommandHistory((prev) => [...prev, command]);
+        gitPush({
+          session_id: props.sessionID,
+          user_id: props.userID,
+          branch_id: props.currentBranch,
+        }).then((response) => {
+          if (response[0]) {
+            // success
+            setTerminalHistory((prev) => [...prev, response[1].message!]);
+          } else {
+            // error
+            setTerminalHistory((prev) => [
+              ...prev,
+              response[1].error_response!,
+            ]);
+            if (response[1].message !== undefined) {
+              const message: string = response[1].message;
+              setTerminalHistory((prev) => [...prev, message]);
+            }
+          }
+        });
         break;
       case "branch all":
-        // TODO: call gitBranch
+        setTerminalHistory((prev) => [...prev, terminalResponse]);
+        setCommandHistory((prev) => [...prev, command]);
+        gitBranch({
+          session_id: props.sessionID,
+          user_id: props.userID,
+          branch_request: "-a",
+          current_branch_id: props.currentBranch,
+        }).then((response) => {
+          if (response[0]) {
+            // success
+            response[1].local_branch_names!.forEach((branchName) =>
+              setTerminalHistory((prev) => [...prev, branchName])
+            );
+            response[1].remote_branch_names!.forEach((branchName) =>
+              setTerminalHistory((prev) => [...prev, branchName])
+            );
+          } else {
+            // error
+            setTerminalHistory((prev) => [
+              ...prev,
+              response[1].error_response!,
+            ]);
+          }
+        });
         break;
       case "branch remote":
-        // TODO: call gitBranch remote
+        setTerminalHistory((prev) => [...prev, terminalResponse]);
+        setCommandHistory((prev) => [...prev, command]);
+        gitBranch({
+          session_id: props.sessionID,
+          user_id: props.userID,
+          branch_request: "-r",
+          current_branch_id: props.currentBranch,
+        }).then((response) => {
+          if (response[0]) {
+            // success
+            response[1].remote_branch_names!.forEach((branchName) =>
+              setTerminalHistory((prev) => [...prev, branchName])
+            );
+          } else {
+            // error
+            setTerminalHistory((prev) => [
+              ...prev,
+              response[1].error_response!,
+            ]);
+          }
+        });
         break;
       case "branch delete":
-        // TODO: call gitBranch delete
+        setTerminalHistory((prev) => [...prev, terminalResponse]);
+        setCommandHistory((prev) => [...prev, command]);
+        gitBranch({
+          session_id: props.sessionID,
+          user_id: props.userID,
+          branch_request: "-a",
+          current_branch_id: props.currentBranch,
+          delete_branch_id: message,
+        }).then((response) => {
+          if (response[0]) {
+            // success
+            setTerminalHistory((prev) => [
+              ...prev,
+              "Deleted branch " + response[1].delete_branch_id,
+            ]);
+          } else {
+            // error
+            setTerminalHistory((prev) => [
+              ...prev,
+              response[1].error_response!,
+            ]);
+          }
+        });
         break;
       case "branch local":
-        // TODO: call gitBranch local
+        setTerminalHistory((prev) => [...prev, terminalResponse]);
+        setCommandHistory((prev) => [...prev, command]);
+        gitBranch({
+          session_id: props.sessionID,
+          user_id: props.userID,
+          branch_request: "",
+          current_branch_id: props.currentBranch,
+        }).then((response) => {
+          if (response[0]) {
+            // success
+            response[1].local_branch_names!.forEach((branchName) =>
+              setTerminalHistory((prev) => [...prev, branchName])
+            );
+          } else {
+            // error
+            setTerminalHistory((prev) => [
+              ...prev,
+              response[1].error_response!,
+            ]);
+          }
+        });
         break;
       case "branch create":
-        // TODO: call gitBranch create, make sure to store the name of the newly created branch in the prop newBranch
+        setTerminalHistory((prev) => [...prev, terminalResponse]);
+        setCommandHistory((prev) => [...prev, command]);
+        gitBranch({
+          session_id: props.sessionID,
+          user_id: props.userID,
+          branch_request: message!,
+          current_branch_id: props.currentBranch,
+          file_map_json: makeFileMapJson(false),
+        }).then((response) => {
+          if (response[0]) {
+            // success
+            const newBranchName: string = response[1].new_branch_id!;
+            props.setNewBranch(() => newBranchName);
+            setTerminalHistory((prev) => [
+              ...prev,
+              "Branch successfully created: " + newBranchName,
+            ]);
+          } else {
+            // error
+            setTerminalHistory((prev) => [
+              ...prev,
+              response[1].error_response!,
+            ]);
+          }
+        });
         break;
       case "log":
+        setTerminalHistory((prev) => [...prev, terminalResponse]);
+        setCommandHistory((prev) => [...prev, command]);
         // TODO: call gitLog
         break;
       case "merge":
+        setTerminalHistory((prev) => [...prev, terminalResponse]);
+        setCommandHistory((prev) => [...prev, command]);
         // TODO: call gitMerge
         break;
       case "pull":
+        setTerminalHistory((prev) => [...prev, terminalResponse]);
+        setCommandHistory((prev) => [...prev, command]);
         // TODO: call gitPull
         break;
       case "reset hard":
+        setTerminalHistory((prev) => [...prev, terminalResponse]);
+        setCommandHistory((prev) => [...prev, command]);
         // TODO: call gitReset hard
         break;
       case "reset soft":
+        setTerminalHistory((prev) => [...prev, terminalResponse]);
+        setCommandHistory((prev) => [...prev, command]);
         // TODO: call gitReset soft
         break;
       case "rm":
+        setTerminalHistory((prev) => [...prev, terminalResponse]);
+        setCommandHistory((prev) => [...prev, command]);
         // TODO: call gitRm
         break;
       case "stash pop":
+        setTerminalHistory((prev) => [...prev, terminalResponse]);
+        setCommandHistory((prev) => [...prev, command]);
         // TODO: call gitStashPop
         break;
       case "stash list":
+        setTerminalHistory((prev) => [...prev, terminalResponse]);
+        setCommandHistory((prev) => [...prev, command]);
         // TODO: call gitStashList
         break;
       case "stash":
+        setTerminalHistory((prev) => [...prev, terminalResponse]);
+        setCommandHistory((prev) => [...prev, command]);
         // TODO: call gitStash
         break;
       case "stash pop index":
+        setTerminalHistory((prev) => [...prev, terminalResponse]);
+        setCommandHistory((prev) => [...prev, command]);
         // TODO: call gitStashPop with specific index
         break;
       case "status":
+        setTerminalHistory((prev) => [...prev, terminalResponse]);
+        setCommandHistory((prev) => [...prev, command]);
         // TODO: call gitStatus
         break;
       default: // error commandstrs

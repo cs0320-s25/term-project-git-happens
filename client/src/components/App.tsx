@@ -21,6 +21,8 @@ import {
   plate,
   cheese,
 } from "../assets/images";
+import { createSession } from "../datasource/sessionCreation";
+import { getAllCommits, getBranchNames } from "../datasource/setupHelpers";
 
 export interface fileCommit {
   fileName: string;
@@ -299,11 +301,32 @@ function App() {
   const [sessionID, setSessionID] = useState("");
   const [userID, setUserID] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [mostRecentCommit, setMostRecentCommit] = useState<fileCommit[]>([]);
 
   useEffect(() => {
-    setBranchData(sampleData);
-    setVisibleBranches(sampleVisibleBranches);
-  }, []);
+    const loadBranchData = async () => {
+      try {
+        const branchNames = await getBranchNames(
+          sessionID,
+          userID,
+          currentBranch
+        );
+        const allCommits = await getAllCommits(sessionID, userID, branchNames);
+        setBranchData({ commits: allCommits, branches: branchNames });
+        setMostRecentCommit(allCommits[0].contents)
+      } catch (error) {
+        console.error("Error loading branch data:", error);
+      }
+    };
+    if (!submitted) {
+      return;
+    }
+
+    loadBranchData();
+    // setBranchData(sampleData);
+    setVisibleBranches(["main", "new-branch"]);
+    // setVisibleBranches(sampleVisibleBranches);
+  }, [sessionID, submitted]);
 
   return (
     <div className="App">
@@ -325,6 +348,15 @@ function App() {
           <button
             onClick={() => {
               if (sessionID && userID) {
+                createSession({
+                  session_id: sessionID,
+                  user_id: userID,
+                  file_map_json: "{}",
+                }).then((response) => {
+                  if (!response[0]) {
+                    console.log(response[1].error_response!);
+                  }
+                });
                 setSubmitted(true);
               }
             }}
@@ -341,6 +373,7 @@ function App() {
             setCurrentBranch={setCurrentBranch}
             sessionID={sessionID}
             userID={userID}
+            startingState={mostRecentCommit}
           />
           <Branch
             currentBranch={currentBranch}

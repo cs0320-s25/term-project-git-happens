@@ -4,7 +4,7 @@ import { Plate } from "./plate/Plate";
 import { Level } from "./level/Level";
 import { Ingredients } from "./ingredients/Ingredients";
 import { Workstation } from "./workstation/Workstation";
-import type { CommitData, BranchData } from "../App";
+import type { CommitData, BranchData, fileCommit } from "../App";
 import {
   fancy_patty,
   fries,
@@ -44,6 +44,7 @@ interface GameProps {
   setCurrentBranch: Dispatch<SetStateAction<string>>;
   sessionID: string;
   userID: string;
+  startingState: fileCommit[];
 }
 
 export interface BranchType {
@@ -61,9 +62,23 @@ export function Game(props: GameProps) {
   const [workstation3Items, setWorkstation3Items] = useState<IngredientImage[]>(
     []
   );
-  const [plate1Items, setPlate1Items] = useState<IngredientImage[]>([]);
-  const [plate2Items, setPlate2Items] = useState<IngredientImage[]>([]);
-  const [plate3Items, setPlate3Items] = useState<IngredientImage[]>([]);
+  let file1Contents: IngredientImage[] = [];
+  let file2Contents: IngredientImage[] = [];
+  let file3Contents: IngredientImage[] = [];
+  for (const file of props.startingState) {
+    if (file.fileName === "file1") {
+      file1Contents = file.fileContents;
+    }
+    if (file.fileName === "file2") {
+      file2Contents = file.fileContents;
+    }
+    if (file.fileName === "file3") {
+      file3Contents = file.fileContents
+    }
+  }
+  const [plate1Items, setPlate1Items] = useState<IngredientImage[]>(file1Contents);
+  const [plate2Items, setPlate2Items] = useState<IngredientImage[]>(file2Contents);
+  const [plate3Items, setPlate3Items] = useState<IngredientImage[]>(file3Contents);
 
   const [selectedWorkstation, setSelectedWorkstation] = useState<
     1 | 2 | 3 | null
