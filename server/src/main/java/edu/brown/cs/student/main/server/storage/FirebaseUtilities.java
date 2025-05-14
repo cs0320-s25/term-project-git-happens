@@ -621,7 +621,7 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws InterruptedException - for firebase methods
    */
   @Override
-  public String commitChange(
+  public Map<String, Object> commitChange(
       String session_id,
       String user_id,
       String branch_id,
@@ -654,7 +654,7 @@ public class FirebaseUtilities implements StorageInterface {
     localBranchRef.head().set(newCommit);
     // clear changes since they have all been committed
     clearField(localBranchRef.addChanges(), FIELD_FILE_MAP_JSON);
-    return commitId;
+    return newCommit;
   }
 
   /**

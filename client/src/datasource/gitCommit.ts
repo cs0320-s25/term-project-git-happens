@@ -1,4 +1,5 @@
 import { BaseResponse, typedFetch } from "./abstractFetch";
+import { BackendCommit } from "./fetcherUtil";
 
 export interface GitCommitParams {
   session_id: string;
@@ -12,16 +13,18 @@ export interface GitCommitParams {
 export interface GitCommitResponse extends BaseResponse {
   commit_id?: string;
   commit_message?: string;
-  num_files_changes?: string;
+  num_files_changed?: string;
   action?: string;
+  new_commit?: BackendCommit;
 }
 
 const allowedKeys: (keyof GitCommitResponse)[] = [
   "error_response",
   "commit_id",
   "commit_message",
-  "num_files_changes",
+  "num_files_changed",
   "action",
+  "new_commit",
 ];
 
 export async function gitCommit(

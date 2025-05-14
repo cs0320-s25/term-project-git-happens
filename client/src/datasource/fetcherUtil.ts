@@ -1,17 +1,18 @@
+import { CommitData } from "../components/App";
+import { IngredientImage } from "../components/game/Game";
+import { fileCommit } from "../components/App";
+
+export interface BackendCommit {
+  file_map_json: string;
+  commit_id: string;
+  author: string;
+  date_time: string;
+  commit_message: string;
+  parent_commits: string[];
+  branch_id: string;
+}
+
 const baseUrl: string = "http://localhost:3232/";
-
-// export function createUrl(endpoint: string, parameterNames: string[], parameters: string[]): string {
-//     if (parameterNames.length !== parameters.length) {
-//       throw new Error("Parameter names and values count do not match.");
-//     }
-
-//     const queryParams = parameterNames
-//       .map((name, index) => `${encodeURIComponent(name)}=${encodeURIComponent(parameters[index])}`)
-//       .join("&");
-
-//     const url = `${baseUrl}${endpoint}${queryParams ? `?${queryParams}` : ""}`;
-//     return url;
-//   }
 
 export function createUrl(
   endpoint: string,
@@ -65,4 +66,22 @@ export function sanitizeObject<T>(data: any, allowedKeys: (keyof T)[]): T {
     }
   }
   return sanitized as T;
+}
+
+export function convertBackendCommit(backendCommit: BackendCommit): CommitData {
+  const files: Record<string, IngredientImage[]> = JSON.parse(backendCommit.file_map_json); 
+  const contents: fileCommit[] = Object.entries(files).map(
+    ([fileName, fileContents]) => ({
+      fileName,
+      fileContents,
+    })
+  );
+
+  return {
+    commit_hash: backendCommit.commit_id,
+    message: backendCommit.commit_message,
+    branch: backendCommit.branch_id,
+    parent_commits: backendCommit.parent_commits,
+    contents,
+  };
 }

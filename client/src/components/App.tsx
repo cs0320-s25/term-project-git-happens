@@ -336,7 +336,9 @@ function App() {
         );
         const allCommits = await getAllCommits(sessionID, userID, branchNames);
         setBranchData({ commits: allCommits, branches: branchNames });
-        setMostRecentCommit(allCommits[0].contents)
+        if (allCommits.length !== 0) {
+          setMostRecentCommit(allCommits[0].contents)
+        }
       } catch (error) {
         console.error("Error loading branch data:", error);
       }

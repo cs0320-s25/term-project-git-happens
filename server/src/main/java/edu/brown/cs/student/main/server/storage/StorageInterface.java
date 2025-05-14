@@ -227,7 +227,7 @@ public interface StorageInterface {
    * @throws ExecutionException - for firebase methods
    * @throws InterruptedException - for firebase methods
    */
-  String commitChange(
+  Map<String, Object> commitChange(
       String session_id,
       String user_id,
       String branch_id,

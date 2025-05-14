@@ -101,8 +101,10 @@ public class GitCommitHandler extends AbstractEndpointHandler {
       }
 
       // make new commit, populate response map for terminal display
-      String commitId =
+      Map<String, Object> newCommit =
           storage.commitChange(session_id, user_id, branchId, commitMessage, parentCommitIdList);
+      String commitId = newCommit.get("commit_id").toString();
+      responseMap.put("new_commit", newCommit);
       responseMap.put("commit_id", commitId);
       responseMap.put("commit_message", commitMessage);
       responseMap.put("num_files_changed", filesWithDifferences.size());

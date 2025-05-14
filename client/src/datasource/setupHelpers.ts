@@ -1,9 +1,8 @@
 import { gitBranch } from "./gitBranch";
-import { gitLog, BackendCommit } from "./gitLog";
+import { gitLog } from "./gitLog";
 import { CommitData } from "../components/App";
 import { BranchData } from "../components/App";
-import { fileCommit } from "../components/App";
-import { IngredientImage } from "../components/game/Game";
+import { convertBackendCommit, BackendCommit } from "./fetcherUtil";
 
 export async function getBranchNames(
   sessionID: string,
@@ -95,22 +94,4 @@ async function getCommitsForBranch(
     );
     return [];
   }
-}
-
-function convertBackendCommit(backendCommit: BackendCommit): CommitData {
-  const files: Record<string, IngredientImage[]> = JSON.parse(backendCommit.file_map_json); 
-  const contents: fileCommit[] = Object.entries(files).map(
-    ([fileName, fileContents]) => ({
-      fileName,
-      fileContents,
-    })
-  );
-
-  return {
-    commit_hash: backendCommit.commit_id,
-    message: backendCommit.commit_message,
-    branch: backendCommit.branch_id,
-    parent_commits: backendCommit.parent_commits,
-    contents,
-  };
 }

@@ -16,6 +16,10 @@ import { gitReset } from "../../../../datasource/gitReset";
 import { gitRm } from "../../../../datasource/gitRm";
 import { gitStash } from "../../../../datasource/gitStash";
 import { gitStatus } from "../../../../datasource/gitStatus";
+import {
+  BackendCommit,
+  convertBackendCommit,
+} from "../../../../datasource/fetcherUtil";
 
 interface TerminalProps {
   workstation1Items: IngredientImage[];
@@ -141,36 +145,51 @@ export function Terminal(props: TerminalProps) {
       case "commit success":
         setTerminalHistory((prev) => [...prev, terminalResponse]);
         setCommandHistory((prev) => [...prev, command]);
-        const gitCommitParams: GitCommitParams = {session_id: props.sessionID, user_id: props.userID, branch_id: props.currentBranch, commit_message: message!}
+        const gitCommitParams: GitCommitParams = {
+          session_id: props.sessionID,
+          user_id: props.userID,
+          branch_id: props.currentBranch,
+          commit_message: message!,
+        };
         if (midMerge) {
-          gitCommitParams.incoming_commit_id =  mergeIncomingId;
+          gitCommitParams.incoming_commit_id = mergeIncomingId;
           gitCommitParams.local_commit_id = mergeLocalId;
         }
-        gitCommit(gitCommitParams).then(
-          (response) => {
-            if (response[0]) {
-
-              // success
-            } else {
-              // error
+        gitCommit(gitCommitParams).then((response) => {
+          if (response[0]) {
+            // success
+            const newBackendCommit: BackendCommit = response[1].new_commit!;
+            const newFrontendCommit: CommitData =
+              convertBackendCommit(newBackendCommit);
+            const updatedCommits = [
+              ...props.branchData.commits,
+              newFrontendCommit,
+            ];
+            props.setBranchData({
+              ...props.branchData,
+              commits: updatedCommits,
+            });
+            const terminalCommitMessage: string =
+              "[" + props.currentBranch + "] " + message;
+            const numFilesChanged: string = response[1].num_files_changed!;
+            const filesChangedMessage: string =
+              numFilesChanged == "1"
+                ? "1 file changed"
+                : numFilesChanged + " files changed";
+            setTerminalHistory((prev) => [...prev, terminalCommitMessage]);
+            setTerminalHistory((prev) => [...prev, filesChangedMessage]);
+            if (midMerge) {
+              setTerminalHistory((prev) => [...prev, "Merge Completed"]);
+              setMidMerge(false);
             }
+          } else {
+            // error
+            setTerminalHistory((prev) => [
+              ...prev,
+              response[1].error_response!,
+            ]);
           }
-        )
-        // TODO: call gitCommit and either update props accordingly from commit response or
-        const commits = props.branchData.commits;
-        const branches = props.branchData.branches;
-
-        // or don't make a new commit, just call git log verbose and update commits
-        const newCommit = {
-          commit_hash: "m",
-          message: message,
-          branch: "main",
-          parent_commits: ["l"],
-          contents: ["aaaaa"],
-        };
-        // commits.push(newCommit);
-
-        props.setBranchData({ commits: commits, branches: branches });
+        });
         break;
       case "push":
         setTerminalHistory((prev) => [...prev, terminalResponse]);
@@ -307,6 +326,14 @@ export function Terminal(props: TerminalProps) {
             // success
             const newBranchName: string = response[1].new_branch_id!;
             props.setNewBranch(() => newBranchName);
+            const updatedBranches = [
+              ...props.branchData.branches,
+              { name: newBranchName },
+            ];
+            props.setBranchData({
+              ...props.branchData,
+              branches: updatedBranches,
+            });
             setTerminalHistory((prev) => [
               ...prev,
               "Branch successfully created: " + newBranchName,

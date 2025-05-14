@@ -189,13 +189,15 @@ public class GitMergeHandler extends AbstractEndpointHandler {
         storage.addChange(sessionId, userId, currentBranch, adapter.toJson(mergedFileMap));
 
         String commitMessage = localCommitId + " " + incomingCommitId + " merged";
-        String mergeCommitId =
+        Map<String, Object> newCommit =
             storage.commitChange(
                 sessionId,
                 userId,
                 currentBranch,
                 commitMessage,
                 List.of(localCommitId, incomingCommitId));
+        String mergeCommitId = newCommit.get("commit_id").toString();
+        responseMap.put("new_commit", newCommit);
         responseMap.put("merge_commit_id", mergeCommitId);
         responseMap.put("message", commitMessage + " successfully and changes committed.");
       }
