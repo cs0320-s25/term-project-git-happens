@@ -50,6 +50,8 @@ interface TerminalProps {
   setNewBranch: Dispatch<SetStateAction<string>>;
   branchTypes: BranchType[];
   setBranchTypes: Dispatch<SetStateAction<BranchType[]>>;
+  showPopup: boolean;
+  setShowPopup: Dispatch<SetStateAction<boolean>>;
   sessionID: string;
   userID: string;
 }
@@ -152,6 +154,7 @@ export function Terminal(props: TerminalProps) {
           commit_message: message!,
         };
         if (midMerge) {
+          gitCommitParams.incoming_commit_id = mergeIncomingId;
           gitCommitParams.incoming_commit_id = mergeIncomingId;
           gitCommitParams.local_commit_id = mergeLocalId;
         }

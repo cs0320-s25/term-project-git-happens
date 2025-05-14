@@ -4,16 +4,34 @@ import "../../../styles/branch.css";
 import "../../../styles/main.css";
 import { BranchData } from "../../App";
 
+/**
+ * Props for the BranchHeaders component.
+ */
 interface BranchHeadersProps {
+  /** List of all branches data. */
   branches: BranchData[];
+  /** List of currently visible branches in dropdowns. */
   visibleBranches: string[];
+  /** Function to update visible branches. */
   setVisibleBranches: Dispatch<SetStateAction<string[]>>;
+  /** A record tracking the index of each branch. */
   branchTrack: Record<string, number>;
+  /** The spacing between each branch dropdown in the UI. */
   branchSpacing: number;
+  /** The base X coordinate for positioning the branches. */
   baseX: number;
-  topOffset?: number; // optional y offset
+  /** Optional Y offset for positioning (default is 40). */
+  topOffset?: number;
 }
 
+/**
+ * Renders the branch headers with dropdowns for selecting branches.
+ * Each dropdown allows the user to select a branch to display in a specific position.
+ * The dropdowns prevent selecting the same branch in multiple positions.
+ *
+ * @param {BranchHeadersProps} props - The props for the BranchHeaders component.
+ * @returns {JSX.Element} The SVG group element containing the branch headers.
+ */
 export function BranchHeaders({
   branches,
   visibleBranches,
@@ -26,6 +44,13 @@ export function BranchHeaders({
   // List of all branch names for the dropdown
   const allBranchNames = branches.map((b) => b.name);
 
+  /**
+   * Handles the change in selected branch from the dropdown.
+   * Updates the corresponding index in the visibleBranches array.
+   *
+   * @param {number} index - The index of the dropdown being updated.
+   * @param {string} newBranch - The new branch selected from the dropdown.
+   */
   const handleChange = (index: number, newBranch: string) => {
     setVisibleBranches((prev) => {
       const updated = [...prev];
@@ -34,6 +59,7 @@ export function BranchHeaders({
     });
   };
 
+  // Log the updated visible branches for debugging
   useEffect(() => {
     console.log("VISIBLE BRANCHES UPDATED", visibleBranches);
   }, [visibleBranches]);

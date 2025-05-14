@@ -2,15 +2,31 @@ import { Dispatch, SetStateAction, useState, useEffect, useRef } from "react";
 import type { CommitData, BranchData } from "../../App";
 import "../../../styles/branch.css";
 
+/**
+ * Props for the CommitPopup component.
+ */
 interface CommitPopupProps {
+  /** The commit data to display */
   commit: CommitData;
+  /** X coordinate for popup positioning */
   x: number;
+  /** Y coordinate for popup positioning */
   y: number;
+  /** Maximum width for the popup */
   maxWidth: number;
+  /** Maximum height for the popup */
   maxHeight: number;
+  /** Function to call when closing the popup */
   onClose: (hash: string) => void;
 }
 
+/**
+ * A popup component that displays detailed commit information including
+ * the commit hash, message, and a list of files and their visual contents.
+ *
+ * @param props - CommitPopupProps
+ * @returns JSX.Element
+ */
 export function CommitPopup(props: CommitPopupProps) {
   const { commit, x, y, maxWidth, maxHeight, onClose } = props;
 
@@ -29,6 +45,7 @@ export function CommitPopup(props: CommitPopupProps) {
         maxHeight: `${maxHeight}px`,
       }}
     >
+      {/* Commit Title */}
       <h4
         id={`commit-title-${commit.commit_hash}`}
         style={{ margin: "0 0 6px" }}
@@ -36,6 +53,7 @@ export function CommitPopup(props: CommitPopupProps) {
         Commit: {commit.commit_hash}
       </h4>
 
+      {/* Commit Message */}
       <div
         id={`commit-description-${commit.commit_hash}`}
         style={{ fontSize: "12px", marginBottom: "8px" }}
@@ -43,6 +61,7 @@ export function CommitPopup(props: CommitPopupProps) {
         {commit.message}
       </div>
 
+      {/* Display each file and its image contents */}
       <div className="commit-contents">
         {commit.contents.map((file, fileIdx) => {
           const imageHeight = 50;
@@ -69,6 +88,9 @@ export function CommitPopup(props: CommitPopupProps) {
                     key={idx}
                     src={img.imgStr}
                     alt={img.imgName || `Ingredient ${idx + 1}`}
+                    aria-label={`Image ${idx + 1} of ${
+                      file.fileContents.length
+                    }`}
                     style={{
                       width: maxWidth - 25,
                       height: imageHeight,
@@ -77,9 +99,6 @@ export function CommitPopup(props: CommitPopupProps) {
                       left: 5,
                       zIndex: 1000 - idx,
                     }}
-                    aria-label={`Image ${idx + 1} of ${
-                      file.fileContents.length
-                    }`}
                   />
                 ))}
               </div>
@@ -88,6 +107,7 @@ export function CommitPopup(props: CommitPopupProps) {
         })}
       </div>
 
+      {/* Close Button */}
       <button
         onClick={() => onClose(commit.commit_hash)}
         aria-label="Close commit details"
