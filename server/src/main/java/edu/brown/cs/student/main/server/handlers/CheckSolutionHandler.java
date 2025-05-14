@@ -63,6 +63,9 @@ public class CheckSolutionHandler extends AbstractEndpointHandler {
 
       // check for differences between user's commit and solution, return boolean
       Set<String> filesWithDifferences = gitDiffHelper.differenceDetected(solutionFileMap, userFileMap);
+      System.out.println(gitDiffHelper.getNewIncomingFiles());
+      System.out.println(gitDiffHelper.getNewLocalFiles());
+      System.out.println(filesWithDifferences);
       responseMap.put("solution_correct", filesWithDifferences.isEmpty());
     } catch (Exception e) {
       return returnErrorResponse("error_database", "check_solution_failed: " + e.getMessage());

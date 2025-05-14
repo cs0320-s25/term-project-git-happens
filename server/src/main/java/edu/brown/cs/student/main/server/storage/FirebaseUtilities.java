@@ -75,7 +75,7 @@ public class FirebaseUtilities implements StorageInterface {
    * @param value the value to be inserted
    */
   private void setField(final DocumentReference docRef, final String key, final Object value) {
-    docRef.set(mapWrap(key, value));
+    docRef.set(mapWrap(key, value), SetOptions.merge());
   }
 
   /**
@@ -465,7 +465,8 @@ public class FirebaseUtilities implements StorageInterface {
 
     // set changes document to new version of file map
     final BranchRef localBranchRef = pather.getLocalBranch(session_id, user_id, branch_id);
-    setField(localBranchRef.addChanges(), FIELD_FILE_MAP_JSON, file_map_json);
+    Map<String, Object> changes = mapWrap(FIELD_FILE_MAP_JSON, file_map_json);
+    localBranchRef.addChanges().set(changes);
     // take opportunity to update local file map in branch info
     setField(localBranchRef.localFileMap(), FIELD_LOCAL_FILE_MAP, file_map_json);
   }
@@ -630,7 +631,7 @@ public class FirebaseUtilities implements StorageInterface {
     }
     // get last stored changes
     String changedFileMapJson = this.getLatestLocalChanges(session_id, user_id, branch_id);
-
+    System.out.println("saved json: " + changedFileMapJson);
     // generate new commit id
     String commitId = helpers.generateUniqueCommitId();
 

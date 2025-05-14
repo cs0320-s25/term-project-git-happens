@@ -45,22 +45,22 @@ public class GitCommitHandler extends AbstractEndpointHandler {
     }
 
     if (session_id == null) {
-      return returnErrorResponse("error_bad_request", "null_parameter", "session_id");
+      return returnErrorResponse("error_bad_request", "null parameter", "session_id");
     } else {
       responseMap.put("session_id", session_id);
     }
     if (user_id == null) {
-      return returnErrorResponse("error_bad_request", "null_parameter", "user_id");
+      return returnErrorResponse("error_bad_request", "null parameter", "user_id");
     } else {
       responseMap.put("user_id", user_id);
     }
     if (branchId == null) {
-      return returnErrorResponse("error_bad_request", "null_parameter", "branch_id");
+      return returnErrorResponse("error_bad_request", "null parameter", "branch_id");
     } else {
       responseMap.put("branch_id", branchId);
     }
     if (commitMessage == null) {
-      return returnErrorResponse("error_bad_request", "null_parameter", "commit_message");
+      return returnErrorResponse("error_bad_request", "null parameter", "commit_message");
     } else {
       responseMap.put("commit_message", commitMessage);
     }

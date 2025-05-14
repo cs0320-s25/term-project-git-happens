@@ -20,6 +20,7 @@ import edu.brown.cs.student.main.server.handlers.gitHandlers.GitStashHandler;
 import edu.brown.cs.student.main.server.handlers.gitHandlers.GitStatusHandler;
 import edu.brown.cs.student.main.server.mergeHelpers.MockFileObject;
 import edu.brown.cs.student.main.server.storage.FirebaseUtilities;
+import edu.brown.cs.student.main.server.storage.MockStorage;
 import edu.brown.cs.student.main.server.storage.StorageInterface;
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -42,16 +43,13 @@ import spark.Spark;
  */
 public abstract class BaseEndpointTest {
 
-  private static FirebaseUtilities firebaseUtils;
+  private static MockStorage firebaseUtils;
   /** Starts the Spark test server before any tests are run. */
   @BeforeAll
   public static void setupBeforeEverything() {
-    try {
-      firebaseUtils = new FirebaseUtilities();
+      firebaseUtils = new MockStorage();
       SparkTestServer.startServer();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
+
   }
 
   /**

@@ -60,6 +60,9 @@ public class GitDiffHelper {
       Map<String, List<MockFileObject>> localState,
       Map<String, List<MockFileObject>> incomingState) {
 
+    newIncomingFiles = new ArrayList<>();
+    newLocalFiles = new ArrayList<>();
+
     List<String> localFileNames = new ArrayList<>(localState.keySet());
     List<String> incomingFileNames = new ArrayList<>(incomingState.keySet());
 
