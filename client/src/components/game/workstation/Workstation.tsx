@@ -146,10 +146,29 @@ export function Workstation(props: WorkstationProps) {
 
   function handleBranchSelect(type: "fries" | "burger") {
     console.log("User selected:", type);
-    props.setBranchTypes((prev) => [
-      ...prev,
-      { branchName: newBranch, branchType: type },
-    ]);
+
+    // Check if the new branch already exists
+    const existingBranch = props.branchTypes.find(
+      (branch) => branch.branchName === newBranch
+    );
+
+    if (existingBranch) {
+      // If the branch exists, update its branchType
+      props.setBranchTypes((prev) =>
+        prev.map((branch) =>
+          branch.branchName === newBranch
+            ? { ...branch, branchType: type }
+            : branch
+        )
+      );
+    } else {
+      // If the branch doesn't exist, add a new branch type
+      props.setBranchTypes((prev) => [
+        ...prev,
+        { branchName: newBranch, branchType: type },
+      ]);
+    }
+
     setShowPopup(false);
   }
 

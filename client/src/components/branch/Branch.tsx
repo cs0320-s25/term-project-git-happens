@@ -16,13 +16,6 @@ interface BranchProps {
 }
 
 export function Branch(props: BranchProps) {
-  // assumption for now that main will always be in focus, otherwise need to default add main
-  const [branchList, setBranchList] = useState<string[]>([]);
-  const [branchFocusList, setBranchFocusList] = useState<string[]>([
-    "b1",
-    "b2",
-  ]);
-
   const [isOpen, setIsOpen] = useState(false);
   const branchHeaderRef = useRef<HTMLParagraphElement>(null);
 
