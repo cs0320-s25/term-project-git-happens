@@ -63,6 +63,25 @@ interface TerminalProps {
   setShowMergePopup: Dispatch<SetStateAction<boolean>>;
   mergePopupDone: boolean;
   setMergePopupDone: Dispatch<SetStateAction<boolean>>;
+  levelData: [
+    {
+      instructions: string;
+      orderItems: { imgStr: string; imgName: string }[];
+      completed: boolean;
+    }
+  ];
+  setLevelData: Dispatch<
+    SetStateAction<
+      [
+        {
+          instructions: string;
+          orderItems: { imgStr: string; imgName: string }[];
+          completed: boolean;
+        }
+      ]
+    >
+  >;
+  currentLevel: number;
 }
 
 // can do branch stuff by changing currentBranch / setCurrentBranch
@@ -626,7 +645,7 @@ export function Terminal(props: TerminalProps) {
               (stash) => stash.stash_message
             );
             stashMessages.forEach((str, index) => {
-              addToTerminal(`stash@\{${index}\}: ${str}`)
+              addToTerminal(`stash@\{${index}\}: ${str}`);
             });
           } else {
             // error

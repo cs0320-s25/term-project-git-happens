@@ -58,6 +58,21 @@ interface WorkstationProps {
   setShowMergePopup: Dispatch<SetStateAction<boolean>>;
   mergePopupDone: boolean;
   setMergePopupDone: Dispatch<SetStateAction<boolean>>;
+  levelData: {
+    instructions: string;
+    orderItems: { imgStr: string; imgName: string }[];
+    completed: boolean;
+  }[];
+  setLevelData: Dispatch<
+    SetStateAction<
+      {
+        instructions: string;
+        orderItems: { imgStr: string; imgName: string }[];
+        completed: boolean;
+      }[]
+    >
+  >;
+  currentLevel: number;
 }
 
 export function Workstation(props: WorkstationProps) {
@@ -388,6 +403,9 @@ export function Workstation(props: WorkstationProps) {
         desiredMergeContents={props.desiredMergeContents}
         mergePopupDone={props.mergePopupDone}
         setMergePopupDone={props.setMergePopupDone}
+        levelData={props.levelData}
+        setLevelData={props.setLevelData}
+        currentLevel={props.currentLevel}
       />
 
       <p>{textDisplay}</p>

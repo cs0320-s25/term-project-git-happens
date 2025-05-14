@@ -97,7 +97,7 @@ export function Game(props: GameProps) {
     1 | 2 | 3 | null
   >(null);
 
-  const levelData = [
+  const [levelData, setLevelData] = useState([
     {
       instructions:
         "Welcome to Git Happens! In this game, you will learn helpful Git commands and practices by taking, making, and sending out food orders from a kitchen. To start, try creating the burger order below! When you're done, git add -A to add the order to the serving tray, git commit -m “<WRITE A HELPFUL MESSAGE HERE>” to ready the order, and git push to serve.",
@@ -143,12 +143,6 @@ export function Game(props: GameProps) {
       ],
       completed: false,
     },
-    // {
-    //   instructions:
-    //     "Uh oh, looks like the health inspector is coming around, so you should get rid of any plates containing moldy burger! Use git rm “<FILE NAME HERE>” to remove a plate from both your local (kitchen) and remote (dining room) repositories.",
-    //   orderItems: [{ imgStr: sesame_bottom, imgName: "1" }],
-    //   completed: false,
-    // },
     {
       instructions:
         "Try pulling and modifying the following order, but instead of pushing, save it with git stash.",
@@ -181,7 +175,7 @@ export function Game(props: GameProps) {
       ],
       completed: false,
     },
-  ];
+  ]);
 
   const [currentLevel, setCurrentLevel] = useState(1);
   const [orderItems, setOrderItems] = useState(levelData[0].orderItems);
@@ -357,11 +351,12 @@ export function Game(props: GameProps) {
   const [showMergePopup, setShowMergePopup] = useState(false);
   const [desiredMergeContents, setDesiredMergeContents] =
     useState<FileContents>({ file1: [], file2: [], file3: [] });
-  const [mergePopupDone, setMergePopupDone] = useState(false);
 
   const [fileConflicts, setFileConflicts] = useState<{
     [key: string]: ConflictEntry;
   }>({});
+
+  const [mergePopupDone, setMergePopupDone] = useState(false);
 
   const exfileConflicts = {
     file2: {
@@ -459,13 +454,16 @@ export function Game(props: GameProps) {
             handleDropOnWorkstation={handleDropOnWorkstation}
             handleDragOver={handleDragOver}
             setFileConflicts={setFileConflicts}
-            setShowMergePopup={setShowMergePopup}
             desiredMergeContents={desiredMergeContents}
+            setShowMergePopup={setShowMergePopup}
             mergePopupDone={mergePopupDone}
             setMergePopupDone={setMergePopupDone}
+            levelData={levelData}
+            setLevelData={setLevelData}
+            currentLevel={currentLevel}
           />
           <Ingredients
-            ingredientsItems={getBranchIngredients(branchTypes.find(b => b.branchName === props.currentBranch)!.branchType)}
+            ingredientsItems={getBranchIngredients(props.currentBranch)}
             workstation1Items={workstation1Items}
             setWorkstation1Items={setWorkstation1Items}
             workstation2Items={workstation2Items}
