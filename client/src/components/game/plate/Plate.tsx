@@ -1,6 +1,5 @@
-import { Dispatch, SetStateAction, useState, useEffect } from "react";
+import { Dispatch, SetStateAction } from "react";
 import "../../../styles/game.css";
-import { tray } from "../../../assets/images";
 import { IngredientImage } from "../Game";
 
 interface PlateProps {
@@ -15,13 +14,26 @@ interface PlateProps {
 export function Plate(props: PlateProps) {
   return (
     <div className="plate-container">
-      <p>Plate</p>
+      <p className="section-text">Plate</p>
       <div className="tray-background">
-        <div className="plate-section plate1">
+        <div
+          className="plate-section plate1"
+          role="list"
+          aria-label="Plate 1 ingredients"
+        >
           {props.plate1Items.map((ing, i) => (
             <img
               key={ing.imgName}
               src={ing.imgStr}
+              alt={`${
+                ing.imgStr
+                  .split("/")
+                  .pop()
+                  ?.split("?")[0]
+                  .replace(/\.\w+$/, "")
+                  .replace(/[-_]/g, " ") || "ingredient"
+              }`}
+              role="listitem"
               style={{
                 zIndex: props.plate1Items.length - i,
                 position: "relative",
@@ -29,11 +41,24 @@ export function Plate(props: PlateProps) {
             />
           ))}
         </div>
-        <div className="plate-section plate2">
+        <div
+          className="plate-section plate2"
+          role="list"
+          aria-label="Plate 2 ingredients"
+        >
           {props.plate2Items.map((ing, i) => (
             <img
               key={ing.imgName}
               src={ing.imgStr}
+              alt={`${
+                ing.imgStr
+                  .split("/")
+                  .pop()
+                  ?.split("?")[0]
+                  .replace(/\.\w+$/, "")
+                  .replace(/[-_]/g, " ") || "ingredient"
+              }`}
+              role="listitem"
               style={{
                 zIndex: props.plate2Items.length - i,
                 position: "relative",
@@ -41,11 +66,24 @@ export function Plate(props: PlateProps) {
             />
           ))}
         </div>
-        <div className="plate-section plate3">
+        <div
+          className="plate-section plate3"
+          role="list"
+          aria-label="Plate 3 ingredients"
+        >
           {props.plate3Items.map((ing, i) => (
             <img
               key={ing.imgName}
               src={ing.imgStr}
+              alt={`${
+                ing.imgStr
+                  .split("/")
+                  .pop()
+                  ?.split("?")[0]
+                  .replace(/\.\w+$/, "")
+                  .replace(/[-_]/g, " ") || "ingredient"
+              }`}
+              role="listitem"
               style={{
                 zIndex: props.plate3Items.length - i,
                 position: "relative",

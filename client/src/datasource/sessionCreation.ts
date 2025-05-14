@@ -1,8 +1,8 @@
 import { BaseResponse, typedFetch } from "./abstractFetch";
 
 export interface CreateSessionParameters {
-  sessionId: string;
-  userId: string;
+  session_id: string;
+  user_id: string;
   file_map_json: string;
 }
 

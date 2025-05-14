@@ -1,3 +1,7 @@
+.section-text {
+  margin: 0px;
+}
+
 /* GAME */
 
 .flex-row {
@@ -9,6 +13,11 @@
   /* border: 1px solid white; */
   width: 300px;
   text-align: left;
+}
+
+.plate-ingredient-workstation-container {
+  display: flex;
+  flex-direction: column;
 }
 
 /* PLATE */
@@ -43,7 +52,7 @@
 }
 
 .plate-section img {
-  margin-top: -50px; /* Controls the amount of overlap */
+  margin-top: -80px; /* Controls the amount of overlap */
   z-index: 0;
   width: 240px;
   height: 100px;
@@ -53,7 +62,7 @@
 
 .ingredients-container {
   width: 800px;
-  height: 100px;
+  height: 50px;
 }
 
 .ingredients-scroll {
@@ -66,14 +75,14 @@
 
 .ingredients-scroll img {
   width: 300px;
-  height: 100px;
+  height: 50px;
 }
 
 /* WORKSTATION */
 
 .workstation-container {
   width: 800px;
-  height: 460px;
+  height: 550px;
   /* border: 1px solid greenyellow; */
   overflow: hidden;
 }
@@ -104,9 +113,14 @@
   height: 300px;
 }
 
-.workstation-section img {
+.workstation-contents {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: -25px;
+}
+
+.workstation-contents img {
   margin-top: -80px; /* Controls the amount of overlap */
-  z-index: 0;
   width: 240px;
   height: 100px;
 }
@@ -119,18 +133,35 @@
 }
 
 .workstation-plate {
+  margin-top: -80px;
   width: 240px;
-  height: 50px;
+  height: 100px;
   object-fit: fill;
+}
+
+.ingredient-img {
+  border: 2px solid transparent;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.ingredient-img.selected {
+  border: 2px solid #4caf50; /* green highlight */
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.7);
+  border-radius: 6px;
 }
 /* TERMINAL */
 
+.terminal-container {
+  width: 800px;
+  height: 225px;
+  overflow: visible;
+}
+
 .terminal-history {
   width: 800px;
-  height: 75px;
+  height: 195px;
   text-align: left;
   overflow: auto;
-  /* border: 1px solid blue; */
   background-color: black;
   cursor: text;
 }
@@ -174,6 +205,10 @@
   gap: 5px;
 }
 
+.level-instructions {
+  padding: 3px;
+}
+
 .logo {
   width: 100px;
   height: 100px;
@@ -192,9 +227,129 @@
   z-index: 10;
 }
 
+/* Info button */
+.info-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  margin-left: 10px;
+  padding: 5px;
+}
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Modal content */
+.modal-content {
+  padding: 20px;
+  border-radius: 8px;
+  width: 800px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Close button */
+.close-modal-btn {
+  border: none;
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 20px;
+}
+
 /* BRANCH CREATION POPUP */
 
 .branch-creation-popup {
   width: 800px;
   height: 300px;
+}
+
+/* MERGE CONFLICT POPUP */
+
+.merge-conflict-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.conflict-container {
+  display: flex;
+  flex-direction: column;
+  background-color: gray;
+  padding-left: 15px;
+  padding-bottom: 15px;
+}
+
+.popup-header {
+  display: flex;
+  gap: 300px;
+  align-items: center;
+  width: 100%;
+  padding: 20px;
+}
+
+.close-popup-btn {
+  background-color: #ff5f5f;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 1rem;
+  border-radius: 5px;
+}
+
+.close-popup-btn:hover {
+  background-color: #ff2a2a;
+}
+
+.local-incoming-container {
+  display: flex;
+  width: 800px;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.conflict-items {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 150px;
+  max-height: 250px;
+  margin-bottom: -25px;
+  /* background-color: #4caf50; */
+}
+
+.conflict-items img {
+  margin-top: -80px; /* Controls the amount of overlap */
+  width: 240px;
+  height: 100px;
+}
+
+.file-conflict-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.ingredient-img.selected {
+  border: 2px solid #4caf50; /* Highlight selected image */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }

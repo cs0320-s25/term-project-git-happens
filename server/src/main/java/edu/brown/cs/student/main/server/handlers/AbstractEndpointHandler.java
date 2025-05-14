@@ -17,6 +17,9 @@ public abstract class AbstractEndpointHandler implements Route {
   protected Map<String, Object> responseMap;
   private final Moshi moshi = new Moshi.Builder().build();
   private final JsonAdapter<Map<String, Object>> responseMapAdapter = makeResponseMapMoshiAdapter();
+  private final JsonAdapter<Map<String, List<MockFileObject>>> fileMapAdapter =
+      makeFileMapMoshiAdapter();
+  private final JsonAdapter<List<String>> fileListAdapter = makeFileListMoshiAdapter();
 
   /**
    * Creates a {@link Moshi} JSON adapter for a {@link Map} with {@link String} keys and {@link
@@ -27,6 +30,18 @@ public abstract class AbstractEndpointHandler implements Route {
   private JsonAdapter<Map<String, Object>> makeResponseMapMoshiAdapter() {
     final Type mapType = Types.newParameterizedType(Map.class, String.class, Object.class);
     return moshi.adapter(mapType);
+  }
+
+  private JsonAdapter<Map<String, List<MockFileObject>>> makeFileMapMoshiAdapter() {
+    final Type fileMapType =
+        Types.newParameterizedType(
+            Map.class, String.class, Types.newParameterizedType(List.class, MockFileObject.class));
+    return moshi.adapter(fileMapType);
+  }
+
+  private JsonAdapter<List<String>> makeFileListMoshiAdapter() {
+    final Type stringListType = Types.newParameterizedType(List.class, String.class);
+    return moshi.adapter(stringListType);
   }
 
   /**
@@ -97,23 +112,13 @@ public abstract class AbstractEndpointHandler implements Route {
    * @param fileMapJson - json string
    * @return map of strings to list of objects
    */
-  public static Map<String, List<MockFileObject>> deserializeFileMap(String fileMapJson) {
+  protected Map<String, List<MockFileObject>> deserializeFileMap(String fileMapJson) {
+    if (fileMapJson == null) {
+      throw new IllegalArgumentException("fileMapJson cannot be null");
+    }
     try {
-      // Initializes Moshi
-      Moshi moshi = new Moshi.Builder().build();
 
-      // Initializes an adapter to a parametrized List class then uses it to parse the JSON.
-      Type type =
-          Types.newParameterizedType(
-              Map.class,
-              String.class,
-              Types.newParameterizedType(List.class, MockFileObject.class));
-
-      JsonAdapter<Map<String, List<MockFileObject>>> adapter = moshi.adapter(type);
-
-      Map<String, List<MockFileObject>> fileMap = adapter.fromJson(fileMapJson);
-
-      return fileMap;
+      return fileMapAdapter.fromJson(fileMapJson);
     } catch (Exception e) {
       // for debugging purposes
       e.printStackTrace();
@@ -127,19 +132,9 @@ public abstract class AbstractEndpointHandler implements Route {
    * @param fileListJson - json string
    * @return a set of filenames
    */
-  public static List<String> deserializeFileList(String fileListJson) {
+  protected List<String> deserializeFileList(String fileListJson) {
     try {
-      // Initializes Moshi
-      Moshi moshi = new Moshi.Builder().build();
-
-      // Initializes an adapter to a parametrized List class then uses it to parse the JSON.
-      Type type = Types.newParameterizedType(List.class, String.class);
-
-      JsonAdapter<List<String>> adapter = moshi.adapter(type);
-
-      List<String> filenames = adapter.fromJson(fileListJson);
-
-      return filenames;
+      return fileListAdapter.fromJson(fileListJson);
     } catch (Exception e) {
       // for debugging purposes
       e.printStackTrace();

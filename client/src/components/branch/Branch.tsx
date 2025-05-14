@@ -12,17 +12,12 @@ interface BranchProps {
     branches: BranchData[];
   };
   visibleBranches: string[];
+  setVisibleBranches: Dispatch<SetStateAction<string[]>>;
 }
 
 export function Branch(props: BranchProps) {
-  // assumption for now that main will always be in focus, otherwise need to default add main
-  const [branchList, setBranchList] = useState<string[]>([]);
-  const [branchFocusList, setBranchFocusList] = useState<string[]>([
-    "b1",
-    "b2",
-  ]);
-
   const [isOpen, setIsOpen] = useState(false);
+  const branchHeaderRef = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -39,11 +34,20 @@ export function Branch(props: BranchProps) {
         e.preventDefault(); // Prevent the default behavior
         setIsOpen((prev) => !prev); // Toggle the sidebar
       }
+
+      if (e.shiftKey && e.key === "N") {
+        console.log("PRESS Ns");
+        if (isOpen && branchHeaderRef.current) {
+          console.log("PRESS Ns inside");
+          e.preventDefault();
+          branchHeaderRef.current.focus();
+        }
+      }
     }
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [isOpen]);
 
   return (
     <div className={`sidebar ${isOpen ? "open" : "collapsed"}`}>
@@ -52,11 +56,14 @@ export function Branch(props: BranchProps) {
       </button>
       {isOpen && (
         <div className="branch">
-          <p>Branch</p>
+          <p className="section-text" ref={branchHeaderRef} tabIndex={-1}>
+            Branch
+          </p>
           <div className="branch-vis">
             <GitGraph
               branchData={props.branchData}
               visibleBranches={props.visibleBranches}
+              setVisibleBranches={props.setVisibleBranches}
             />
           </div>
         </div>

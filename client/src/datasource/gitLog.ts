@@ -1,4 +1,5 @@
 import { BaseResponse, typedFetch } from "./abstractFetch";
+import { BackendCommit } from "./fetcherUtil";
 
 export interface GitLogParams {
   session_id: string;
@@ -8,7 +9,7 @@ export interface GitLogParams {
 }
 
 export interface GitLogResponse extends BaseResponse {
-  commits?: Map<string, any>[];
+  commits?: BackendCommit[];
   action?: string;
 }
 

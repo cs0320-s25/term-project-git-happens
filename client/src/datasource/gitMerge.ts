@@ -1,4 +1,6 @@
+import { ConflictEntry, IngredientImage } from "../components/game/Game";
 import { BaseResponse, typedFetch } from "./abstractFetch";
+import { BackendCommit } from "./fetcherUtil";
 
 export interface GitMergeParams {
   session_id: string;
@@ -11,12 +13,14 @@ export interface GitMergeParams {
 export interface GitMergeResponse extends BaseResponse {
   message?: string;
   instructions?: string;
-  files_with_differences?: Set<string>;
+  files_with_differences?: string[] // Set<string>;
   merged_files?: Map<string, any[]>;
-  file_conflicts?: Map<string, Map<string, any[]>>;
+  file_conflicts?: Record<string, ConflictEntry>; // FileConflicts // Map<string, Map<string, any[]>>;
   local_commit_id?: string;
   incoming_commit_id?: string;
   merge_commit_id?: string;
+  difference_detected?: string;
+  new_commit?: BackendCommit;
 }
 
 const allowedKeys: (keyof GitMergeResponse)[] = [
@@ -29,6 +33,8 @@ const allowedKeys: (keyof GitMergeResponse)[] = [
   "local_commit_id",
   "incoming_commit_id",
   "merge_commit_id",
+  "difference_detected",
+  "new_commit",
 ];
 
 export async function gitMerge(

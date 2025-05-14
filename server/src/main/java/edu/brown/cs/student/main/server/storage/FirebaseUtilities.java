@@ -122,7 +122,12 @@ public class FirebaseUtilities implements StorageInterface {
         // create initial commit
         Map<String, Object> initialCommit =
             helpers.createCommit(
-                file_map_json, initialCommitId, "game", "Initial commit", Collections.emptyList());
+                file_map_json,
+                initialCommitId,
+                "game",
+                "Initial commit",
+                Collections.emptyList(),
+                "main");
 
         // setup branch info
         final BranchRef remoteMainBranchReference = pather.getRemoteBranch(session_id, "main");
@@ -618,7 +623,7 @@ public class FirebaseUtilities implements StorageInterface {
    * @throws InterruptedException - for firebase methods
    */
   @Override
-  public String commitChange(
+  public Map<String, Object> commitChange(
       String session_id,
       String user_id,
       String branch_id,
@@ -638,7 +643,7 @@ public class FirebaseUtilities implements StorageInterface {
     // create new commit
     Map<String, Object> newCommit =
         helpers.createCommit(
-            changedFileMapJson, commitId, user_id, commit_message, parent_commit_ids);
+            changedFileMapJson, commitId, user_id, commit_message, parent_commit_ids, branch_id);
 
     // add new commit to local staged commits then update local store
 
@@ -651,7 +656,7 @@ public class FirebaseUtilities implements StorageInterface {
     localBranchRef.head().set(newCommit);
     // clear changes since they have all been committed
     clearField(localBranchRef.addChanges(), FIELD_FILE_MAP_JSON);
-    return commitId;
+    return newCommit;
   }
 
   /**

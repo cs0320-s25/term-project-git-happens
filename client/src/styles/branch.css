@@ -1,11 +1,19 @@
 .branch-vis {
   width: 600px;
-  height: 700px;
+  height: 850px;
   /* border: 1px solid lime; */
 }
 
+.popup-container {
+  border-radius: 8px;
+  padding: 10px;
+  z-index: 1000;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  overflow: auto;
+}
+
 .svg-container {
-  max-height: 700px;
+  max-height: 850px;
   overflow-y: auto;
   position: relative;
 }
@@ -48,16 +56,12 @@
 .commit-contents {
   display: flex;
   flex-direction: column;
+  color: 1px solid purple;
 }
 
 .file-contents {
   display: flex;
   flex-direction: column;
-  border: 1px solid red;
-}
-
-.file-contents img {
-  border: 1px solid yellow;
 }
 
 .commitpopup-img {

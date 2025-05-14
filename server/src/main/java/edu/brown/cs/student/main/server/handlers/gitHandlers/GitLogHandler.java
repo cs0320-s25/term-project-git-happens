@@ -2,6 +2,7 @@ package edu.brown.cs.student.main.server.handlers.gitHandlers;
 
 import static edu.brown.cs.student.main.server.storage.FirestoreConstants.FIELD_DATE_TIME;
 import static edu.brown.cs.student.main.server.storage.FirestoreConstants.FIELD_FILE_MAP_JSON;
+import static edu.brown.cs.student.main.server.storage.FirestoreConstants.FIELD_PARENT_COMMIT_IDS;
 
 import edu.brown.cs.student.main.server.handlers.AbstractEndpointHandler;
 import edu.brown.cs.student.main.server.storage.StorageInterface;
@@ -72,6 +73,7 @@ public class GitLogHandler extends AbstractEndpointHandler {
         allCommits.forEach(
             commit -> {
               commit.remove(FIELD_FILE_MAP_JSON);
+              commit.remove(FIELD_PARENT_COMMIT_IDS);
             });
       }
 

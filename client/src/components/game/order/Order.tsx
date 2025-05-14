@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useState, useEffect } from "react";
+import { Dispatch, SetStateAction } from "react";
 import "../../../styles/game.css";
 import { IngredientImage } from "../Game";
 
@@ -9,12 +9,14 @@ interface OrderProps {
 
 export function Order(props: OrderProps) {
   return (
-    <div className="order-container">
+    <section className="order-container" aria-label="Order preview" role="list">
       <div className="order-section">
         {props.orderItems.map((ing, i) => (
           <img
             key={ing.imgName}
             src={ing.imgStr}
+            alt={ing.imgName}
+            role="listitem"
             style={{
               zIndex: props.orderItems.length - i,
               position: "relative",
@@ -22,6 +24,6 @@ export function Order(props: OrderProps) {
           />
         ))}
       </div>
-    </div>
+    </section>
   );
 }

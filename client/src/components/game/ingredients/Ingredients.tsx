@@ -11,10 +11,17 @@ interface IngredientsProps {
   workstation3Items: IngredientImage[];
   setWorkstation3Items: Dispatch<SetStateAction<IngredientImage[]>>;
   selectedWorkstation: 1 | 2 | 3 | null;
+  handleDragStartFromIngredients: (
+    e: React.DragEvent,
+    img: IngredientImage
+  ) => void;
+  handleDropOnIngredients: (e: React.DragEvent) => void;
+  handleDragOver: (e: React.DragEvent) => void;
 }
 
 export function Ingredients(props: IngredientsProps) {
   const ingredientRefs = useRef<(HTMLImageElement | null)[]>([]);
+
   useEffect(() => {
     ingredientRefs.current = ingredientRefs.current.slice(
       0,
@@ -53,7 +60,6 @@ export function Ingredients(props: IngredientsProps) {
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      // Check if the user is typing (in input or text area)
       const target = e.target as HTMLElement;
       const isTyping =
         target.tagName === "INPUT" ||
@@ -62,7 +68,6 @@ export function Ingredients(props: IngredientsProps) {
 
       if (isTyping) return;
 
-      // Listen for Shift + I and focus the ingredients container
       if (e.shiftKey && e.key === "I") {
         e.preventDefault();
         ingredientsContainerRef.current?.focus();
@@ -74,11 +79,18 @@ export function Ingredients(props: IngredientsProps) {
   }, []);
 
   return (
-    <div className="ingredients-container">
+    <div
+      className="ingredients-container drop-zone"
+      role="region"
+      aria-label="Available ingredients"
+    >
       <div
         className="ingredients-scroll"
         ref={ingredientsContainerRef}
         tabIndex={-1}
+        onDrop={props.handleDropOnIngredients}
+        onDragOver={props.handleDragOver}
+        aria-label="Ingredient list. Use arrow keys to navigate, Enter or Space to add."
       >
         {props.ingredientsItems.map((ingredient, index) => (
           <img
@@ -87,7 +99,18 @@ export function Ingredients(props: IngredientsProps) {
             src={ingredient.imgStr}
             tabIndex={0}
             role="button"
-            aria-label={`Add ${ingredient.imgStr}`}
+            aria-label={`Add ${
+              ingredient.imgStr
+                .split("/")
+                .pop()
+                ?.split("?")[0]
+                .replace(/\.\w+$/, "")
+                .replace(/[-_]/g, " ") || "ingredient"
+            }`}
+            draggable
+            onDragStart={(e) =>
+              props.handleDragStartFromIngredients(e, ingredient)
+            }
             onClick={() =>
               handleAddIngredient({
                 imgStr: ingredient.imgStr,

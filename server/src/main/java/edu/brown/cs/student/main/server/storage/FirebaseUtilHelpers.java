@@ -102,6 +102,7 @@ public class FirebaseUtilHelpers {
    * @param author the author of the commit
    * @param commitMessage the commit message
    * @param parentCommitIds the commit ID of the parent(s) (could be 2 in case of merge)
+   * @param branchName the name of the original branch of the commit
    * @return a map containing commit metadata
    */
   public Map<String, Object> createCommit(
@@ -109,7 +110,8 @@ public class FirebaseUtilHelpers {
       final String commitId,
       final String author,
       final String commitMessage,
-      final List<String> parentCommitIds) {
+      final List<String> parentCommitIds,
+      final String branchName) {
     Map<String, Object> commit = new HashMap<>();
     commit.put(FIELD_FILE_MAP_JSON, fileMap);
     commit.put(FIELD_COMMIT_ID, commitId);
@@ -117,6 +119,7 @@ public class FirebaseUtilHelpers {
     commit.put(FIELD_DATE_TIME, formatter.format((ZonedDateTime.now())));
     commit.put(FIELD_COMMIT_MESSAGE, commitMessage);
     commit.put(FIELD_PARENT_COMMIT_IDS, parentCommitIds);
+    commit.put(FIELD_BRANCH_ID, branchName);
     return commit;
   }
 }
