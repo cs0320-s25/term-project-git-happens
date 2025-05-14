@@ -4,6 +4,7 @@ import edu.brown.cs.student.main.server.handlers.AbstractEndpointHandler;
 import edu.brown.cs.student.main.server.mergeHelpers.GitDiffHelper;
 import edu.brown.cs.student.main.server.mergeHelpers.MockFileObject;
 import edu.brown.cs.student.main.server.storage.StorageInterface;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +60,8 @@ public class GitCommitHandler extends AbstractEndpointHandler {
       String newFileMapJson = storage.getLatestLocalChanges(session_id, user_id, branchId);
       // if there are no staged changes, return error for terminal display
       if (newFileMapJson == null) {
-        returnErrorResponse("error_database", "No changes added to commit (use 'git add -A')");
+        return returnErrorResponse(
+            "error_database", "No changes added to commit (use 'git add -A')");
       }
 
       // get last latest local commit and deserialize file map
@@ -67,6 +69,8 @@ public class GitCommitHandler extends AbstractEndpointHandler {
           storage.getLatestLocalCommit(session_id, user_id, branchId);
       Map<String, List<MockFileObject>> latestFileMap =
           deserializeFileMap((String) latestLocalCommit.get("file_map_json"));
+      List<String> parentCommitIdList =
+          Collections.singletonList(latestLocalCommit.get("commit_id").toString());
 
       // check that there is a difference between the last commit and staged changes
 
@@ -75,10 +79,12 @@ public class GitCommitHandler extends AbstractEndpointHandler {
 
       // if the filemap has not changed since last commit, return message for terminal display
       if (filesWithDifferences.isEmpty()) {
-        returnErrorResponse("error_database", "Nothing to commit, working tree clean");
+        return returnErrorResponse("error_database", "Nothing to commit, working tree clean");
       }
+
       // make new commit, populate response map for terminal display
-      String commitId = storage.commitChange(session_id, user_id, branchId, commitMessage);
+      String commitId =
+          storage.commitChange(session_id, user_id, branchId, commitMessage, parentCommitIdList);
       responseMap.put("commit_id", commitId);
       responseMap.put("commit_message", commitMessage);
       responseMap.put("num_files_changed", filesWithDifferences.size());

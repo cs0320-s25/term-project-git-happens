@@ -222,11 +222,17 @@ public interface StorageInterface {
    * @param user_id - unique user id
    * @param branch_id - branch id for currently checked out branch
    * @param commit_message - corresponding message for commit
+   * @param parent_commit_ids - the commit ID of the parent(s) (could be 2 in case of merge)
    * @throws IllegalArgumentException - if any parameters are null
    * @throws ExecutionException - for firebase methods
    * @throws InterruptedException - for firebase methods
    */
-  String commitChange(String session_id, String user_id, String branch_id, String commit_message)
+  String commitChange(
+      String session_id,
+      String user_id,
+      String branch_id,
+      String commit_message,
+      List<String> parent_commit_ids)
       throws IllegalArgumentException, ExecutionException, InterruptedException;
 
   /**

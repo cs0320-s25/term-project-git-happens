@@ -40,22 +40,22 @@ public class GitMergeHandler extends AbstractEndpointHandler {
     final String fileMapJson = request.queryParams("file_map_json");
 
     if (sessionId == null) {
-      returnErrorResponse("error_bad_request", "null parameter", "session_id");
+      return returnErrorResponse("error_bad_request", "null parameter", "session_id");
     } else {
       responseMap.put("session_id", sessionId);
     }
     if (userId == null) {
-      returnErrorResponse("error_bad_request", "null parameter", "user_id");
+      return returnErrorResponse("error_bad_request", "null parameter", "user_id");
     } else {
       responseMap.put("user_id", userId);
     }
     if (currentBranch == null) {
-      returnErrorResponse("error_bad_request", "null parameter", "current_branch_id");
+      return returnErrorResponse("error_bad_request", "null parameter", "current_branch_id");
     } else {
       responseMap.put("current_branch_id", currentBranch);
     }
     if (mergeBranch == null) {
-      returnErrorResponse("error_bad_request", "null parameter", "merge_branch_id");
+      return returnErrorResponse("error_bad_request", "null parameter", "merge_branch_id");
     } else {
       responseMap.put("merge_branch_id", mergeBranch);
     }
@@ -65,14 +65,14 @@ public class GitMergeHandler extends AbstractEndpointHandler {
       // if current branch is same as merge branch, return message for terminal display
       if (currentBranch.equals(mergeBranch)) {
         responseMap.put("message", "Already up to date");
-        returnSuccessResponse();
+        return returnSuccessResponse();
       }
 
       // if user does not have merge branch stored locally, return error for terminal display
       List<String> allLocalBranches = storage.getAllLocalBranches(sessionId, userId);
       if (!allLocalBranches.contains(mergeBranch)) {
         // TODO: maybe suggest trying git fetch/offering some guidance in terminal??
-        returnErrorResponse(
+        return returnErrorResponse(
             "error_database", "Merge: " + mergeBranch + " - not something we can merge.");
       }
 
@@ -97,7 +97,7 @@ public class GitMergeHandler extends AbstractEndpointHandler {
           responseMap.put(
               "instructions", "Please commit your changes or stash them before you merge.");
           responseMap.put("files_with_differences", filesWithDifferences);
-          returnErrorResponse(
+          return returnErrorResponse(
               "error_database",
               "Your local changes to the following files would be overwritten by merge:");
         }
@@ -114,7 +114,7 @@ public class GitMergeHandler extends AbstractEndpointHandler {
         responseMap.put(
             "instructions", "Please commit your changes or stash them before you merge.");
         responseMap.put("files_with_differences", filesWithDifferences);
-        returnErrorResponse(
+        return returnErrorResponse(
             "error_database",
             "Your local changes to the following files would be overwritten by merge:");
       }
@@ -163,7 +163,7 @@ public class GitMergeHandler extends AbstractEndpointHandler {
 
       if (!diffHelper.getFileConflicts().isEmpty()) {
         responseMap.put("file_conflicts", diffHelper.getFileConflicts());
-        returnErrorResponse(
+        return returnErrorResponse(
             "error_database", "Automatic merge failed; fix conflicts and then commit the results.");
       }
       //  if there were no conflicts, add and commit merged files
@@ -185,7 +185,12 @@ public class GitMergeHandler extends AbstractEndpointHandler {
         responseMap.put("incoming_commit_id", incomingCommitId);
         String commitMessage = localCommitId + " " + incomingCommitId + " merged";
         String mergeCommitId =
-            storage.commitChange(sessionId, userId, currentBranch, commitMessage);
+            storage.commitChange(
+                sessionId,
+                userId,
+                currentBranch,
+                commitMessage,
+                List.of(localCommitId, incomingCommitId));
         responseMap.put("merge_commit_id", mergeCommitId);
         responseMap.put("message", commitMessage + " successfully and changes committed.");
       }

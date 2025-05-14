@@ -4,6 +4,7 @@ export interface GitLogParams {
   session_id: string;
   user_id: string;
   branch_id: string;
+  verbose: string; // boolean
 }
 
 export interface GitLogResponse extends BaseResponse {

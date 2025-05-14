@@ -69,7 +69,6 @@ public class Server {
       Spark.get("gitreset", new GitResetHandler(firebaseUtils));
       Spark.get("gitrm", new GitRmHandler(firebaseUtils));
       Spark.get("gitstash", new GitStashHandler(firebaseUtils));
-      // Spark.get("gitstashpop", new GitStashPopHandler(firebaseUtils));
       Spark.get("gitstatus", new GitStatusHandler(firebaseUtils));
 
       Spark.notFound(
