@@ -125,9 +125,11 @@ public class CheckSolutionHandlerTest extends BaseEndpointTest {
       solutionMap.put("file2", new ArrayList<>(solFile2));
 
       String userFileMapJson = serializeFileMap(userMap);
-
+      String solutionFileMapJson = serializeFileMap(solutionMap);
       setSolution();
 
+      System.out.println("Serialized user JSON: " + serializeFileMap(userMap));
+      System.out.println("Serialized solution JSON: " + serializeFileMap(solutionMap));
       HttpURLConnection connection = tryRequest("gitadd?session_id=" + testSessionId
           + "&user_id=" + testUserId + "&branch_id=" + testBranchId + "&file_map_json="
           + userFileMapJson);
@@ -147,12 +149,10 @@ public class CheckSolutionHandlerTest extends BaseEndpointTest {
 
       connection = tryRequest("checksolution?session_id=" + testSessionId
           + "&user_id=" + testUserId + "&solution_branch_id=" + testBranchId
-          + "&solution_file_map_json=" + serializeFileMap(solutionMap));
+          + "&solution_file_map_json=" + solutionFileMapJson);
       response = deserializeResponse(connection);
       assertEquals("success", response.get("response"));
       assertEquals(false, response.get("solution_correct"));
-
-      connection = tryRequest("deletesession?session_id=" + testSessionId);
 
   } catch (Exception e) {
     e.printStackTrace();

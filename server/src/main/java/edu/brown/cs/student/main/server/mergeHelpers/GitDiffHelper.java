@@ -84,6 +84,9 @@ public class GitDiffHelper {
       Map<String, List<MockFileObject>> storedState,
       Map<String, List<MockFileObject>> currentState) {
     // files are different if stored or current state have different files
+    System.out.println("stored keys: " + storedState.keySet());
+    System.out.println("current keys: " + currentState.keySet());
+
     detectNewFiles(storedState, currentState);
     Set<String> filesWithDifferences = new HashSet<>();
     filesWithDifferences.addAll(newIncomingFiles);
