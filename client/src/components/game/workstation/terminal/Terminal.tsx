@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction, useState, useEffect, useRef } from "react";
 import "../../../../styles/game.css";
 import { parseCommand } from "./commandParser";
-import { IngredientImage } from "../../Game";
+import { IngredientImage, FileContents } from "../../Game";
 import type { CommitData, BranchData, fileCommit } from "../../../App";
 import type { BranchType } from "../../Game";
 import { gitAdd } from "../../../../datasource/gitAdd";
@@ -53,6 +53,8 @@ interface TerminalProps {
   setShowPopup: Dispatch<SetStateAction<boolean>>;
   sessionID: string;
   userID: string;
+  setFileConflicts: Dispatch<SetStateAction<FileContents>>;
+  setShowMergePopup: Dispatch<SetStateAction<FileContents>>;
 }
 
 // can do branch stuff by changing currentBranch / setCurrentBranch

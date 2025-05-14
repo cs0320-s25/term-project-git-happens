@@ -371,6 +371,8 @@ export function Workstation(props: WorkstationProps) {
         setShowPopup={setShowPopup}
         sessionID={props.sessionID}
         userID={props.userID}
+        setFileConflicts={props.setFileConflicts}
+        setShowMergePopup={props.setShowMergePopup}
       />
 
       <p>{textDisplay}</p>
