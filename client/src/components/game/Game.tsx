@@ -71,55 +71,85 @@ export function Game(props: GameProps) {
 
   const levelData = [
     {
-      instructions: "Instructions for level 1",
+      instructions:
+        "Welcome to Git Happens! In this game, you will learn helpful Git commands and practices by taking, making, and sending out food orders from a kitchen. To start, try creating the burger order below! When you're done, git add -A to add the order to the serving tray, git commit -m “<WRITE A HELPFUL MESSAGE HERE>” to ready the order, and git push to serve.",
       orderItems: [
         { imgStr: sesame_top, imgName: "1" },
-        { imgStr: sesame_bottom, imgName: "1" },
-        { imgStr: sesame_bottom, imgName: "1" },
-        { imgStr: sesame_bottom, imgName: "1" },
-        { imgStr: sesame_bottom, imgName: "1" },
+        { imgStr: tomato, imgName: "1" },
+        { imgStr: lettuce, imgName: "1" },
+        { imgStr: cheese, imgName: "1" },
+        { imgStr: patty, imgName: "1" },
         { imgStr: sesame_bottom, imgName: "1" },
       ],
-      completed: true,
+      completed: false,
     },
     {
       instructions:
-        "Instructions for level 2 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
+        "It looks like one of your coworkers served a moldy burger... Take it back to your workstations with git pull. If you encounter a merge conflict, try to resolve it by choosing the ingredients you want to keep. In this case, keep everything but the mold. Once you are done, add, commit, and push your burger when it looks like the order below!",
       orderItems: [
-        { imgStr: sesame_bottom, imgName: "1" },
-        { imgStr: sesame_bottom, imgName: "1" },
-      ],
-      completed: true,
-    },
-    {
-      instructions: "Instructions for level 3",
-      orderItems: [
-        { imgStr: sesame_bottom, imgName: "1" },
+        { imgStr: sesame_top, imgName: "1" },
+        { imgStr: lettuce, imgName: "1" },
+        { imgStr: cheese, imgName: "1" },
         { imgStr: sesame_bottom, imgName: "1" },
       ],
       completed: false,
     },
     {
-      instructions: "Instructions for level 4",
+      instructions:
+        "This time, your customers want an order of fries... Try creating a new fry station branch using git branch “<BRANCH NAME HERE>”, and navigate to it using git checkout “<BRANCH NAME HERE>”. Once you have added your fries, try to git merge back into your main branch in order to assemble the complete order and serve.",
       orderItems: [
-        { imgStr: sesame_bottom, imgName: "1" },
+        { imgStr: ketchup, imgName: "1" },
+        { imgStr: fries, imgName: "1" },
+      ],
+      completed: false,
+    },
+    {
+      instructions:
+        "This time, your customers want to order the moldy burger you pulled previously, which you can't make from your workstation. Try using git log to view the kitchen's previous commits, and git reset “<COMMIT ID HERE>” to return to that commit.",
+      orderItems: [
+        { imgStr: sesame_top, imgName: "1" },
+        { imgStr: lettuce, imgName: "1" },
+        { imgStr: cheese, imgName: "1" },
+        { imgStr: moldy_patty, imgName: "1" },
         { imgStr: sesame_bottom, imgName: "1" },
       ],
       completed: false,
     },
     {
-      instructions: "Instructions for level 5",
+      instructions:
+        "Uh oh, looks like the health inspector is coming around, so you should get rid of any plates containing moldy burger! Use git rm “<FILE NAME HERE>” to remove a plate from both your local (kitchen) and remote (dining room) repositories.",
+      orderItems: [{ imgStr: sesame_bottom, imgName: "1" }],
+      completed: false,
+    },
+    {
+      instructions:
+        "Try pulling and modifying the following order, but instead of pushing, save it with git stash.",
       orderItems: [
-        { imgStr: sesame_bottom, imgName: "1" },
-        { imgStr: sesame_bottom, imgName: "1" },
+        { imgStr: fancy_patty, imgName: "1" },
+        { imgStr: pretzel_bottom, imgName: "1" },
       ],
       completed: false,
     },
     {
-      instructions: "Instructions for level 6",
+      instructions:
+        "Now that we've stashed our burger, we can take care of this order of fries using the commands that we've learned previously.",
       orderItems: [
-        { imgStr: sesame_bottom, imgName: "1" },
-        { imgStr: sesame_bottom, imgName: "1" },
+        { imgStr: mustard, imgName: "1" },
+        { imgStr: fries, imgName: "1" },
+      ],
+      completed: false,
+    },
+    {
+      instructions:
+        "Finally, let's finish our fancy half-made burger by viewing our stash with git stash list and retrieving our stashed commit with git stash pop in order to complete the following order.",
+      orderItems: [
+        { imgStr: pretzel_top, imgName: "1" },
+        { imgStr: tomato, imgName: "1" },
+        { imgStr: mayo, imgName: "1" },
+        { imgStr: onion, imgName: "1" },
+        { imgStr: cheese, imgName: "1" },
+        { imgStr: fancy_patty, imgName: "1" },
+        { imgStr: pretzel_bottom, imgName: "1" },
       ],
       completed: false,
     },
