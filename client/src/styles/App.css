@@ -1,0 +1,13 @@
+/* For controlling appearance of the mock app (such as headers) */
+.App {
+  text-align: center;
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.game-branch-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}

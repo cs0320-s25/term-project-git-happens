@@ -1,0 +1,71 @@
+.branch-vis {
+  width: 600px;
+  height: 850px;
+  /* border: 1px solid lime; */
+}
+
+.popup-container {
+  border-radius: 8px;
+  padding: 10px;
+  z-index: 1000;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  overflow: auto;
+}
+
+.svg-container {
+  max-height: 850px;
+  overflow-y: auto;
+  position: relative;
+}
+
+.svg-vis {
+  /* border: 1px solid cyan; */
+  background: "transparent";
+}
+
+.commit-node {
+  cursor: pointer;
+}
+
+.sidebar {
+  height: 100vh;
+  transition: width 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar.open {
+  width: 600px;
+}
+
+.sidebar.collapsed {
+  width: 50px;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  padding: 10px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.commit-contents {
+  display: flex;
+  flex-direction: column;
+  color: 1px solid purple;
+}
+
+.file-contents {
+  display: flex;
+  flex-direction: column;
+}
+
+.commitpopup-img {
+  width: 100%;
+  margin-top: -15px;
+  margin-bottom: -15px;
+}
