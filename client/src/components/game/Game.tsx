@@ -358,7 +358,13 @@ export function Game(props: GameProps) {
   const [desiredMergeContents, setDesiredMergeContents] =
     useState<FileContents>({ file1: [], file2: [], file3: [] });
 
-  const fileConflicts = {
+  const [fileConflicts, setFileConflicts] = useState<FileContents>({
+    file1: [],
+    file2: [],
+    file3: [],
+  });
+
+  const exfileConflicts = {
     file2: {
       incoming: [
         { imgStr: sesame_top, imgName: "blobs" },
@@ -395,7 +401,7 @@ export function Game(props: GameProps) {
     <div className="game-container">
       {showMergePopup && (
         <MergeConflictPopup
-          fileConflicts={fileConflicts}
+          fileConflicts={exfileConflicts}
           setShowMergePopup={setShowMergePopup}
           desiredMergeContents={desiredMergeContents}
           setDesiredMergeContents={setDesiredMergeContents}
@@ -452,6 +458,8 @@ export function Game(props: GameProps) {
             handleDragStartFromWorkstation={handleDragStartFromWorkstation}
             handleDropOnWorkstation={handleDropOnWorkstation}
             handleDragOver={handleDragOver}
+            setFileConflicts={setFileConflicts}
+            setShowMergePopup={setShowMergePopup}
           />
           <Ingredients
             ingredientsItems={getBranchIngredients(props.currentBranch)}

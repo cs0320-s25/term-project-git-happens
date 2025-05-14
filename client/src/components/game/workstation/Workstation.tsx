@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useState, useEffect, useRef } from "react";
 import "../../../styles/game.css";
-import { IngredientImage, BranchType } from "../Game";
+import { IngredientImage, BranchType, FileContents } from "../Game";
 import { Terminal } from "./terminal/Terminal";
 import type { CommitData, BranchData } from "../../App";
 import { plate } from "../../../assets/images";
@@ -44,6 +44,8 @@ interface WorkstationProps {
   ) => void;
   handleDropOnWorkstation: (e: React.DragEvent, workstationNum: number) => void;
   handleDragOver: (e: React.DragEvent) => void;
+  setFileConflicts: Dispatch<SetStateAction<FileContents>>;
+  setShowMergePopup: Dispatch<SetStateAction<FileContents>>;
 }
 
 export function Workstation(props: WorkstationProps) {
