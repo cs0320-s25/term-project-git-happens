@@ -3,13 +3,13 @@ import "../../../../styles/game.css";
 import { parseCommand } from "./commandParser";
 import { IngredientImage, ConflictEntry } from "../../Game";
 import type { CommitData, BranchData, fileCommit } from "../../../App";
-import type { BranchType } from "../../Game";
+import type { BranchType, FileContents } from "../../Game";
 import { gitAdd } from "../../../../datasource/gitAdd";
 import { gitBranch } from "../../../../datasource/gitBranch";
 import { gitCheckout } from "../../../../datasource/gitCheckout";
 import { gitCommit, GitCommitParams } from "../../../../datasource/gitCommit";
 import { gitLog } from "../../../../datasource/gitLog";
-import { FileConflicts, gitMerge } from "../../../../datasource/gitMerge";
+import { gitMerge } from "../../../../datasource/gitMerge";
 import { gitPull } from "../../../../datasource/gitPull";
 import { gitPush } from "../../../../datasource/gitPush";
 import { gitReset } from "../../../../datasource/gitReset";
@@ -19,6 +19,7 @@ import {
   BackendCommit,
   convertBackendCommit,
 } from "../../../../datasource/fetcherUtil";
+import { parse } from "path";
 
 interface TerminalProps {
   workstation1Items: IngredientImage[];
@@ -58,7 +59,10 @@ interface TerminalProps {
       [key: string]: ConflictEntry;
     }>
   >;
+  desiredMergeContents: FileContents;
   setShowMergePopup: Dispatch<SetStateAction<boolean>>;
+  mergePopupDone: boolean;
+  setMergePopupDone: Dispatch<SetStateAction<boolean>>;
 }
 
 // can do branch stuff by changing currentBranch / setCurrentBranch
@@ -80,13 +84,32 @@ export function Terminal(props: TerminalProps) {
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const historyRef = useRef<HTMLDivElement | null>(null); // Ref for scrolling
+  const [conflictingFiles, setConflictingFiles] = useState<string[]>([]);
 
   // Scroll to bottom whenever the command history updates
   useEffect(() => {
     if (historyRef.current) {
       historyRef.current.scrollTop = historyRef.current.scrollHeight;
     }
-  }, [commandHistory]);
+  }, [terminalHistory, commandHistory]);
+
+  useEffect(() => {
+    if (!props.mergePopupDone) return;
+
+    const mergeResults = props.desiredMergeContents;
+    if (conflictingFiles.includes("file1")) {
+      props.setWorkstation1Items(() => mergeResults["file1"]);
+    }
+    if (conflictingFiles.includes("file2")) {
+      props.setWorkstation2Items(() => mergeResults["file2"]);
+    }
+    if (conflictingFiles.includes("file3")) {
+      props.setWorkstation3Items(() => mergeResults["file3"]);
+    }
+
+    setConflictingFiles([]);
+    props.setMergePopupDone(() => false);
+  }, [props.mergePopupDone]);
 
   // Focus the terminal input when the history is clicked
   function handleHistoryClick() {
@@ -160,7 +183,6 @@ export function Terminal(props: TerminalProps) {
       case "add all":
         addToTerminal(command);
         addToTerminal(terminalResponse);
-        setCommandHistory((prev) => [...prev, command]);
 
         gitAdd({
           session_id: props.sessionID,
@@ -177,10 +199,11 @@ export function Terminal(props: TerminalProps) {
         props.setPlate2Items(props.workstation2Items);
         props.setPlate3Items(props.workstation3Items);
 
+        setCommandHistory((prev) => [...prev, command]);
         break;
       case "commit success":
         addToTerminal(terminalResponse);
-        setCommandHistory((prev) => [...prev, command]);
+
         const gitCommitParams: GitCommitParams = {
           session_id: props.sessionID,
           user_id: props.userID,
@@ -223,11 +246,11 @@ export function Terminal(props: TerminalProps) {
             addToTerminal(response[1].error_response!);
           }
         });
+        setCommandHistory((prev) => [...prev, command]);
         break;
       case "push":
         addToTerminal(command);
         addToTerminal(terminalResponse);
-        setCommandHistory((prev) => [...prev, command]);
 
         gitPush({
           session_id: props.sessionID,
@@ -246,11 +269,11 @@ export function Terminal(props: TerminalProps) {
             }
           }
         });
+        setCommandHistory((prev) => [...prev, command]);
         break;
       case "branch all":
         addToTerminal(command);
         addToTerminal(terminalResponse);
-        setCommandHistory((prev) => [...prev, command]);
 
         gitBranch({
           session_id: props.sessionID,
@@ -271,11 +294,11 @@ export function Terminal(props: TerminalProps) {
             addToTerminal(response[1].error_response!);
           }
         });
+        setCommandHistory((prev) => [...prev, command]);
         break;
       case "branch remote":
         addToTerminal(command);
         addToTerminal(terminalResponse);
-        setCommandHistory((prev) => [...prev, command]);
 
         gitBranch({
           session_id: props.sessionID,
@@ -293,16 +316,16 @@ export function Terminal(props: TerminalProps) {
             addToTerminal(response[1].error_response!);
           }
         });
+        setCommandHistory((prev) => [...prev, command]);
         break;
       case "branch delete":
         addToTerminal(command);
         addToTerminal(terminalResponse);
-        setCommandHistory((prev) => [...prev, command]);
 
         gitBranch({
           session_id: props.sessionID,
           user_id: props.userID,
-          branch_request: "-a",
+          branch_request: "-d",
           current_branch_id: props.currentBranch,
           delete_branch_id: message,
         }).then((response) => {
@@ -325,12 +348,12 @@ export function Terminal(props: TerminalProps) {
             // error
             addToTerminal(response[1].error_response!);
           }
+          setCommandHistory((prev) => [...prev, command]);
         });
         break;
       case "branch local":
         addToTerminal(command);
         addToTerminal(terminalResponse);
-        setCommandHistory((prev) => [...prev, command]);
 
         gitBranch({
           session_id: props.sessionID,
@@ -348,11 +371,11 @@ export function Terminal(props: TerminalProps) {
             addToTerminal(response[1].error_response!);
           }
         });
+        setCommandHistory((prev) => [...prev, command]);
         break;
       case "branch create":
         addToTerminal(command);
         addToTerminal(terminalResponse);
-        setCommandHistory((prev) => [...prev, command]);
 
         gitBranch({
           session_id: props.sessionID,
@@ -384,11 +407,11 @@ export function Terminal(props: TerminalProps) {
             addToTerminal(response[1].error_response!);
           }
         });
+        setCommandHistory((prev) => [...prev, command]);
         break;
       case "log":
         addToTerminal(command);
         addToTerminal(terminalResponse);
-        setCommandHistory((prev) => [...prev, command]);
 
         gitLog({
           session_id: props.sessionID,
@@ -404,11 +427,11 @@ export function Terminal(props: TerminalProps) {
             addToTerminal(response[1].error_response!);
           }
         });
+        setCommandHistory((prev) => [...prev, command]);
         break;
       case "merge":
         addToTerminal(command);
         addToTerminal(terminalResponse);
-        setCommandHistory((prev) => [...prev, command]);
 
         gitMerge({
           session_id: props.sessionID,
@@ -436,7 +459,7 @@ export function Terminal(props: TerminalProps) {
               setupWorkspace(newFrontendCommit.contents);
             }
           } else {
-            if (response[1].differences_detected == "true") {
+            if (response[1].difference_detected == "true") {
               const mergeMessage =
                 response[1].error_response +
                 " " +
@@ -452,19 +475,22 @@ export function Terminal(props: TerminalProps) {
                 setMergeIncomingId(response[1].incoming_commit_id);
                 setMidMerge(true);
               }
-              // TODO: handle file conflicts
-              const conflicts: FileConflicts = JSON.parse(
-                response[1].file_conflicts!
-              );
+              if (response[1].file_conflicts != undefined) {
+                const parsedConflictEntries: Record<string, ConflictEntry> =
+                  response[1].file_conflicts;
+                props.setFileConflicts(() => parsedConflictEntries);
+                setConflictingFiles(Object.keys(parsedConflictEntries));
+                props.setShowMergePopup(() => true);
+              }
               addToTerminal(response[1].error_response!);
             }
           }
         });
+        setCommandHistory((prev) => [...prev, command]);
         break;
       case "pull":
         addToTerminal(command);
         addToTerminal(terminalResponse);
-        setCommandHistory((prev) => [...prev, command]);
 
         gitPull({
           session_id: props.sessionID,
@@ -499,18 +525,21 @@ export function Terminal(props: TerminalProps) {
               setMergeIncomingId(response[1].incoming_commit_id);
               setMidMerge(true);
             }
-            // TODO: handle file conflicts
-            const conflicts: FileConflicts = JSON.parse(
-              response[1].file_conflicts!
-            );
+            if (response[1].file_conflicts != undefined) {
+              const parsedConflictEntries: Record<string, ConflictEntry> =
+                response[1].file_conflicts;
+              props.setFileConflicts(() => parsedConflictEntries);
+              setConflictingFiles(Object.keys(parsedConflictEntries));
+              props.setShowMergePopup(() => true);
+            }
             addToTerminal(response[1].error_response!);
           }
         });
+        setCommandHistory((prev) => [...prev, command]);
         break;
       case "reset":
         addToTerminal(command);
         addToTerminal(terminalResponse);
-        setCommandHistory((prev) => [...prev, command]);
 
         gitReset({
           session_id: props.sessionID,
@@ -533,11 +562,11 @@ export function Terminal(props: TerminalProps) {
             }
           }
         });
+        setCommandHistory((prev) => [...prev, command]);
         break;
       case "stash pop":
         addToTerminal(command);
         addToTerminal(terminalResponse);
-        setCommandHistory((prev) => [...prev, command]);
 
         // TODO: call gitStashPop
         break;
@@ -545,27 +574,65 @@ export function Terminal(props: TerminalProps) {
         addToTerminal(command);
         addToTerminal(terminalResponse);
         setCommandHistory((prev) => [...prev, command]);
+        gitStash({
+          session_id: props.sessionID,
+          user_id: props.userID,
+          branch_id: props.currentBranch,
+          stash_request: "list",
+          file_map_json: makeFileMapJson(false),
+        }).then((response) => {
+          if (response[0]) {
+            // success
+            addToTerminal(response[1].stashes!);
+          } else {
+            // error
+            addToTerminal(response[1].error_response!);
+          }
+        });
+        setCommandHistory((prev) => [...prev, command]);
 
         // TODO: call gitStashList
         break;
       case "stash":
         addToTerminal(command);
         addToTerminal(terminalResponse);
+        gitStash({
+          session_id: props.sessionID,
+          user_id: props.userID,
+          branch_id: props.currentBranch,
+          stash_request: "",
+          file_map_json: makeFileMapJson(false),
+        }).then((response) => {
+          if (response[0]) {
+            // success
+            const fileMap: Record<string, IngredientImage[]> = JSON.parse(
+              response[1].reset_file_map_json!
+            );
+            const fileCommits: fileCommit[] = Object.entries(fileMap).map(
+              ([fileName, fileContents]) => ({
+                fileName,
+                fileContents,
+              })
+            );
+            setupWorkspace(fileCommits);
+            addToTerminal(response[1].message!);
+          } else {
+            // error
+            addToTerminal(response[1].error_response!);
+          }
+        });
         setCommandHistory((prev) => [...prev, command]);
-
-        // TODO: call gitStash
         break;
       case "stash pop index":
         addToTerminal(command);
         addToTerminal(terminalResponse);
-        setCommandHistory((prev) => [...prev, command]);
 
         // TODO: call gitStashPop with specific index
+        setCommandHistory((prev) => [...prev, command]);
         break;
       case "status":
         addToTerminal(command);
         addToTerminal(terminalResponse);
-        setCommandHistory((prev) => [...prev, command]);
 
         gitStatus({
           session_id: props.sessionID,
@@ -593,6 +660,50 @@ export function Terminal(props: TerminalProps) {
             addToTerminal(response[1].error_response!);
           }
         });
+        setCommandHistory((prev) => [...prev, command]);
+        break;
+      case "checkout":
+        addToTerminal(command);
+        addToTerminal(terminalResponse);
+
+        gitCheckout({
+          session_id: props.sessionID,
+          user_id: props.userID,
+          current_branch_id: props.currentBranch,
+          new_branch_id: message!,
+          file_map_json: makeFileMapJson(false),
+        }).then((response) => {
+          // success
+          if (response[0]) {
+            const fileMap: Record<string, IngredientImage[]> = JSON.parse(
+              response[1].file_map_json!
+            );
+            const fileCommits: fileCommit[] = Object.entries(fileMap).map(
+              ([fileName, fileContents]) => ({
+                fileName,
+                fileContents,
+              })
+            );
+            setupWorkspace(fileCommits);
+            props.setCurrentBranch(() => message!);
+            addToTerminal(response[1].message!);
+            addToTerminal(response[1].action!);
+          } else {
+            // error
+            if (response[1].difference_detected) {
+              const uncommitedChangesMessage =
+                response[1].error_response +
+                " " +
+                response[1].files_with_differences;
+              addToTerminal(uncommitedChangesMessage);
+              addToTerminal(response[1].message!);
+            } else {
+              addToTerminal(response[1].error_response!);
+            }
+          }
+        });
+
+        setCommandHistory((prev) => [...prev, command]);
         break;
       default: // error commandstrs
         addToTerminal(terminalResponse);

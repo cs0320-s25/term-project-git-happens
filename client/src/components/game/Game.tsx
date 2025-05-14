@@ -354,9 +354,10 @@ export function Game(props: GameProps) {
     e.preventDefault(); // Required to allow dropping
   };
 
-  const [showMergePopup, setShowMergePopup] = useState(true);
+  const [showMergePopup, setShowMergePopup] = useState(false);
   const [desiredMergeContents, setDesiredMergeContents] =
     useState<FileContents>({ file1: [], file2: [], file3: [] });
+  const [mergePopupDone, setMergePopupDone] = useState(false);
 
   const [fileConflicts, setFileConflicts] = useState<{
     [key: string]: ConflictEntry;
@@ -403,6 +404,7 @@ export function Game(props: GameProps) {
           setShowMergePopup={setShowMergePopup}
           desiredMergeContents={desiredMergeContents}
           setDesiredMergeContents={setDesiredMergeContents}
+          setMergePopupDone={setMergePopupDone}
         />
       )}
 
@@ -458,9 +460,12 @@ export function Game(props: GameProps) {
             handleDragOver={handleDragOver}
             setFileConflicts={setFileConflicts}
             setShowMergePopup={setShowMergePopup}
+            desiredMergeContents={desiredMergeContents}
+            mergePopupDone={mergePopupDone}
+            setMergePopupDone={setMergePopupDone}
           />
           <Ingredients
-            ingredientsItems={getBranchIngredients(props.currentBranch)}
+            ingredientsItems={getBranchIngredients(branchTypes.find(b => b.branchName === props.currentBranch)!.branchType)}
             workstation1Items={workstation1Items}
             setWorkstation1Items={setWorkstation1Items}
             workstation2Items={workstation2Items}

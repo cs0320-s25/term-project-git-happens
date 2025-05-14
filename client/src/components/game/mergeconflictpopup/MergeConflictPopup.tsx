@@ -15,6 +15,7 @@ interface MergeConflictPopupProps {
   setShowMergePopup: Dispatch<SetStateAction<boolean>>; // To close the popup
   desiredMergeContents: FileContents;
   setDesiredMergeContents: Dispatch<SetStateAction<FileContents>>;
+  setMergePopupDone: Dispatch<SetStateAction<boolean>>;
 }
 
 export function MergeConflictPopup({
@@ -22,6 +23,7 @@ export function MergeConflictPopup({
   setShowMergePopup,
   desiredMergeContents,
   setDesiredMergeContents,
+  setMergePopupDone,
 }: MergeConflictPopupProps) {
   const popupRef = useRef<HTMLDivElement>(null);
 
@@ -50,6 +52,7 @@ export function MergeConflictPopup({
 
   const handleClosePopup = () => {
     setShowMergePopup(false);
+    setMergePopupDone(true);
   };
 
   function generateIngredientName(baseName: string, fileName: string): string {

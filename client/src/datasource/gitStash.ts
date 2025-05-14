@@ -10,10 +10,10 @@ export interface GitStashParams {
 }
 
 export interface GitStashResponse extends BaseResponse {
-  reset_file_map_json?: Map<string, any[]>;
+  reset_file_map_json?: string;
   message?: string;
   action?: string;
-  stashes?: Map<string, any>[];
+  stashes?: string; // Map<string, any>[];
   merged_files?: Map<string, any[]>;
   file_conflicts?: Map<string, Map<string, any[]>>;
 }

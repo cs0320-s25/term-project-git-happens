@@ -1,4 +1,5 @@
 import { CommitData } from "../components/App";
+import { ConflictEntry } from "../components/game/Game";
 import { BaseResponse, typedFetch } from "./abstractFetch";
 import { BackendCommit } from "./fetcherUtil";
 
@@ -13,7 +14,7 @@ export interface GitPullResponse extends BaseResponse {
   message?: string;
   files_with_differences?: Set<string>;
   merged_files?: Map<string, any[]>;
-  file_conflicts?: string; // Map<string, Map<string, any[]>>;
+  file_conflicts?: Record<string, ConflictEntry>; // Map<string, Map<string, any[]>>;
   local_commit_id?: string;
   incoming_commit_id?: string;
   merge_commit_id?: string;

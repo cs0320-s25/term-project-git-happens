@@ -64,7 +64,7 @@ function App() {
   useEffect(() => {
     const loadBranchData = async () => {
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 3000));
         const branchNames = await getBranchNames(
           sessionID,
           userID,
@@ -110,7 +110,7 @@ function App() {
                 createSession({
                   session_id: sessionID,
                   user_id: userID,
-                  file_map_json: "{}",
+                  file_map_json: JSON.stringify({file1: [], file2: [], file3: []}),
                 }).then((response) => {
                   if (!response[0]) {
                     console.log(response[1].error_response!);

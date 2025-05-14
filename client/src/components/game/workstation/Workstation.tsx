@@ -1,6 +1,11 @@
 import { Dispatch, SetStateAction, useState, useEffect, useRef } from "react";
 import "../../../styles/game.css";
-import { IngredientImage, BranchType, ConflictEntry } from "../Game";
+import {
+  IngredientImage,
+  BranchType,
+  ConflictEntry,
+  FileContents,
+} from "../Game";
 import { Terminal } from "./terminal/Terminal";
 import type { CommitData, BranchData } from "../../App";
 import { plate } from "../../../assets/images";
@@ -49,7 +54,10 @@ interface WorkstationProps {
       [key: string]: ConflictEntry;
     }>
   >;
+  desiredMergeContents: FileContents;
   setShowMergePopup: Dispatch<SetStateAction<boolean>>;
+  mergePopupDone: boolean;
+  setMergePopupDone: Dispatch<SetStateAction<boolean>>;
 }
 
 export function Workstation(props: WorkstationProps) {
@@ -377,6 +385,9 @@ export function Workstation(props: WorkstationProps) {
         userID={props.userID}
         setFileConflicts={props.setFileConflicts}
         setShowMergePopup={props.setShowMergePopup}
+        desiredMergeContents={props.desiredMergeContents}
+        mergePopupDone={props.mergePopupDone}
+        setMergePopupDone={props.setMergePopupDone}
       />
 
       <p>{textDisplay}</p>

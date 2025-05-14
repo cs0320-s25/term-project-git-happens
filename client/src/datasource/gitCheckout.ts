@@ -13,6 +13,8 @@ export interface GitCheckoutResponse extends BaseResponse {
   message?: string;
   new_branch_id?: string;
   action?: string;
+  difference_detected?: boolean;
+  file_map_json?: string;
 }
 
 const allowedKeys: (keyof GitCheckoutResponse)[] = [
@@ -21,6 +23,8 @@ const allowedKeys: (keyof GitCheckoutResponse)[] = [
   "message",
   "new_branch_id",
   "action",
+  "difference_detected",
+  "file_map_json",
 ];
 
 export async function gitCheckout(
