@@ -19,6 +19,8 @@ public class GitCheckoutHandler extends AbstractEndpointHandler {
     this.storage = storage;
   }
 
+  // TODO: should probably handle git checkout -b to create a new branch and immediately check out
+
   @Override
   public Object handle(final Request request, final Response response) throws Exception {
     responseMap = new HashMap<>();

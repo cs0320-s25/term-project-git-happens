@@ -59,6 +59,11 @@ public class GitMergeHandler extends AbstractEndpointHandler {
     } else {
       responseMap.put("merge_branch_id", mergeBranch);
     }
+    if (fileMapJson == null) {
+      return returnErrorResponse("error_bad_request", "null parameter", "file_map_json");
+    } else {
+      responseMap.put("file_map_json", fileMapJson);
+    }
 
     try {
 
@@ -121,9 +126,13 @@ public class GitMergeHandler extends AbstractEndpointHandler {
 
       // get latest commit from branch user wishes to merge with
       Map<String, Object> commitToMerge =
-          storage.getLatestLocalCommit(sessionId, userId, currentBranch);
+          storage.getLatestLocalCommit(sessionId, userId, mergeBranch);
       Map<String, List<MockFileObject>> toMergeFileMap =
           deserializeFileMap((String) commitToMerge.get("file_map_json"));
+      String localCommitId = (String) currentLatestLocalCommit.get("commit_id");
+      String incomingCommitId = (String) commitToMerge.get("commit_id");
+      responseMap.put("local_commit_id", localCommitId);
+      responseMap.put("incoming_commit_id", incomingCommitId);
 
       // add any new local files to incoming filemap
       diffHelper = new GitDiffHelper();
@@ -178,11 +187,7 @@ public class GitMergeHandler extends AbstractEndpointHandler {
         JsonAdapter<Map<String, List<MockFileObject>>> adapter = moshi.adapter(type);
 
         storage.addChange(sessionId, userId, currentBranch, adapter.toJson(mergedFileMap));
-        String localCommitId = (String) currentLatestLocalCommit.get("commit_id");
-        String incomingCommitId = (String) commitToMerge.get("commit_id");
-        // for updating branch map
-        responseMap.put("local_commit_id", localCommitId);
-        responseMap.put("incoming_commit_id", incomingCommitId);
+
         String commitMessage = localCommitId + " " + incomingCommitId + " merged";
         String mergeCommitId =
             storage.commitChange(

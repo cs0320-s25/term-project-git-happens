@@ -34,6 +34,16 @@ public class GitCommitHandler extends AbstractEndpointHandler {
     // message to accompany commit
     final String commitMessage = request.queryParams("commit_message");
 
+    // optional parent commit ids (for merge that was halted by conflicts)
+    final String localCommitId = request.queryParams("local_commit_id");
+    if (localCommitId != null) {
+      responseMap.put("local_commit_id", localCommitId);
+    }
+    final String incomingCommitId = request.queryParams("incoming_commit_id");
+    if (incomingCommitId != null) {
+      responseMap.put("incoming_commit_id", incomingCommitId);
+    }
+
     if (session_id == null) {
       return returnErrorResponse("error_bad_request", "null_parameter", "session_id");
     } else {
@@ -54,6 +64,11 @@ public class GitCommitHandler extends AbstractEndpointHandler {
     } else {
       responseMap.put("commit_message", commitMessage);
     }
+    if ((localCommitId == null) != (incomingCommitId == null)) {
+      return returnErrorResponse(
+          "error_bad_request",
+          "both local_commit_id and incoming_commit_id must be either null or included");
+    }
     try {
 
       // get staged changes
@@ -69,8 +84,11 @@ public class GitCommitHandler extends AbstractEndpointHandler {
           storage.getLatestLocalCommit(session_id, user_id, branchId);
       Map<String, List<MockFileObject>> latestFileMap =
           deserializeFileMap((String) latestLocalCommit.get("file_map_json"));
+
       List<String> parentCommitIdList =
-          Collections.singletonList(latestLocalCommit.get("commit_id").toString());
+          localCommitId == null
+              ? Collections.singletonList(latestLocalCommit.get("commit_id").toString())
+              : List.of(localCommitId, incomingCommitId);
 
       // check that there is a difference between the last commit and staged changes
 
