@@ -99,7 +99,7 @@ public class GitStashHandler extends AbstractEndpointHandler {
 
           // if stash not found, return message for terminal display
           if (stash == null) {
-            returnErrorResponse(
+            return returnErrorResponse(
                 "error_database",
                 "Error: stash@{"
                     + stashIndex
@@ -149,7 +149,7 @@ public class GitStashHandler extends AbstractEndpointHandler {
 
           if (!gitDiffHelper.getFileConflicts().isEmpty()) {
             responseMap.put("file_conflicts", gitDiffHelper.getFileConflicts());
-            returnErrorResponse(
+            return returnErrorResponse(
                 "error_database",
                 "Error: Could not apply "
                     + "stash@{"

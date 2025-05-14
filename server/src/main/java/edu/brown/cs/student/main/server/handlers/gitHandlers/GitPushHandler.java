@@ -2,6 +2,7 @@ package edu.brown.cs.student.main.server.handlers.gitHandlers;
 
 import edu.brown.cs.student.main.server.handlers.AbstractEndpointHandler;
 import edu.brown.cs.student.main.server.storage.StorageInterface;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import spark.Request;
@@ -17,7 +18,7 @@ public class GitPushHandler extends AbstractEndpointHandler {
 
   @Override
   public Object handle(final Request request, final Response response) throws Exception {
-
+    responseMap = new HashMap<>();
     // unique session id
     final String sessionId = request.queryParams("session_id");
     // unique user id
@@ -26,17 +27,17 @@ public class GitPushHandler extends AbstractEndpointHandler {
     final String currentBranch = request.queryParams("branch_id");
 
     if (sessionId == null) {
-      returnErrorResponse("error_bad_request", "null parameter", "session_id");
+      return returnErrorResponse("error_bad_request", "null parameter", "session_id");
     } else {
       responseMap.put("session_id", sessionId);
     }
     if (userId == null) {
-      returnErrorResponse("error_bad_request", "null parameter", "user_id");
+      return returnErrorResponse("error_bad_request", "null parameter", "user_id");
     } else {
       responseMap.put("user_id", userId);
     }
     if (currentBranch == null) {
-      returnErrorResponse("error_bad_request", "null parameter", "current_branch_id");
+      return returnErrorResponse("error_bad_request", "null parameter", "current_branch_id");
     } else {
       responseMap.put("branch_id", currentBranch);
     }
@@ -50,15 +51,17 @@ public class GitPushHandler extends AbstractEndpointHandler {
       // if there is nothing to commit, return message for terminal display
       if (stagedCommits.isEmpty()) {
         responseMap.put("message", "Already up to date.");
-        returnSuccessResponse();
+        return returnSuccessResponse();
       }
 
-      // check that local and remote head are the same
-      Map<String, Object> localLatestCommit =
-          storage.getLatestLocalCommit(sessionId, userId, currentBranch);
+      // check that local most recent pushed commit and remote head are the same
+      List<Map<String, Object>> localPushedCommits =
+          storage.getLocalPushedCommits(sessionId, userId, currentBranch);
+      Map<String, Object> localLatestPushedCommit =
+          localPushedCommits.get(localPushedCommits.size() - 1);
       Map<String, Object> remoteLatestCommit =
           storage.getLatestRemoteCommit(sessionId, currentBranch);
-      String localLatestCommitId = (String) localLatestCommit.get("commit_id");
+      String localLatestCommitId = (String) localLatestPushedCommit.get("commit_id");
       String remoteLatestCommitId = (String) remoteLatestCommit.get("commit_id");
 
       // if user needs to pull remote changes, return message for terminal display
@@ -69,7 +72,8 @@ public class GitPushHandler extends AbstractEndpointHandler {
                 + " not have locally. This is usually caused by another repository pushing "
                 + "to the same remote branch. You may want to first integrate the remote changes "
                 + "(e.g., 'git pull') before pushing again.");
-        returnErrorResponse("error_database", "Error: failed to push to origin/" + currentBranch);
+        return returnErrorResponse(
+            "error_database", "Error: failed to push to origin/" + currentBranch);
       }
 
       // otherwise, push staged commit(s) to remote

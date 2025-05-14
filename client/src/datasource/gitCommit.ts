@@ -5,6 +5,8 @@ export interface GitCommitParams {
   user_id: string;
   branch_id: string;
   commit_message: string;
+  local_commit_id?: string; // included with incoming_commit_id in case of merge conflict resolution
+  incoming_commit_id?: string;
 }
 
 export interface GitCommitResponse extends BaseResponse {

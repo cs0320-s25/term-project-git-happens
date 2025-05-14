@@ -32,9 +32,9 @@ public final class FirestoreConstants {
   public static final String FIELD_AUTHOR = "author";
   public static final String FIELD_DATE_TIME = "date_time";
   public static final String FIELD_COMMIT_MESSAGE = "commit_message";
+  public static final String FIELD_PARENT_COMMIT_IDS = "parent_commits";
 
   public static final String FIELD_PARENT_BRANCH_ID = "parent_branch_id";
-  public static final String FIELD_HEAD = "head";
   public static final String FIELD_REMOTE_FILE_MAP = "remote_file_map_json";
   public static final String FIELD_LOCAL_FILE_MAP = "local_file_map_json";
 

@@ -35,6 +35,8 @@ public class GitLogHandler extends AbstractEndpointHandler {
     final String userId = request.queryParams("user_id");
     // id of currently checked out branch
     final String branchId = request.queryParams("branch_id");
+    // verbose - include commit contents
+    final String verbose = request.queryParams("verbose");
 
     if (sessionId == null) {
       return returnErrorResponse("error_bad_request", "null parameter", "session_id");
@@ -51,14 +53,27 @@ public class GitLogHandler extends AbstractEndpointHandler {
     } else {
       responseMap.put("branch_id", branchId);
     }
+    if (verbose == null) {
+      return returnErrorResponse("error_bad_request", "null_parameter", "verbose");
+    } else {
+      responseMap.put("verbose", verbose);
+    }
+    if (!verbose.equalsIgnoreCase("true") && !verbose.equalsIgnoreCase("false")) {
+      return returnErrorResponse("error_bad_request", "parameter_not_bool", "verbose");
+      // verbose field is not true/True/false/False
+      // we need to do this check because parseBoolean returns false for any non true/True inputs
+    }
+    final boolean verboseBool = Boolean.parseBoolean(verbose);
     responseMap.put("action", "log");
 
     try {
       List<Map<String, Object>> allCommits = storage.getAllCommits(sessionId, userId, branchId);
-      allCommits.forEach(
-          commit -> {
-            commit.remove(FIELD_FILE_MAP_JSON);
-          });
+      if (!verboseBool) {
+        allCommits.forEach(
+            commit -> {
+              commit.remove(FIELD_FILE_MAP_JSON);
+            });
+      }
 
       // sort using date in reverse order (newest commits first)
       allCommits.sort(

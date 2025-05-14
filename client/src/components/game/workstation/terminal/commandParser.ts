@@ -213,11 +213,11 @@ export function gitCommand(
           };
       }
 
-    case "diff":
-      return {
-        commandStr: "diff",
-        terminalResponse: "", // Todo: Fill
-      };
+    // case "diff":
+    //   return {
+    //     commandStr: "diff",
+    //     terminalResponse: "", // Todo: Fill
+    //   };
 
     case "log":
       if (tag) {
@@ -362,6 +362,29 @@ export function gitCommand(
         commandStr: "status",
         terminalResponse: "Fetching Status",
       };
+
+    case "checkout":
+      switch (tag) {
+        case null: // Error
+          return {
+            commandStr: "checkout null",
+            terminalResponse: "Error: Branch name required.",
+          };
+          
+        default: // Check for branch name
+          if (!message) {
+            var branchname = checkQuotes(tag);
+            return {
+              commandStr: "checkout",
+              terminalResponse: `Attempting to Checkout to Branch: ${branchname}`,
+              message: `${branchname}`,
+            };
+          }
+          return {
+            commandStr: "checkout null",
+            terminalResponse: "Error: Branch name required.",
+          };
+      }
 
     case null:
       return {

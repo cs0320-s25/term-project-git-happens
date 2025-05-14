@@ -120,7 +120,8 @@ public class FirebaseUtilities implements StorageInterface {
 
         // create initial commit
         Map<String, Object> initialCommit =
-            helpers.createCommit(file_map_json, initialCommitId, "game", "Initial commit");
+            helpers.createCommit(
+                file_map_json, initialCommitId, "game", "Initial commit", Collections.emptyList());
 
         // setup branch info
         final BranchRef remoteMainBranchReference = pather.getRemoteBranch(session_id, "main");
@@ -148,7 +149,7 @@ public class FirebaseUtilities implements StorageInterface {
       clearField(localMainBranchReference.parentBranch(), FIELD_PARENT_BRANCH_ID);
 
       // set head
-      setField(localMainBranchReference.head(), FIELD_HEAD, mainHead);
+      localMainBranchReference.head().set(mainHead);
 
       // set pushed commits to match main
       List<Map<String, Object>> mainCommits = remoteMainBranchReference.getPushedCommitsMap();
@@ -333,7 +334,7 @@ public class FirebaseUtilities implements StorageInterface {
         // set local branch's head
         Map<String, Object> head = this.getLatestRemoteCommit(session_id, new_branch_id);
 
-        setField(newLocalBranchRef.head(), FIELD_HEAD, head);
+        newLocalBranchRef.head().set(head);
 
         // set local branch's parent branch
         String parentId =
@@ -360,7 +361,7 @@ public class FirebaseUtilities implements StorageInterface {
 
     // set new branch's head
     Map<String, Object> head = this.getLatestLocalCommit(session_id, user_id, current_branch_id);
-    setField(newLocalBranchRef.head(), FIELD_HEAD, head);
+    newLocalBranchRef.head().set(head);
 
     // set new branch's parent branch
     setField(newLocalBranchRef.parentBranch(), FIELD_PARENT_BRANCH_ID, current_branch_id);
@@ -378,7 +379,7 @@ public class FirebaseUtilities implements StorageInterface {
 
     // add branch to remote repository for convenience
     setField(newRemoteBranchRef.parentBranch(), FIELD_PARENT_BRANCH_ID, current_branch_id);
-    setField(newRemoteBranchRef.head(), FIELD_HEAD, head);
+    newRemoteBranchRef.head().set(head);
     setField(newRemoteBranchRef.localFileMap(), FIELD_LOCAL_FILE_MAP, file_map_json);
     setField(newRemoteBranchRef.pushedCommits(), FIELD_COMMITS, pushedCommits);
   }
@@ -609,13 +610,18 @@ public class FirebaseUtilities implements StorageInterface {
    * @param user_id - unique user id
    * @param branch_id - branch id for currently checked out branch
    * @param commit_message - corresponding message for commit
+   * @param parent_commit_ids - the commit ID of the parent(s) (could be 2 in case of merge)
    * @throws IllegalArgumentException - if any parameters are null
    * @throws ExecutionException - for firebase methods
    * @throws InterruptedException - for firebase methods
    */
   @Override
   public String commitChange(
-      String session_id, String user_id, String branch_id, String commit_message)
+      String session_id,
+      String user_id,
+      String branch_id,
+      String commit_message,
+      List<String> parent_commit_ids)
       throws IllegalArgumentException, ExecutionException, InterruptedException {
     if (session_id == null || user_id == null || branch_id == null) {
       throw new IllegalArgumentException(
@@ -629,7 +635,8 @@ public class FirebaseUtilities implements StorageInterface {
 
     // create new commit
     Map<String, Object> newCommit =
-        helpers.createCommit(changedFileMapJson, commitId, user_id, commit_message);
+        helpers.createCommit(
+            changedFileMapJson, commitId, user_id, commit_message, parent_commit_ids);
 
     // add new commit to local staged commits then update local store
 
@@ -684,6 +691,8 @@ public class FirebaseUtilities implements StorageInterface {
     setField(localBranchRef.pushedCommits(), FIELD_COMMITS, localPushedCommits);
     // update remote store with new pushed commits
     setField(remoteBranchRef.pushedCommits(), FIELD_COMMITS, remotePushedCommits);
+    // update remote store head with most recent commit
+    remoteBranchRef.head().set(remotePushedCommits.get(remotePushedCommits.size() - 1));
 
     // clear staged commits, as they have all now been pushed
     List<Map<String, Object>> clearedCommits = new ArrayList<>();
