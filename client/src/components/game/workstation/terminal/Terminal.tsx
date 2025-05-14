@@ -154,6 +154,19 @@ export function Terminal(props: TerminalProps) {
     });
   }
 
+  function setMergedFiles(mergeResults: Record<string, IngredientImage[]>) {
+    const mergedFiles: string[] = Object.keys(mergeResults);
+    if (mergedFiles.includes("file1")) {
+      props.setWorkstation1Items(() => mergeResults["file1"]);
+    }
+    if (mergedFiles.includes("file2")) {
+      props.setWorkstation2Items(() => mergeResults["file2"]);
+    }
+    if (mergedFiles.includes("file3")) {
+      props.setWorkstation3Items(() => mergeResults["file3"]);
+    }
+  }
+
   function addToTerminal(text: string) {
     setTerminalHistory((prev) => [...prev, text]);
   }
@@ -502,7 +515,7 @@ export function Terminal(props: TerminalProps) {
             // success
             const returnedMessage: string = response[1].message!;
             addToTerminal(response[1].message!);
-            if (returnedMessage !== "Already up to date") {
+            if (returnedMessage !== "Already up to date.") {
               const newBackendCommit: BackendCommit = response[1].new_commit!;
               const newFrontendCommit: CommitData =
                 convertBackendCommit(newBackendCommit);
@@ -567,8 +580,33 @@ export function Terminal(props: TerminalProps) {
       case "stash pop":
         addToTerminal(command);
         addToTerminal(terminalResponse);
-
-        // TODO: call gitStashPop
+        gitStash({
+          session_id: props.sessionID,
+          user_id: props.userID,
+          branch_id: props.currentBranch,
+          stash_request: "pop",
+          file_map_json: makeFileMapJson(false),
+          stash_index: "0",
+        }).then((response) => {
+          if (response[0]) {
+            addToTerminal(response[1].message!);
+            const mergedFiles: Record<string, IngredientImage[]> =
+              response[1].merged_files!;
+            setMergedFiles(mergedFiles);
+            // success
+          } else {
+            // error
+            addToTerminal(response[1].error_response!);
+            if (response[1].file_conflicts != undefined) {
+              const parsedConflictEntries: Record<string, ConflictEntry> =
+                response[1].file_conflicts;
+              props.setFileConflicts(() => parsedConflictEntries);
+              setConflictingFiles(Object.keys(parsedConflictEntries));
+              props.setShowMergePopup(() => true);
+            }
+          }
+        });
+        setCommandHistory((prev) => [...prev, command]);
         break;
       case "stash list":
         addToTerminal(command);
@@ -583,7 +621,13 @@ export function Terminal(props: TerminalProps) {
         }).then((response) => {
           if (response[0]) {
             // success
-            addToTerminal(response[1].stashes!);
+            const stashLog: Record<string, any>[] = response[1].stashes!;
+            const stashMessages: string[] = stashLog.map(
+              (stash) => stash.stash_message
+            );
+            stashMessages.forEach((str, index) => {
+              addToTerminal(`stash@\{${index}\}: ${str}`)
+            });
           } else {
             // error
             addToTerminal(response[1].error_response!);
@@ -626,8 +670,32 @@ export function Terminal(props: TerminalProps) {
       case "stash pop index":
         addToTerminal(command);
         addToTerminal(terminalResponse);
-
-        // TODO: call gitStashPop with specific index
+        gitStash({
+          session_id: props.sessionID,
+          user_id: props.userID,
+          branch_id: props.currentBranch,
+          stash_request: "pop",
+          file_map_json: makeFileMapJson(false),
+          stash_index: message!,
+        }).then((response) => {
+          if (response[0]) {
+            addToTerminal(response[1].message!);
+            const mergedFiles: Record<string, IngredientImage[]> =
+              response[1].merged_files!;
+            setMergedFiles(mergedFiles);
+            // success
+          } else {
+            // error
+            addToTerminal(response[1].error_response!);
+            if (response[1].file_conflicts != undefined) {
+              const parsedConflictEntries: Record<string, ConflictEntry> =
+                response[1].file_conflicts;
+              props.setFileConflicts(() => parsedConflictEntries);
+              setConflictingFiles(Object.keys(parsedConflictEntries));
+              props.setShowMergePopup(() => true);
+            }
+          }
+        });
         setCommandHistory((prev) => [...prev, command]);
         break;
       case "status":

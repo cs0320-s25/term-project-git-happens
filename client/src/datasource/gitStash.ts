@@ -1,3 +1,4 @@
+import { ConflictEntry, IngredientImage } from "../components/game/Game";
 import { BaseResponse, typedFetch } from "./abstractFetch";
 
 export interface GitStashParams {
@@ -13,9 +14,9 @@ export interface GitStashResponse extends BaseResponse {
   reset_file_map_json?: string;
   message?: string;
   action?: string;
-  stashes?: string; // Map<string, any>[];
-  merged_files?: Map<string, any[]>;
-  file_conflicts?: Map<string, Map<string, any[]>>;
+  stashes?: Record<string, any>[]; // Map<string, any>[];
+  merged_files?: Record<string, IngredientImage[]>;
+  file_conflicts?: Record<string, ConflictEntry>;
 }
 
 const allowedKeys: (keyof GitStashResponse)[] = [
