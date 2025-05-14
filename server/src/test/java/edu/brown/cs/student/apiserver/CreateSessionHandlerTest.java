@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 
 public class CreateSessionHandlerTest  extends BaseEndpointTest {
 
-  private final String testSessionId = "create-test";
+  private final String testSessionId = "test";
   private final Map<String, List<MockFileObject>> originalFileMap = new HashMap<>();
   @Test
   void testMissingParameters() {

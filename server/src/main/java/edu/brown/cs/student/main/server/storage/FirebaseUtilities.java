@@ -598,9 +598,9 @@ public class FirebaseUtilities implements StorageInterface {
       throw new IllegalArgumentException(
           "getLatestStagedCommit: session_id, user_id, and branch_id cannot be null");
     }
-    return pather
-        .getLocalBranch(session_id, user_id, branch_id)
-        .getSnapshotFieldString(DOC_ADD_CHANGES, FIELD_FILE_MAP_JSON);
+    String json = pather.getLocalBranch(session_id, user_id, branch_id).getSnapshotFieldString(DOC_ADD_CHANGES, FIELD_FILE_MAP_JSON);
+    System.out.println(json);
+    return json;
   }
 
   /**

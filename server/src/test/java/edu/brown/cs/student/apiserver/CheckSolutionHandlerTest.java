@@ -15,10 +15,11 @@ import org.junit.jupiter.api.Test;
 public class CheckSolutionHandlerTest extends BaseEndpointTest {
 
   static final Map<String, List<MockFileObject>> solutionMap = new HashMap<>();
-  static final String testSessionId = "check-test";
+  static final String testSessionId = "test";
   static final String testUserId = "test-user1";
   static final String testBranchId = "main";
 
+  @BeforeEach
   public void setSolution() {
 
     try {
@@ -46,7 +47,6 @@ public class CheckSolutionHandlerTest extends BaseEndpointTest {
   @Test
   public void testMissingParameter() {
     try {
-      setSolution();
       HttpURLConnection connection = tryRequest("checksolution?");
       Map<String, Object> response = deserializeResponse(connection);
       assertEquals("error_bad_request", response.get("response"));
@@ -70,19 +70,15 @@ public class CheckSolutionHandlerTest extends BaseEndpointTest {
       connection = tryRequest("gitcommit?session_id=" + testSessionId
           + "&user_id=" + testUserId + "&branch_id=" + testBranchId + "&commit_message=test");
       response = deserializeResponse(connection);
+      System.out.println(response.get("error_cause"));
       assertEquals("success", response.get("response"));
-//      System.out.flush();
-//      System.out.println(response.get("error_cause"));
 
       connection = tryRequest("gitpush?session_id=" + testSessionId
           + "&user_id=" + testUserId + "&branch_id=" + testBranchId);
       response = deserializeResponse(connection);
       assertEquals("success", response.get("response"));
-      System.out.flush();
-      System.out.println(response.get("error_cause"));
-      System.out.print(response);
 
-      connection = tryRequest("checksolution?session_id=" + testSessionId
+      connection = tryRequest("check?session_id=" + testSessionId
           + "&user_id=" + testUserId + "&solution_branch_id=" + testBranchId
           + "&solution_file_map_json=" + serializeFileMap(solutionMap));
       response = deserializeResponse(connection);

@@ -19,8 +19,6 @@ public class GitCheckoutHandler extends AbstractEndpointHandler {
     this.storage = storage;
   }
 
-  // TODO: should probably handle git checkout -b to create a new branch and immediately check out
-
   @Override
   public Object handle(final Request request, final Response response) throws Exception {
     responseMap = new HashMap<>();
@@ -38,27 +36,37 @@ public class GitCheckoutHandler extends AbstractEndpointHandler {
     final String fileMapJson = request.queryParams("file_map_json");
 
     if (sessionId == null) {
-      return returnErrorResponse("error_bad_request", "null parameter", "session_id");
+      return returnErrorResponse("error_bad_request",
+          "null parameter",
+          "session_id");
     } else {
       responseMap.put("session_id", sessionId);
     }
     if (userId == null) {
-      return returnErrorResponse("error_bad_request", "null parameter", "user_id");
+      return returnErrorResponse("error_bad_request",
+          "null parameter",
+          "user_id");
     } else {
       responseMap.put("user_id", userId);
     }
     if (currentBranch == null) {
-      return returnErrorResponse("error_bad_request", "null parameter", "current_branch_id");
+      return returnErrorResponse("error_bad_request",
+          "null parameter",
+          "current_branch_id");
     } else {
       responseMap.put("current_branch_id", currentBranch);
     }
     if (newBranch == null) {
-      return returnErrorResponse("error_bad_request", "null parameter", "new_branch_id");
+      return returnErrorResponse("error_bad_request",
+          "null parameter",
+          "new_branch_id");
     } else {
       responseMap.put("new_branch_id", newBranch);
     }
     if (fileMapJson == null) {
-      return returnErrorResponse("error_bad_request", "null parameter", "file_map_json");
+      return returnErrorResponse("error_bad_request",
+          "null parameter",
+          "file_map_json");
     } else {
       responseMap.put("file_map_json", fileMapJson);
     }
