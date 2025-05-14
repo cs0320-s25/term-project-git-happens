@@ -73,7 +73,7 @@ public class MockStorage implements StorageInterface {
   }
 
   @Override
-  public String commitChange(String sessionId, String userId, String branchId, String message,
+  public Map<String, Object> commitChange(String sessionId, String userId, String branchId, String message,
       List<String> parents) {
     // just pass staged to staging area for simplicity
     Map<String, Object> staged = new HashMap<String, Object>();
@@ -83,7 +83,7 @@ public class MockStorage implements StorageInterface {
     staged.put("message", message);
     staged.put("file_map_json", "{}");
     stagedCommits.get(sessionId).get(userId).get(branchId).add(staged);
-    return commitId;
+    return staged;
   }
 
   @Override
